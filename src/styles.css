@@ -1,1 +1,179 @@
-/* You can add global styles to this file, and also import other style files */
+
+:root {
+    --clr-background: #f0f7ff;  /* Um azul quase branco para o fundo geral */
+    --clr-surface: #cfe5ff;    /* Um azul claro para o fundo do menu e da secção de tarefas */
+    --clr-card: #ffffff;        /* Mantemos os cards em branco para se destacarem */
+    --clr-primary: #007bff;      /* O azul principal da Contactus */
+    --clr-text: #212529;        /* Cinza escuro para o texto */
+    --clr-border: #dee2e6;      /* Cinza claro para as bordas */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+}
+
+main {
+    flex-grow: 1; /* Faz o conteúdo principal crescer e empurrar o footer para baixo */
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+}
+
+body {
+    font-family: sans-serif;
+    background-color: var(--clr-background);
+    color: var(--clr-text);
+    
+    /* Organiza a página inteira como uma coluna flexível */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+aside {
+    background-color: var(--clr-surface);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+section {
+    background-color: var(--clr-surface);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 2. Estilos para Header e Footer */
+header, footer {
+    background-color: var(--clr-primary);
+    color: white;
+    padding: 20px;
+    text-align: center;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+footer {
+    font-size: 0.9rem;
+    opacity: 0.95;
+}
+
+/* 3. Centrar o título do Menu */
+aside h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Estilo dos Cards de Tarefa */
+.task-card {
+    display: flex; /* ATIVA O FLEXBOX! */
+    justify-content: space-between; /* Coloca espaço máximo entre os itens (info vs actions) */
+    align-items: center; /* Alinha os itens verticalmente ao centro */
+
+    background-color: var(--clr-card);
+    padding: 15px;
+    margin-bottom: 10px; /* Espaço entre os cards */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.task-info {
+    display: flex;
+    align-items: center;
+}
+
+.task-info label {
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+/* Estilo base para os botões de ação do card */
+.task-actions button {
+    background-color: transparent;
+    padding: 5px 10px;
+    border: 1px solid var(--clr-primary);
+    color: var(--clr-primary);
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 5px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+/* Efeito hover para os botões de ação */
+.task-actions button:hover {
+    background-color: var(--clr-primary);
+    color: white; /* O texto passa a branco, como pediste */
+}
+
+/* Estilo específico para o botão de excluir */
+.task-actions .delete-button {
+    border-color: #dc3545; /* Um tom de vermelho */
+    color: #dc3545;
+}
+
+.task-actions .delete-button:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Estilo do Formulário de Adicionar Tarefa */
+.task-form-container {
+    margin-bottom: 20px; /* Adiciona espaço abaixo do formulário */
+}
+
+#add-task-form {
+    display: flex;
+    gap: 10px;
+}
+
+#add-task-form input[type="text"] {
+    flex-grow: 1; /* Faz o input crescer para ocupar o espaço disponível */
+    padding: 10px;
+    border: 1px solid var(--clr-border);
+    border-radius: 4px;
+    font-size: 1rem;
+    color: var(--clr-text);
+}
+
+#add-task-form button {
+    background-color: var(--clr-primary);
+    color: white;
+    padding: 10px 15px;
+    border: 1px solid transparent; 
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+#add-task-form button:hover {
+    background-color: #ffffff;
+    color: var(--clr-text);
+    border-color: var(--clr-primary);
+}
+
+#add-task-form label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media screen and (min-width: 768px) {
+    main{
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 20px;
+    }
+
+}

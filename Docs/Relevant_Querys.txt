@@ -1,0 +1,99 @@
+1. Listar todas as tarefas de um utilizador específico (com o nome da categoria)
+SQL
+
+SELECT t.titulo, t.estado, t.prioridade, c.nome_categoria, u.nome AS dono
+FROM tarefas t
+LEFT JOIN categorias c ON t.id_categoria = c.id
+JOIN utilizadores u ON t.id_utilizador = u.id
+WHERE u.id = 1; -- Substituir pelo ID do utilizador
+-------------------------------------------------------------------
+
+2. Contagem de tarefas por estado (Pendente vs Concluído)
+SQL
+
+SELECT estado, COUNT(*) AS total 
+FROM tarefas 
+GROUP BY estado;
+
+-------------------------------------------------------------------
+
+3. Ver tarefas com alta prioridade que ainda estão pendentes
+SQL
+
+SELECT titulo, data_vencimento 
+FROM tarefas 
+WHERE prioridade = 'alta' AND estado = 'pendente'
+ORDER BY data_vencimento ASC;
+
+-------------------------------------------------------------------
+
+
+4. Listar tarefas que terminam o prazo hoje
+SQL
+
+SELECT titulo, prioridade 
+FROM tarefas 
+WHERE DATE(data_vencimento) = CURDATE();
+
+-------------------------------------------------------------------
+
+5. Encontrar tarefas "Órfãs" (Sem categoria)
+SQL
+
+SELECT titulo, data_criacao 
+FROM tarefas 
+WHERE id_categoria IS NULL;
+
+-------------------------------------------------------------------
+
+6. Procurar tarefas por uma palavra-chave no título ou descrição
+SQL
+
+SELECT * FROM tarefas 
+WHERE titulo LIKE '%reunião%' OR descricao LIKE '%reunião%';
+
+-------------------------------------------------------------------
+
+
+
+7. Ranking de utilizadores com mais tarefas (Top 5)
+Mostra quem são os utilizadores mais ativos na plataforma.
+SQL
+
+SELECT u.nome, COUNT(t.id) AS num_tarefas
+FROM utilizadores u
+LEFT JOIN tarefas t ON u.id = t.id_utilizador
+GROUP BY u.id
+ORDER BY num_tarefas DESC
+LIMIT 5;
+
+-------------------------------------------------------------------
+
+8. Percentagem de tarefas concluídas por categoria
+
+SELECT c.nome_categoria, 
+       ROUND((SUM(CASE WHEN t.estado = 'concluido' THEN 1 ELSE 0 END) / COUNT(t.id)) * 100, 2) AS percentagem_concluida
+FROM categorias c
+JOIN tarefas t ON c.id = t.id_categoria
+GROUP BY c.id;
+
+-------------------------------------------------------------------
+
+
+9. Identificar utilizadores que ainda não criaram nenhuma tarefa
+
+SQL
+
+SELECT nome, email 
+FROM utilizadores 
+WHERE id NOT IN (SELECT DISTINCT id_utilizador FROM tarefas);
+
+-------------------------------------------------------------------
+
+10. Listar tarefas que já passaram do prazo e não foram concluídas
+SQL
+
+SELECT u.nome AS user, t.titulo, t.data_vencimento
+FROM tarefas t
+JOIN utilizadores u ON t.id_utilizador = u.id
+WHERE t.data_vencimento < NOW() AND t.estado = 'pendente';
