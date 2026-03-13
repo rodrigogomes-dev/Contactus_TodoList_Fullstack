@@ -37,10 +37,26 @@
             <label [class.completed]="task.completed">{{ task.name }}</label>
           </div>
           <div class="task-actions">
-            <!-- O botão de editar pode ser implementado no futuro -->
+            <button class="edit-button" (click)="editTask(task)">Editar</button>
             <button class="delete-button" (click)="deleteTask(task.id)">Excluir</button>
           </div>
         </div>
+
+        <!-- Formulário de Edição -->
+        @if (editingTask() === task) {
+          <div class="task-edit-form">
+            <input
+              type="text"
+              [(ngModel)]="editedTaskName"
+              (keyup.enter)="saveTask()"
+              (keyup.escape)="cancelEdit()"
+            >
+            <div class="task-edit-actions">
+              <button class="save-button" (click)="saveTask()">Salvar</button>
+              <button class="cancel-button" (click)="cancelEdit()">Cancelar</button>
+            </div>
+          </div>
+        }
       } @empty {
         <p>Parabéns, não há tarefas pendentes!</p>
       }

@@ -12,7 +12,7 @@ interface Task {
   standalone: true,            // <-- Isto é o que o torna um componente standalone
   imports: [FormsModule],        // <-- Isto permite usar o ngModel no template
   templateUrl: './app.html',
-  styleUrl: './app.css',
+  styleUrls: ['./app.css'],
 })
 export class App { // <-- A classe que está a ser exportada
   tasks = signal<Task[]>([
@@ -22,6 +22,8 @@ export class App { // <-- A classe que está a ser exportada
   ]);
 
   newTask: string = '';
+  editingTask = signal<Task | null>(null);
+  editedTaskName: string = '';
 
   addTask() {
     if (this.newTask.trim() !== '') {
@@ -45,5 +47,26 @@ export class App { // <-- A classe que está a ser exportada
         task.id === id ? { ...task, completed: !task.completed } : task
       )
     );
+  }
+
+  editTask(task: Task) {
+    this.editingTask.set(task);
+    this.editedTaskName = task.name;
+  }
+
+  saveTask() {
+    if (this.editingTask()) {
+      this.tasks.update(tasks =>
+        tasks.map((task: Task) =>
+          task.id === this.editingTask()!.id ? { ...task, name: this.editedTaskName } : task
+        )
+      );
+      this.cancelEdit();
+    }
+  }
+
+  cancelEdit() {
+    this.editingTask.set(null);
+    this.editedTaskName = '';
   }
 }
