@@ -13,7 +13,6 @@
 
     <!-- Formulário para adicionar tarefa -->
     <div class="task-form-container">
-      <label for="taskInput">Nova Tarefa:</label>
       <input
         type="text"
         id="taskInput"
@@ -31,11 +30,18 @@
           <div class="task-info">
             <input
               type="checkbox"
-              [checked]="task.completed"
-              (change)="toggleComplete(task.id)"
+              [checked]="task.status=== 'completed'"
+              (change)="toggleStatus(task.id)"
             >
-            <label [class.completed]="task.completed">{{ task.name }}</label>
+            <label [class.completed]="task.status === 'completed'">{{ task.name }}</label>
           </div>
+
+          <div class="task-meta">
+            <span [class]="'priority-' + task.priority">
+              <span class ="priority-label">{{ task.priority }}</span>
+          </span>
+          </div>
+          
           <div class="task-actions">
             <button class="edit-button" (click)="editTask(task)">Editar</button>
             <button class="delete-button" (click)="deleteTask(task.id)">Excluir</button>

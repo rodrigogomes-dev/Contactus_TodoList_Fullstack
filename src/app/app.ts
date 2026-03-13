@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 interface Task {
   id: number;
   name: string;
-  completed: boolean;
+  status: 'open' | 'completed';
+  priority: 'low' | 'medium' | 'high'; 
 }
 
 @Component({
@@ -16,9 +17,10 @@ interface Task {
 })
 export class App { // <-- A classe que está a ser exportada
   tasks = signal<Task[]>([
-    { id: 1, name: 'Aprender Angular', completed: true },
-    { id: 2, name: 'Criar um To-Do App', completed: false },
-    { id: 3, name: 'Implementar Signals', completed: false },
+    { id: 1, name: 'Estudar o novo Control Flow do Angular', status: 'completed', priority: 'high' },
+    { id: 2, name: 'Implementar o @for com a cláusula track', status: 'open', priority: 'high' },
+    { id: 3, name: 'Verificar a renderização condicional com @if', status: 'open', priority: 'medium' },
+    { id: 4, name: 'Analisar Class Binding para prioridades', status: 'open', priority: 'low' },
   ]);
 
   newTask: string = '';
@@ -30,7 +32,8 @@ export class App { // <-- A classe que está a ser exportada
       const newTask: Task = {
         id: Date.now(),
         name: this.newTask,
-        completed: false,
+        status: 'open',
+        priority: 'low',
       };
       this.tasks.update(tasks => [...tasks, newTask]);
       this.newTask = '';
@@ -41,10 +44,10 @@ export class App { // <-- A classe que está a ser exportada
     this.tasks.update(tasks => tasks.filter((task: Task) => task.id !== id));
   }
 
-  toggleComplete(id: number) {
+  toggleStatus(id: number) {
     this.tasks.update(tasks =>
       tasks.map((task: Task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
+        task.id === id ? { ...task, status: task.status === 'open' ? 'completed' : 'open'} : task
       )
     );
   }

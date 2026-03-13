@@ -114,6 +114,7 @@ section h2 {
 .task-info {
     display: flex;
     align-items: center;
+    flex-grow: 1;
 }
 
 .task-info label {
@@ -201,3 +202,28 @@ section h2 {
     white-space: nowrap;
     border: 0;
 }
+
+.priority-label{
+    background-color: #6c756d;
+    font-size: 0.8em;
+    padding: 3px 8px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    text-transform: capitalize;
+    min-width: 65px;
+    text-align: center;
+    display: inline-block;
+}
+
+.priority-low .priority-label{
+    background-color: #28a745;
+}
+
+.priority-medium .priority-label{
+    background-color: #ffc107;
+}
+
+.priority-high .priority-label{
+    background-color: #dc3545;
+}   
