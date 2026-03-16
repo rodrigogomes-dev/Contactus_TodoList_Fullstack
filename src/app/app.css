@@ -14,6 +14,7 @@
   background-color: #f0f7ff;
   border-radius: 8px;
   border: 1px solid #cfe5ff;
+  width: 100%;
 }
 
 .task-edit-form input[type="text"] {
@@ -34,43 +35,49 @@
 /* Estilo para os botões de editar, salvar e cancelar */
 .edit-button,
 .save-button,
-.cancel-button {
+.cancel-button,
+.close-button,
+.delete-button {
   padding: 8px 12px;
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  background-color: transparent;
 }
 
 .edit-button {
-  background-color: #007bff;
-  color: white;
   border-color: #007bff;
+  color: #007bff;
 }
 
 .edit-button:hover {
-  background-color: #0056b3;
+  background-color: #007bff;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
 }
 
 .save-button {
-  background-color: #28a745;
-  color: white;
   border-color: #28a745;
+  color: #28a745;
 }
 
 .save-button:hover {
-  background-color: #218838;
+  background-color: #28a745;
+  color: white;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
 }
 
 .cancel-button {
-  background-color: #dc3545;
-  color: white;
   border-color: #dc3545;
+  color: #dc3545;
 }
 
 .cancel-button:hover {
-  background-color: #c82333;
+  background-color: #dc3545;
+  color: white;
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
 }
 
 aside {
@@ -103,12 +110,19 @@ section h2 {
     display: flex; /* ATIVA O FLEXBOX! */
     justify-content: space-between; /* Coloca espaço máximo entre os itens (info vs actions) */
     align-items: center; /* Alinha os itens verticalmente ao centro */
-
     background-color: var(--clr-card);
     padding: 15px;
     margin-bottom: 10px; /* Espaço entre os cards */
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.task-card:hover {
+    box-shadow: 0 6px 12px rgba(0, 123, 255, 0.2);
+    transform: translateY(-2px);
+    background-color: #f8fbff;
 }
 
 .task-info {
@@ -150,6 +164,7 @@ section h2 {
 .task-actions .delete-button:hover {
     background-color: #dc3545;
     color: white;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
 }
 
 /* Estilo do Formulário de Adicionar Tarefa */
@@ -169,24 +184,25 @@ section h2 {
 }
 
 .task-form-container button {
-    background-color: var(--clr-primary);
-    color: var(--clr-card);
+    background-color: transparent;
+    color: var(--clr-primary);
     padding: 10px 15px;
-    border: 1px solid transparent; 
+    border: 2px solid var(--clr-primary); 
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .task-form-container button:hover {
-    background-color: var(--clr-card);
-    color: var(--clr-primary);
-    border-color: var(--clr-primary);
+    background-color: var(--clr-primary);
+    color: var(--clr-card);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
 }
 
 .task-form-container button:disabled {
-    background-color: var(--clr-primary);
+    border-color: #ccc;
+    color: #ccc;
     opacity: 0.65;
     cursor: not-allowed;
 }
@@ -216,14 +232,71 @@ section h2 {
     display: inline-block;
 }
 
-.priority-low .priority-label{
+.priority-baixa .priority-label{
     background-color: #28a745;
 }
 
-.priority-medium .priority-label{
+.priority-media .priority-label{
     background-color: #ffc107;
 }
 
-.priority-high .priority-label{
+.priority-alta .priority-label{
     background-color: #dc3545;
-}   
+}
+
+.due-date {
+  background-color: transparent;
+  border: 1px solid var(--clr-border);
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--clr-text);
+  margin-left: 10px;
+}
+
+.task-details {
+  background-color: #f8fbff;
+  padding: 15px;
+  border-left: 4px solid var(--clr-primary);
+  margin-top: -10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  animation: slideIn 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.task-details p {
+  margin-bottom: 10px;
+  color: var(--clr-text);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.close-button {
+  border-color: #dc3545;
+  color: #dc3545;
+  margin-top: 10px;
+  align-self: flex-end;
+}
+
+.close-button:hover {
+  background-color: #dc3545;
+  color: white;
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+  transform: scale(1.05);
+}
+
+.close-button:active {
+  transform: scale(0.98);
+}

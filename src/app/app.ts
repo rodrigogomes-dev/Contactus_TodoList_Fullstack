@@ -1,75 +1,110 @@
-import { Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
-interface Task {
-  id: number;
-  name: string;
-  status: 'open' | 'completed';
-  priority: 'low' | 'medium' | 'high'; 
-}
+import { TaskService, Tarefa} from './services/task';
 
 @Component({
   selector: 'app-root',
-  standalone: true,            // <-- Isto é o que o torna um componente standalone
-  imports: [FormsModule],        // <-- Isto permite usar o ngModel no template
+  standalone: true,
+  imports: [FormsModule, CommonModule],
   templateUrl: './app.html',
   styleUrls: ['./app.css'],
 })
-export class App { // <-- A classe que está a ser exportada
-  tasks = signal<Task[]>([
-    { id: 1, name: 'Estudar o novo Control Flow do Angular', status: 'completed', priority: 'high' },
-    { id: 2, name: 'Implementar o @for com a cláusula track', status: 'open', priority: 'high' },
-    { id: 3, name: 'Verificar a renderização condicional com @if', status: 'open', priority: 'medium' },
-    { id: 4, name: 'Analisar Class Binding para prioridades', status: 'open', priority: 'low' },
-  ]);
+export class App {
+  private taskService = inject(TaskService);
+  tasks = signal<Tarefa[]>([]);
+  editingTask = signal<Tarefa | null>(null);
+  selectedTask = signal<Tarefa | null>(null);
+  tarefaEditada = signal<Tarefa | null>(null);
 
-  newTask: string = '';
-  editingTask = signal<Task | null>(null);
-  editedTaskName: string = '';
+  novoTitulo: string = '';
+
+  constructor() {
+    this.tasks.set(this.taskService.getTasks());
+  }
 
   addTask() {
-    if (this.newTask.trim() !== '') {
-      const newTask: Task = {
-        id: Date.now(),
-        name: this.newTask,
-        status: 'open',
-        priority: 'low',
+    if (this.novoTitulo.trim() !== '') {
+      const maxId = this.tasks().reduce((max, task) => task.id > max ? task.id : max, 0);
+      const newTask: Tarefa = {
+        id: maxId + 1,
+        id_utilizador: 1, // default user id
+        titulo: this.novoTitulo,
+        descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl eu nisl.',
+        estado: 'pendente',
+        prioridade: 'media',
+        data_vencimento: null,
+        data_criacao: new Date(),
+        id_categoria: 1, // default category
       };
-      this.tasks.update(tasks => [...tasks, newTask]);
-      this.newTask = '';
+      this.taskService.addTask(newTask);
+      this.tasks.set(this.taskService.getTasks());
+      this.novoTitulo = '';
     }
   }
 
   deleteTask(id: number) {
-    this.tasks.update(tasks => tasks.filter((task: Task) => task.id !== id));
+    this.taskService.deleteTask(id);
+    this.tasks.set(this.taskService.getTasks());
   }
 
   toggleStatus(id: number) {
-    this.tasks.update(tasks =>
-      tasks.map((task: Task) =>
-        task.id === id ? { ...task, status: task.status === 'open' ? 'completed' : 'open'} : task
-      )
-    );
+    const task = this.tasks().find(task => task.id === id);
+    if (task) {
+      const newEstado: Tarefa['estado'] = task.estado === 'pendente' ? 'concluido' : 'pendente';
+      const updatedTask: Tarefa = { ...task, estado: newEstado };
+      this.taskService.updateTask(updatedTask);
+      this.tasks.set(this.taskService.getTasks());
+    }
   }
 
-  editTask(task: Task) {
+  selectTask(task: Tarefa) {
+    if (this.selectedTask() === task) {
+      this.selectedTask.set(null);
+    } else {
+      this.selectedTask.set(task);
+    }
+  }
+
+  editTask(task: Tarefa) {
     this.editingTask.set(task);
-    this.editedTaskName = task.name;
+    this.tarefaEditada.set({ ...task });
   }
 
   saveTask() {
-    if (this.editingTask()) {
-      this.tasks.update(tasks =>
-        tasks.map((task: Task) =>
-          task.id === this.editingTask()!.id ? { ...task, name: this.editedTaskName } : task
-        )
-      );
+    if (this.editingTask() && this.tarefaEditada() && this.tarefaEditada()!.titulo.trim() !== '') {
+      this.taskService.updateTask(this.tarefaEditada()!);
+      this.tasks.set(this.taskService.getTasks());
       this.cancelEdit();
     }
   }
 
   cancelEdit() {
     this.editingTask.set(null);
-    this.editedTaskName = '';
+    this.tarefaEditada.set(null);
+  }
+
+  updateDueDate(dateString: string) {
+    if (this.tarefaEditada()) {
+      const newDate = dateString ? new Date(dateString + 'T00:00:00') : null;
+      this.tarefaEditada.set({
+        ...this.tarefaEditada()!,
+        data_vencimento: newDate,
+      });
+    }
+  }
+
+  updateEstado(estado: string) {
+    this.tarefaEditada.update(task => {
+      if (!task) return null;
+      return { ...task, estado: estado as 'pendente' | 'concluido' };
+    });
+  }
+
+  updatePrioridade(prioridade: string) {
+    this.tarefaEditada.update(task => {
+      if (!task) return null;
+      return { ...task, prioridade: prioridade as 'baixa' | 'media' | 'alta' };
+    });
   }
 }

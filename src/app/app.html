@@ -17,50 +17,69 @@
         type="text"
         id="taskInput"
         placeholder="O que precisa de ser feito hoje?"
-        [(ngModel)]="newTask"
+        [(ngModel)]="novoTitulo"
         (keyup.enter)="addTask()"
       >
-      <button (click)="addTask()" [disabled]="newTask.trim() === ''">Adicionar +</button>
+      <button (click)="addTask()" [disabled]="novoTitulo.trim() === ''">Adicionar +</button>
     </div>
 
     <!-- Container da Lista de Tarefas -->
     <div class="task-list-container">
       @for (task of tasks(); track task.id) {
-        <div class="task-card">
-          <div class="task-info">
-            <input
-              type="checkbox"
-              [checked]="task.status=== 'completed'"
-              (change)="toggleStatus(task.id)"
-            >
-            <label [class.completed]="task.status === 'completed'">{{ task.name }}</label>
-          </div>
-
-          <div class="task-meta">
-            <span [class]="'priority-' + task.priority">
-              <span class ="priority-label">{{ task.priority }}</span>
-          </span>
-          </div>
-          
-          <div class="task-actions">
-            <button class="edit-button" (click)="editTask(task)">Editar</button>
-            <button class="delete-button" (click)="deleteTask(task.id)">Excluir</button>
-          </div>
-        </div>
-
-        <!-- Formulário de Edição -->
-        @if (editingTask() === task) {
-          <div class="task-edit-form">
-            <input
-              type="text"
-              [(ngModel)]="editedTaskName"
-              (keyup.enter)="saveTask()"
-              (keyup.escape)="cancelEdit()"
-            >
-            <div class="task-edit-actions">
-              <button class="save-button" (click)="saveTask()">Salvar</button>
-              <button class="cancel-button" (click)="cancelEdit()">Cancelar</button>
+        <div class="task-card" (click)="selectTask(task)">
+          @if (editingTask() !== task) {
+            <div class="task-info">
+              <input
+                type="checkbox"
+                [checked]="task.estado === 'concluido'"
+                (change)="toggleStatus(task.id)"
+              >
+              <label [class.completed]="task.estado === 'concluido'">{{ task.titulo }}</label>
             </div>
+
+            <div class="task-meta">
+              <span [class]="'priority-' + task.prioridade">
+                <span class ="priority-label">{{ task.prioridade }}</span>
+              </span>
+              @if (task.data_vencimento) {
+                <span class="due-date">
+                  {{ task.data_vencimento | date:'dd/MM/yyyy' }}
+                </span>
+              }
+            </div>
+            
+            <div class="task-actions">
+              <button class="edit-button" (click)="editTask(task)">Editar</button>
+              <button class="delete-button" (click)="deleteTask(task.id)">Excluir</button>
+            </div>
+          } @else {
+            <div class="task-edit-form">
+              <input type="text" [(ngModel)]="tarefaEditada()!.titulo">
+              <textarea [(ngModel)]="tarefaEditada()!.descricao"></textarea>
+              <select [ngModel]="tarefaEditada()!.estado" (ngModelChange)="updateEstado($event)">
+                <option value="pendente">Pendente</option>
+                <option value="concluido">Concluído</option>
+              </select>
+              <select [ngModel]="tarefaEditada()!.prioridade" (ngModelChange)="updatePrioridade($event)">
+                <option value="baixa">Baixa</option>
+                <option value="media">Média</option>
+                <option value="alta">Alta</option>
+              </select>
+              <input type="date" [ngModel]="tarefaEditada()!.data_vencimento | date:'yyyy-MM-dd'" (ngModelChange)="updateDueDate($event)">
+
+              <div class="task-edit-actions">
+                <button class="save-button" (click)="saveTask()">Salvar</button>
+                <button class="cancel-button" (click)="cancelEdit()">Cancelar</button>
+              </div>
+            </div>
+          }
+        </div>
+        @if (selectedTask() === task && editingTask() !== task) {
+          <div class="task-details">
+            <p><strong>Descrição:</strong> {{ task.descricao || 'N/A' }}</p>
+            <p><strong>Categoria ID:</strong> {{ task.id_categoria }}</p>
+            <p><strong>Data de Criação:</strong> {{ task.data_criacao | date:'dd/MM/yyyy HH:mm' }}</p>
+            <button class="close-button" (click)="selectTask(task)">Fechar</button>
           </div>
         }
       } @empty {
