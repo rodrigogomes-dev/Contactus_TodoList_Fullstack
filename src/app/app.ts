@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { DatePipe, UpperCasePipe, TitleCasePipe } from '@angular/common';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TaskService, Tarefa} from './services/task';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, DatePipe, UpperCasePipe, TitleCasePipe],
   templateUrl: './app.html',
-  styleUrls: ['./app.css'],
 })
 export class App {
   private taskService = inject(TaskService);
@@ -16,11 +16,43 @@ export class App {
   editingTask = signal<Tarefa | null>(null);
   selectedTask = signal<Tarefa | null>(null);
   tarefaEditada = signal<Tarefa | null>(null);
+  menuOpen = signal<boolean>(false);
+  currentView = signal<'pendentes' | 'concluidas'>('pendentes');
+
+  filteredTasks = computed(() => {
+    const view = this.currentView();
+    return this.tasks().filter(task =>
+      view === 'pendentes' ? task.estado === 'pendente' : task.estado === 'concluido'
+    );
+  });
+
+  totalPendentes = computed(() => {
+    return this.tasks().filter(task => task.estado === 'pendente').length;
+  });
+
+  totalConcluidas = computed(() => {
+    return this.tasks().filter(task => task.estado === 'concluido').length;
+  });
+
+  percentualConcluido = computed(() => {
+    const total = this.tasks().length;
+    if (total === 0) return 0;
+    return Math.round((this.totalConcluidas() / total) * 100);
+  });
 
   novoTitulo: string = '';
 
   constructor() {
     this.tasks.set(this.taskService.getTasks());
+  }
+
+  toggleMenu() {
+    this.menuOpen.update(value => !value);
+  }
+
+  setView(view: 'pendentes' | 'concluidas') {
+    this.currentView.set(view);
+    this.menuOpen.set(false);
   }
 
   addTask() {

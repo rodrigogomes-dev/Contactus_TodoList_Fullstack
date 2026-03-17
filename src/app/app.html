@@ -1,15 +1,41 @@
 <header>
+  <button class="hamburger" (click)="toggleMenu()" [class.active]="menuOpen()">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
   <h1>Todo List App</h1>
 </header>
 
 <main>
-  <aside>
+  <aside [class.open]="menuOpen()">
     <h2>Menu</h2>
-    <!-- Pode adicionar links de navegação aqui no futuro -->
+    <nav class="menu-nav">
+      <button 
+        class="menu-button" 
+        [class.active]="currentView() === 'pendentes'"
+        (click)="setView('pendentes')">
+        📋 Tarefas Pendentes
+      </button>
+      <button 
+        class="menu-button" 
+        [class.active]="currentView() === 'concluidas'"
+        (click)="setView('concluidas')">
+        ✅ Tarefas Concluídas
+      </button>
+    </nav>
   </aside>
 
   <section>
-    <h2>Lista de Tarefas</h2>
+    <h2>{{ currentView() === 'pendentes' ? 'Tarefas Pendentes' : 'Tarefas Concluídas' }}</h2>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="percentualConcluido()"></div>
+      </div>
+      <p class="progress-text">{{ totalConcluidas() }} de {{ tasks().length }} tarefas completadas ({{ percentualConcluido() }}%)</p>
+    </div>
 
     <!-- Formulário para adicionar tarefa -->
     <div class="task-form-container">
@@ -25,27 +51,29 @@
 
     <!-- Container da Lista de Tarefas -->
     <div class="task-list-container">
-      @for (task of tasks(); track task.id) {
-        <div class="task-card" (click)="selectTask(task)">
+      @for (task of filteredTasks(); track task.id) {
+        <div class="task-card task-priority-{{ task.prioridade }}" (click)="selectTask(task)">
           @if (editingTask() !== task) {
-            <div class="task-info">
-              <input
-                type="checkbox"
-                [checked]="task.estado === 'concluido'"
-                (change)="toggleStatus(task.id)"
-              >
-              <label [class.completed]="task.estado === 'concluido'">{{ task.titulo }}</label>
-            </div>
+            <div class="task-left">
+              <div class="task-info">
+                <input
+                  type="checkbox"
+                  [checked]="task.estado === 'concluido'"
+                  (change)="toggleStatus(task.id)"
+                >
+                <label [class.completed]="task.estado === 'concluido'">{{ task.titulo }}</label>
+              </div>
 
-            <div class="task-meta">
-              <span [class]="'priority-' + task.prioridade">
-                <span class ="priority-label">{{ task.prioridade }}</span>
-              </span>
-              @if (task.data_vencimento) {
-                <span class="due-date">
-                  {{ task.data_vencimento | date:'dd/MM/yyyy' }}
+              <div class="task-meta">
+                <span class="priority-badge priority-badge-{{ task.prioridade }}">
+                  <span class ="priority-label">{{ task.prioridade | titlecase }}</span>
                 </span>
-              }
+                @if (task.data_vencimento) {
+                  <span class="due-date">
+                    {{ task.data_vencimento | date:'dd/MM/yyyy' }}
+                  </span>
+                }
+              </div>
             </div>
             
             <div class="task-actions">
@@ -76,9 +104,9 @@
         </div>
         @if (selectedTask() === task && editingTask() !== task) {
           <div class="task-details">
-            <p><strong>Descrição:</strong> {{ task.descricao || 'N/A' }}</p>
-            <p><strong>Categoria ID:</strong> {{ task.id_categoria }}</p>
-            <p><strong>Data de Criação:</strong> {{ task.data_criacao | date:'dd/MM/yyyy HH:mm' }}</p>
+            <div class="task-details-content">
+              <p><strong>Descrição:</strong> {{ task.descricao || 'N/A' }} | <strong>Criado:</strong> {{ task.data_criacao | date:'dd/MM/yyyy' }}</p>
+            </div>
             <button class="close-button" (click)="selectTask(task)">Fechar</button>
           </div>
         }
