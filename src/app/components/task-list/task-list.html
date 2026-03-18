@@ -1,0 +1,89 @@
+<section>
+  <h2>{{ currentView() === 'pendente' ? 'Tarefas Abertas' : 'Tarefas Concluídas' }}</h2>
+
+  <!-- Progress Bar -->
+  <div class="progress-container">
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="percentualConcluido()"></div>
+    </div>
+    <p class="progress-text">{{ totalConcluidas() }} de {{ tasks().length }} tarefas completadas ({{ percentualConcluido() }}%)</p>
+  </div>
+
+  <!-- Formulário para adicionar tarefa -->
+  <div class="task-form-container">
+    <input
+      type="text"
+      id="taskInput"
+      placeholder="O que precisa de ser feito hoje?"
+      [(ngModel)]="novoTitulo"
+      (keyup.enter)="addTask()"
+    >
+    <button (click)="addTask()" [disabled]="novoTitulo.trim() === ''">Adicionar +</button>
+  </div>
+
+  <!-- Container da Lista de Tarefas -->
+  <div class="task-list-container">
+    @for (task of filteredTasks(); track task.id) {
+      <div class="task-card task-priority-{{ task.prioridade }}" (click)="selectTask(task)">
+        @if (editingTask() !== task) {
+          <div class="task-left">
+            <div class="task-info">
+              <input
+                type="checkbox"
+                [checked]="task.estado === 'concluido'"
+                (change)="toggleStatus(task.id)"
+              >
+              <label [class.completed]="task.estado === 'concluido'">{{ task.titulo }}</label>
+            </div>
+
+            <div class="task-meta">
+              <span class="priority-badge priority-badge-{{ task.prioridade }}">
+                <span class="priority-label">{{ task.prioridade | titlecase }}</span>
+              </span>
+              @if (task.data_vencimento) {
+                <span class="due-date">
+                  {{ task.data_vencimento | date:'dd/MM/yyyy' }}
+                </span>
+              }
+            </div>
+          </div>
+          
+          <div class="task-actions">
+            <button class="edit-button" (click)="editTask(task)">Editar</button>
+            <button class="delete-button" (click)="deleteTask(task.id)">Excluir</button>
+          </div>
+        } @else {
+          <div class="task-edit-form">
+            <input type="text" [(ngModel)]="tarefaEditada()!.titulo">
+            <textarea [(ngModel)]="tarefaEditada()!.descricao"></textarea>
+            <select [ngModel]="tarefaEditada()!.estado" (ngModelChange)="updateEstado($event)">
+              <option value="pendente">Pendente</option>
+              <option value="concluido">Concluído</option>
+            </select>
+            <select [ngModel]="tarefaEditada()!.prioridade" (ngModelChange)="updatePrioridade($event)">
+              <option value="baixa">Baixa</option>
+              <option value="media">Média</option>
+              <option value="alta">Alta</option>
+            </select>
+            <input type="date" [ngModel]="tarefaEditada()!.data_vencimento | date:'yyyy-MM-dd'" (ngModelChange)="updateDueDate($event)">
+
+            <div class="task-edit-actions">
+              <button class="save-button" (click)="saveTask()">Salvar</button>
+              <button class="cancel-button" (click)="cancelEdit()">Cancelar</button>
+            </div>
+          </div>
+        }
+      </div>
+      @if (selectedTask() === task && editingTask() !== task) {
+        <div class="task-details">
+          <div class="task-details-content">
+            <p><strong>Descrição:</strong> {{ task.descricao || 'N/A' }} | <strong>Criado:</strong> {{ task.data_criacao | date:'dd/MM/yyyy' }}</p>
+          </div>
+          <button class="close-button" (click)="selectTask(task)">Fechar</button>
+        </div>
+      }
+    } @empty {
+      <p>Parabéns, não há tarefas pendentes!</p>
+    }
+  </div>
+</section>
