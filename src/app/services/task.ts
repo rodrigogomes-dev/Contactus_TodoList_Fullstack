@@ -41,5 +41,9 @@ export class TaskService {
       this.tarefas[index] = updatedTask;
     }
   }
+
+  getById(id: number): Tarefa | undefined {
+    return this.tarefas.find(task => task.id === id);
+  }
 }
 

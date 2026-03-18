@@ -1,0 +1,27 @@
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 4rem 2rem;
+  gap: 1rem;
+  text-align: center;
+}
+
+.admin-icon {
+  font-size: 5rem;
+  color: #007bff;
+  font-variation-settings: 'FILL' 1;
+}
+
+.admin-page h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.admin-page p {
+  color: #6b7280;
+  font-size: 1rem;
+}

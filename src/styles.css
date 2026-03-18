@@ -195,6 +195,27 @@ aside h2 {
     font-variation-settings: 'FILL' 1;
 }
 
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 1rem;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.logout-btn:hover {
+    background: transparent;
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+
 /* FOOTER */
 footer {
     background: #1f2937;

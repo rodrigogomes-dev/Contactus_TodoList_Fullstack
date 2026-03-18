@@ -12,36 +12,40 @@
   </div>
   <div class="header-right">
     <span class="header-badge">Angular 19</span>
+    @if (auth.authenticated()) {
+      <button class="logout-btn" (click)="logout()">
+        <span class="material-symbols-rounded">logout</span> Logout
+      </button>
+    }
   </div>
 </header>
 
-<main>
-  <aside [class.open]="menuOpen()">
-    <h2>Menu</h2>
-    <nav class="menu-nav">
-      <!-- ✅ routerLink em vez de (click) -->
-      <!-- routerLinkActive="active" marca o link ativo -->
-      <a 
-        routerLink="/tarefas-abertas"
-        routerLinkActive="active"
-        (click)="toggleMenu()">
-        <span class="material-symbols-rounded">assignment</span>
-        Tarefas Abertas
-      </a>
-      
-      <a 
-        routerLink="/tarefas-concluidas"
-        routerLinkActive="active"
-        (click)="toggleMenu()">
-        <span class="material-symbols-rounded">task_alt</span>
-        Tarefas Concluídas
-      </a>
-    </nav>
-  </aside>
-
-  <!-- 🎯 Router renderiza TaskListComponent aqui -->
+@if (!auth.authenticated()) {
   <router-outlet></router-outlet>
-</main>
+} @else {
+  <main>
+    <aside [class.open]="menuOpen()">
+      <h2>Menu</h2>
+      <nav class="menu-nav">
+        <a routerLink="/tarefas-abertas" routerLinkActive="active" (click)="toggleMenu()">
+          <span class="material-symbols-rounded">assignment</span>
+          Tarefas Abertas
+        </a>
+        <a routerLink="/tarefas-concluidas" routerLinkActive="active" (click)="toggleMenu()">
+          <span class="material-symbols-rounded">task_alt</span>
+          Tarefas Concluídas
+        </a>
+        @if (auth.role() === 'admin') {
+          <a routerLink="/admin" routerLinkActive="active" (click)="toggleMenu()">
+            <span class="material-symbols-rounded">shield_person</span>
+            Admin
+          </a>
+        }
+      </nav>
+    </aside>
+    <router-outlet></router-outlet>
+  </main>
+}
 
 <footer>
   <p>Desenvolvido por Rodrigo Gomes - Contexto Formativo Estágio Contactus - 2026</p>
