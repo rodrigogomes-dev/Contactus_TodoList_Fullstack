@@ -1,0 +1,60 @@
+<div class="modal-overlay" (click)="cancel()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>{{ task ? 'Editar Tarefa' : 'Nova Tarefa' }}</h2>
+
+    <form [formGroup]="form" (ngSubmit)="saveTask()">
+      <div class="form-grid">
+
+        <div class="form-col">
+          <div class="form-group">
+            <label>Título</label>
+            <input type="text" formControlName="titulo" />
+            @if (form.get('titulo')?.invalid && form.get('titulo')?.touched) {
+              <span class="error">Título obrigatório</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Descrição</label>
+            <textarea formControlName="descricao" rows="4"></textarea>
+          </div>
+        </div>
+
+        <div class="form-col">
+          <div class="form-group">
+            <label>Categoria</label>
+            <select formControlName="categoria">
+              <option value="">Seleciona...</option>
+              <option value="Informática">Informática</option>
+              <option value="Gestão">Gestão</option>
+              <option value="Recursos Humanos">Recursos Humanos</option>
+            </select>
+            @if (form.get('categoria')?.invalid && form.get('categoria')?.touched) {
+              <span class="error">Categoria obrigatória</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Prioridade</label>
+            <select formControlName="prioridade">
+              <option value="baixa">Baixa</option>
+              <option value="media">Média</option>
+              <option value="alta">Alta</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Data de Validade</label>
+            <input type="date" formControlName="dataValidade" />
+            @if (form.get('dataValidade')?.errors?.['dateInPast']) {
+              <span class="error">A data não pode ser no passado</span>
+            }
+          </div>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="form.invalid">Guardar</button>
+        <button type="button" (click)="cancel()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
