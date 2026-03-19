@@ -20,41 +20,42 @@
 
   <!-- Container da Lista de Tarefas -->
   <div class="task-list-container">
-    @for (task of filteredTasks(); track task.id) {
-      <div class="task-card task-priority-{{ task.prioridade }}" (click)="selectTask(task)">
-        <div class="task-left">
-          <div class="task-info">
-            <input
-              type="checkbox"
-              [checked]="task.estado === 'concluido'"
-              (change)="toggleStatus(task.id)"
-            >
-            <label [class.completed]="task.estado === 'concluido'">{{ task.titulo }}</label>
+      @for (task of filteredTasks(); track task.id) {
+        <div class="task-card task-priority-{{ task.prioridade }}" (click)="selectTask(task)">
+          <div class="task-left">
+            <div class="task-info">
+              <input
+                type="checkbox"
+                [checked]="task.estado === 'concluido'"
+                (change)="toggleStatus(task.id)"
+              >
+              <label [class.completed]="task.estado === 'concluido'">{{ task.titulo }}</label>
+            </div>
+            <div class="task-meta">
+              <span class="priority-badge priority-badge-{{ task.prioridade }}">
+                <span class="priority-label">{{ task.prioridade | titlecase }}</span>
+              </span>
+              @if (task.data_vencimento) {
+                <span class="due-date">{{ task.data_vencimento | date:'dd/MM/yyyy' }}</span>
+              }
+            </div>
           </div>
-          <div class="task-meta">
-            <span class="priority-badge priority-badge-{{ task.prioridade }}">
-              <span class="priority-label">{{ task.prioridade | titlecase }}</span>
-            </span>
-            @if (task.data_vencimento) {
-              <span class="due-date">{{ task.data_vencimento | date:'dd/MM/yyyy' }}</span>
-            }
+          <div class="task-actions">
+            <button class="edit-button" (click)="$event.stopPropagation(); openEditModal(task)">Editar</button>
+            <button class="delete-button" (click)="$event.stopPropagation(); deleteTask(task.id)">Excluir</button>
           </div>
         </div>
-        <div class="task-actions">
-          <button class="edit-button" (click)="$event.stopPropagation(); openEditModal(task)">Editar</button>
-          <button class="delete-button" (click)="$event.stopPropagation(); deleteTask(task.id)">Excluir</button>
-        </div>
-      </div>
-      @if (selectedTask() === task) {
-        <div class="task-details">
-          <div class="task-details-content">
-            <p><strong>Descrição:</strong> {{ task.descricao || 'N/A' }} | <strong>Criado:</strong> {{ task.data_criacao | date:'dd/MM/yyyy' }}</p>
+        @if (selectedTask() === task) {
+          <div class="task-details">
+            <div class="task-details-content">
+              <p><strong>Descrição:</strong> {{ task.descricao || 'N/A' }} | <strong>Criado:</strong> {{ task.data_criacao | date:'dd/MM/yyyy' }}</p>
+            </div>
+            <button class="close-button" (click)="selectTask(task)">Fechar</button>
           </div>
-          <button class="close-button" (click)="selectTask(task)">Fechar</button>
-        </div>
+        }
+      } @empty {
+        <p>Parabéns, não há tarefas pendentes!</p>
       }
-    } @empty {
-      <p>Parabéns, não há tarefas pendentes!</p>
-    }
-  </div>
+    </div>
+
 </section>

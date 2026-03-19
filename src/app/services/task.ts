@@ -1,4 +1,6 @@
 import { Injectable, signal } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { delay, map } from 'rxjs/operators';
 
 export interface Tarefa {
   id: number;
@@ -19,11 +21,18 @@ export class TaskService {
   private tarefas = signal<Tarefa[]>([
     { id: 1, id_utilizador: 1, titulo: 'Estudar o novo Control Flow do Angular', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl eu nisl.', prioridade: 'alta', estado: 'pendente', data_vencimento: new Date('2026-03-20'), data_criacao: new Date(), id_categoria: 1 },
     { id: 2, id_utilizador: 1, titulo: 'Implementar o @for com a cláusula track', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl eu nisl.', prioridade: 'alta', estado: 'concluido', data_vencimento: null, data_criacao: new Date(), id_categoria: 1 },
-    { id: 3, id_utilizador: 1, titulo: 'Verificar a renderização condicional', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl eu nisl.',  prioridade: 'media', estado: 'pendente', data_vencimento: new Date('2026-03-10'), data_criacao: new Date(), id_categoria: 2 },
+    { id: 3, id_utilizador: 1, titulo: 'Verificar a renderização condicional', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl eu nisl.', prioridade: 'media', estado: 'pendente', data_vencimento: new Date('2026-03-10'), data_criacao: new Date(), id_categoria: 2 },
     { id: 4, id_utilizador: 1, titulo: 'Analisar Class Binding para prioridades', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl eu nisl.', prioridade: 'baixa', estado: 'pendente', data_vencimento: null, data_criacao: new Date(), id_categoria: 2 },
   ]);
 
-  getTasks() {
+  getTasks(): Observable<Tarefa[]> {
+    return of(this.tarefas()).pipe(
+      delay(2000),
+      map(tasks => tasks.map(t => ({ ...t, titulo: t.titulo.toUpperCase() })))
+    );
+  }
+
+  getTasksSignal() {
     return this.tarefas;
   }
 
@@ -45,4 +54,3 @@ export class TaskService {
     return this.tarefas().find(task => task.id === id);
   }
 }
-

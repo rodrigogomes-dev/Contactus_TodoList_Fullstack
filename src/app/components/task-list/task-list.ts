@@ -16,13 +16,13 @@ export class TaskListComponent implements HasUnsavedChanges {
   private route = inject(ActivatedRoute);
   private taskService = inject(TaskService);
 
-  tasks = this.taskService.getTasks();
+  tasks = this.taskService.getTasksSignal();
+
   selectedTask = signal<Tarefa | null>(null);
   currentView = signal<'pendente' | 'concluido'>('pendente');
   showModal = signal<boolean>(false);
   editingTask = signal<Tarefa | null>(null);
   isDirty = false;
-
   filteredTasks = computed(() =>
     this.tasks().filter(task => task.estado === this.currentView())
   );
@@ -50,7 +50,7 @@ export class TaskListComponent implements HasUnsavedChanges {
   }
 
   toggleStatus(id: number) {
-    const task = this.tasks().find(task => task.id === id);
+    const task = this.taskService.getTasksSignal()().find(t => t.id === id);
     if (task) {
       this.taskService.updateTask({ ...task, estado: task.estado === 'pendente' ? 'concluido' : 'pendente' });
     }

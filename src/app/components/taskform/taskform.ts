@@ -53,7 +53,8 @@ export class TaskformComponent implements OnInit {
           data_vencimento: dataValidade,
         });
       } else {
-        const maxId = this.taskService.getTasks()().reduce((max: number, t: Tarefa) => t.id > max ? t.id : max, 0);
+        const maxId = this.taskService.getTasksSignal()().reduce((max: number, t: Tarefa) => t.id > max ? t.id : max, 0);
+
         this.taskService.addTask({
           id:              maxId + 1,
           id_utilizador:   1,
