@@ -133,7 +133,8 @@ router-outlet {
     display: none;
 }
 
-app-task-list {
+app-task-list,
+app-profile {
     grid-column: 2;
     min-width: 0;
 }

@@ -39,6 +39,12 @@ export const routes: Routes = [
     canMatch: [roleGuard]
   },
   {
+    path: 'perfil',
+    loadComponent: () =>
+      import('./components/profile/profile').then(m => m.ProfileComponent),
+    canActivate: [authGuard]
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./components/page-not-found/page-not-found').then(m => m.PageNotFoundComponent)

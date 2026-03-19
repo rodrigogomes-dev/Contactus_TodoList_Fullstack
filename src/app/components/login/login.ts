@@ -47,10 +47,10 @@ export class LoginComponent {
     if (this.loginForm.invalid) return;
     const { username, password } = this.loginForm.value;
     if (username === 'admin' && password === 'password') {
-      this.auth.login('admin');
+      this.auth.login('admin', 'admin');
       this.router.navigate(['/admin']);
     } else if (username === 'user' && password === 'password') {
-      this.auth.login('user');
+      this.auth.login('user', 'user');
       this.router.navigate(['/tarefas-abertas']);
     } else {
       alert('Credenciais inválidas. Tente novamente.');
