@@ -14,18 +14,16 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         $query = Task::with('user', 'category');
-        $authUserId = (int) $request->user()->id;
         
         // Security: Only show tasks belonging to the authenticated user
         if ($request->has('user_id')) {
-            $requestedUserId = (int) $request->user_id;
-            if ($requestedUserId !== $authUserId) {
+            if ($request->user_id != $request->user()->id) {
                 abort(403, 'Unauthorized');
             }
-            $query->where('user_id', $requestedUserId);
+            $query->where('user_id', $request->user_id);
         } else {
             // If no user_id specified, return only current user's tasks
-            $query->where('user_id', $authUserId);
+            $query->where('user_id', $request->user()->id);
         }
         
         return $query->paginate(15);
