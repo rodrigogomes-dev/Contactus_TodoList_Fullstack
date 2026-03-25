@@ -6,6 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Badge extends Model
 {
+    protected $fillable = [
+        'nome',
+        'descricao',
+        'icon',
+        'category_id',
+    ];
+
     public function users()
     {
         return $this->belongsToMany(User::class);

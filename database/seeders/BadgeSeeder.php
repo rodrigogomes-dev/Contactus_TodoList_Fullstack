@@ -23,7 +23,7 @@ class BadgeSeeder extends Seeder
         ];
 
         foreach ($badges as $badge) {
-            Badge::create($badge);
+            Badge::create(array_merge($badge, ['category_id' => null]));
         }
 
         foreach (Category::all() as $category) {
