@@ -1,53 +1,251 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# TODO App - Backend Laravel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicação de gestão de tarefas com sistema de gamificação baseado em badges, desenvolvida com Laravel 11 e MySQL.
 
-## About Laravel
+## Visão Geral
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Backend REST API para uma plataforma de gestão de tarefas com suporte a:
+- Autenticação com tokens Sanctum
+- CRUD de tarefas, categorias e badges
+- Sistema de gamificação com milestones
+- Painel administrativo para gestão
+- Relacionamentos muitos-para-muitos (badges-users)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requisitos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2+
+- Composer
+- MySQL 8.0+
+- Laravel 11
 
-## Learning Laravel
+## Instalação
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Clone o repositório e instale as dependências:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone <repository-url>
+cd todo-laravel
+composer install
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Configure o ficheiro `.env`:
 
-## Contributing
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Execute as migrações:
 
-## Code of Conduct
+```bash
+php artisan migrate
+php artisan seed
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Inicie o servidor:
+
+```bash
+php artisan serve
+```
+
+O servidor estará disponível em `http://localhost:8000`
+
+## Estrutura de Base de Dados
+
+### Tabelas Principais
+
+| Tabela | Funcionalidade |
+|--------|---|
+| users | Utilizadores da plataforma |
+| tasks | Tarefas dos utilizadores |
+| categories | Categorias de tarefas |
+| badges | Badges de gamificação |
+| badge_user | Relação muitos-para-muitos entre badges e utilizadores |
+
+### Modelos
+
+#### User
+- Campos: id, name, email, password, is_admin, avatar_path
+- Relações: hasMany(Task), belongsToMany(Badge)
+
+#### Task
+- Campos: id, titulo, descricao, estado, prioridade, data_vencimento, user_id, category_id
+- Estados: pendente, concluída
+- Prioridades: baixa, média, alta
+- Relações: belongsTo(User), belongsTo(Category)
+
+#### Category
+- Campos: id, nome_categoria
+- Relações: hasMany(Badge)
+
+#### Badge
+- Campos: id, nome, descricao, icon, category_id, milestone
+- Milestones: iniciante, intermediário, avançado, especialista
+- Relações: belongsToMany(User), belongsTo(Category)
+
+## Autenticação
+
+A API utiliza Laravel Sanctum para autenticação baseada em tokens.
+
+### Registrar e Login
+
+```
+POST /api/register
+{
+  "name": "João Silva",
+  "email": "joao@example.com",
+  "password": "password123"
+}
+```
+
+```
+POST /api/login
+{
+  "email": "joao@example.com",
+  "password": "password123"
+}
+```
+
+Resposta inclui um token Bearer para utilizar em requisições autenticadas.
+
+## Endpoints da API
+
+### Público
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST | /api/register | Registar novo utilizador |
+| POST | /api/login | Fazer login |
+
+### Autenticado
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST | /api/logout | Fazer logout e revogar token |
+| GET | /api/me | Obter dados do utilizador autenticado |
+| GET | /api/tasks | Listar tarefas do utilizador |
+| GET | /api/tasks?user_id={id} | Filtrar tarefas por utilizador |
+| GET | /api/tasks/{id} | Obter tarefa específica |
+| POST | /api/tasks | Criar nova tarefa |
+| PUT | /api/tasks/{id} | Atualizar tarefa |
+| DELETE | /api/tasks/{id} | Deletar tarefa |
+| GET | /api/categories | Listar categorias |
+| GET | /api/categories/{id} | Obter categoria específica |
+| GET | /api/badges | Listar badges com percentagem |
+| GET | /api/badges/{id} | Obter badge específica |
+| POST | /api/users/avatar | Upload de avatar |
+
+### Administrativo
+
+| Método | Endpoint | Descrição | Requisito |
+|--------|----------|-----------|-----------|
+| POST | /api/categories | Criar categoria | Admin |
+| PUT | /api/categories/{id} | Atualizar categoria | Admin |
+| DELETE | /api/categories/{id} | Deletar categoria | Admin |
+| POST | /api/badges | Criar badge | Admin |
+| PUT | /api/badges/{id} | Atualizar badge | Admin |
+| DELETE | /api/badges/{id} | Deletar badge | Admin |
+| GET | /api/admin/stats | Obter estatísticas | Admin |
+
+## Gamificação
+
+### Milestones Globais
+
+Quando um utilizador conclui tarefas, recebe automaticamente badges de milestone:
+
+- Iniciante: 1 tarefa concluída
+- Intermediário: 10 tarefas concluídas
+- Avançado: 50 tarefas concluídas
+- Especialista: 100 tarefas concluídas
+
+### Badges de Categoria
+
+Ao criar uma categoria, são geradas automaticamente 5 badges:
+
+- Badge principal da categoria (milestone: null)
+- Iniciante em {categoria} (milestone: iniciante)
+- Intermediário em {categoria} (milestone: intermediário)
+- Avançado em {categoria} (milestone: avançado)
+- Especialista em {categoria} (milestone: especialista)
+
+### Percentagem de Badges
+
+Cada badge inclui um campo `percentage` que indica que percentagem de utilizadores a possuem.
+
+## Segurança
+
+- Validação de proprietário em operações de tarefas (um utilizador só vê/modifica as suas tarefas)
+- Middleware de autenticação Sanctum para rotas protegidas
+- Middleware administrativo para rotas de admin
+- Delete on cascade para integridade referencial
+- Passwords encriptadas com bcrypt
+
+## CORS
+
+A API está configurada para aceitar pedidos de:
+- localhost:3000
+- localhost:4200
+- localhost:8000
+
+## Exemplo de Utilização
+
+```javascript
+// Login
+const response = await fetch('http://localhost:8000/api/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    email: 'user@example.com',
+    password: 'password123'
+  })
+});
+const { user, token } = await response.json();
+
+// Criar tarefa
+const taskResponse = await fetch('http://localhost:8000/api/tasks', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    titulo: 'Implementar feature X',
+    descricao: 'Descrição detalhada',
+    prioridade: 'alta',
+    estado: 'pendente',
+    data_vencimento: '2026-04-01',
+    user_id: user.id,
+    category_id: 1
+  })
+});
+```
+
+## Desenvolvimento
+
+### Crear Observadores
+
+O projeto inclui Observers para automatizar lógica de negócio:
+
+- TaskObserver: Atribui badges ao completar tarefas
+- CategoryObserver: Cria badges ao criar categorias
+
+### Migrações
+
+Para criar uma nova migração:
+
+```bash
+php artisan make:migration create_table_name
+php artisan make:model ModelName -m
+```
+
+## Licença
+
+MIT
+
+## Autor
+
+Desenvolvido como projeto de aprendizagem em Laravel.
+
 
 ## Security Vulnerabilities
 

@@ -21,6 +21,11 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        // Apenas admins podem criar categorias
+        if (!$request->user() || !$request->user()->is_admin) {
+            abort(403, 'Apenas administradores podem criar categorias');
+        }
+
         $validated = $request->validate([
             'nome_categoria' => 'required|string|max:255|unique:categories',
         ]);

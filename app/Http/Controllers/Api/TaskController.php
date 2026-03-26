@@ -50,9 +50,16 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
-        return Task::with('user', 'category')->findOrFail($id);
+        $task = Task::with('user', 'category')->findOrFail($id);
+        
+        // Security: Only show task if it belongs to the authenticated user
+        if ($task->user_id !== (int) $request->user()->id) {
+            abort(403, 'Unauthorized');
+        }
+        
+        return $task;
     }
 
     /**
@@ -61,6 +68,12 @@ class TaskController extends Controller
     public function update(Request $request, string $id)
     {
         $task = Task::with('user', 'category')->findOrFail($id);
+        
+        // Segurança: Só permita atualizar se a tarefa pertence ao user autenticado
+        if ($task->user_id !== (int) $request->user()->id) {
+            abort(403, 'Unauthorized');
+        }
+        
         $validated = $request->validate([
             'titulo' => 'required|string|max:255',
             'descricao' => 'nullable|string',
@@ -77,9 +90,16 @@ class TaskController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
-        Task::findOrFail($id)->delete();
+        $task = Task::findOrFail($id);
+        
+        // Segurança: Só permite apagar se a tarefa pertence ao user autenticado
+        if ($task->user_id !== (int) $request->user()->id) {
+            abort(403, 'Unauthorized');
+        }
+        
+        $task->delete();
         return response()->noContent();
     }
 }

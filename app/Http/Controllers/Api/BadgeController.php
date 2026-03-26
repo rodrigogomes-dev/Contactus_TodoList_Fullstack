@@ -13,7 +13,7 @@ class BadgeController extends Controller
      */
     public function index()
     {
-        return Badge::with('users')->paginate(15);
+        return Badge::paginate(15);
     }
 
     /**
@@ -29,7 +29,7 @@ class BadgeController extends Controller
         ]);
 
         $badge = Badge::create($validated);
-        return response()->json($badge->load('users'), 201);
+        return response()->json($badge, 201);
     }
 
     /**
@@ -37,7 +37,7 @@ class BadgeController extends Controller
      */
     public function show(string $id)
     {
-        return Badge::with('users')->findOrFail($id);
+        return Badge::findOrFail($id);
     }
 
     /**
@@ -54,7 +54,7 @@ class BadgeController extends Controller
         ]);
 
         $badge->update($validated);
-        return response()->json($badge->load('users'), 200);
+        return response()->json($badge, 200);
     }
 
     /**
