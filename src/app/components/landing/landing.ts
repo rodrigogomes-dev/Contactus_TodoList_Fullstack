@@ -1,0 +1,254 @@
+import { isPlatformBrowser } from '@angular/common';
+import { AfterViewInit, Component, OnDestroy, PLATFORM_ID, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { BadgeItem, BadgeService } from '../../services/badge';
+import { LandingUiStateService } from '../../services/landing-ui-state';
+
+type GlobalWindow = Window & { THREE?: unknown };
+
+type VantaNetFactory = (options: {
+  el: HTMLElement;
+  THREE: unknown;
+  mouseControls: boolean;
+  touchControls: boolean;
+  gyroControls: boolean;
+  minHeight: number;
+  minWidth: number;
+  scale: number;
+  scaleMobile: number;
+  color: number;
+  showDots?: boolean;
+  points?: number;
+  maxDistance?: number;
+  spacing?: number;
+  backgroundColor: number;
+}) => { destroy: () => void };
+
+type VantaNetInstance = {
+  destroy: () => void;
+  setOptions?: (options: { color?: number; backgroundColor?: number }) => void;
+  blending?: 'additive' | 'subtractive';
+  linesMesh?: {
+    material?: {
+      blending?: number;
+      transparent?: boolean;
+      opacity?: number;
+      vertexColors?: boolean;
+      color?: { set?: (value: number | string) => void };
+      needsUpdate?: boolean;
+    };
+  };
+};
+
+@Component({
+  selector: 'app-landing',
+  imports: [RouterLink],
+  templateUrl: './landing.html',
+  styleUrl: './landing.css',
+})
+export class Landing implements AfterViewInit, OnDestroy {
+  private platformId = inject(PLATFORM_ID);
+  private badgeService = inject(BadgeService);
+  private landingUiState = inject(LandingUiStateService);
+  private vantaEffect: { destroy: () => void } | null = null;
+  private revealObserver: IntersectionObserver | null = null;
+  private removeLandingScrollListener: (() => void) | null = null;
+
+  badges = this.badgeService.getBadgesSignal();
+  activeBadgeIndex = signal(0);
+
+  currentBadge = computed(() => this.badges()[this.activeBadgeIndex()] ?? null);
+  isFirstBadge = computed(() => this.activeBadgeIndex() === 0);
+  isLastBadge = computed(() => this.activeBadgeIndex() >= this.badges().length - 1);
+
+  async ngAfterViewInit(): Promise<void> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    this.bindLandingScrollTracking();
+    this.initRevealAnimations();
+
+    const vantaElement = document.getElementById('landing-vanta-bg');
+    if (!vantaElement) {
+      return;
+    }
+
+    try {
+      const [threeModule, vantaNetModule] = await Promise.all([
+        import('three'),
+        import('vanta/dist/vanta.net.min'),
+      ]);
+
+      const threeInstance = (threeModule as unknown as { default?: unknown }).default ?? threeModule;
+      const win = window as GlobalWindow;
+      win.THREE = threeInstance;
+
+      const vantaFactory = (vantaNetModule.default ?? vantaNetModule) as unknown as VantaNetFactory;
+
+      const effect = vantaFactory({
+        el: vantaElement,
+        THREE: threeInstance,
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200,
+        minWidth: 200,
+        scale: 1,
+        scaleMobile: 1,
+        color: 0x007bff,
+        showDots: true,
+        points: 9,
+        maxDistance: 14,
+        spacing: 30,
+        backgroundColor: 0x202022,
+      });
+
+      const netEffect = effect as VantaNetInstance;
+      netEffect.setOptions?.({ color: 0x007bff, backgroundColor: 0x202022 });
+      netEffect.blending = 'additive';
+
+      const additiveBlending = (threeInstance as { AdditiveBlending?: number }).AdditiveBlending;
+      if (netEffect.linesMesh?.material) {
+        if (typeof additiveBlending === 'number') {
+          netEffect.linesMesh.material.blending = additiveBlending;
+        }
+        // In newer Three.js versions, force vertex colors or lines can render white.
+        netEffect.linesMesh.material.vertexColors = true;
+        netEffect.linesMesh.material.color?.set?.(0x007bff);
+        netEffect.linesMesh.material.transparent = true;
+        netEffect.linesMesh.material.opacity = 0.95;
+        netEffect.linesMesh.material.needsUpdate = true;
+      }
+
+      this.vantaEffect = netEffect;
+    } catch (error) {
+      console.error('Vanta NET initialization failed', error);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.removeLandingScrollListener?.();
+    this.removeLandingScrollListener = null;
+    this.landingUiState.reset();
+    this.revealObserver?.disconnect();
+    this.revealObserver = null;
+    this.vantaEffect?.destroy();
+    this.vantaEffect = null;
+  }
+
+  goNextBadge(): void {
+    if (this.isLastBadge()) {
+      return;
+    }
+
+    this.activeBadgeIndex.update((index) => index + 1);
+  }
+
+  goPreviousBadge(): void {
+    if (this.isFirstBadge()) {
+      return;
+    }
+
+    this.activeBadgeIndex.update((index) => index - 1);
+  }
+
+  getBadgeShortDescription(badge: BadgeItem): string {
+    const goalByMilestone: Record<BadgeItem['milestone'], number> = {
+      iniciante: 1,
+      intermediario: 10,
+      avancado: 50,
+      especialista: 100,
+    };
+
+    const target = goalByMilestone[badge.milestone];
+    const taskLabel = target === 1 ? 'tarefa' : 'tarefas';
+    return `Completa ${target} ${taskLabel} de uma categoria para ganhar este badge.`;
+  }
+
+  spinBadgeImage(image: HTMLImageElement): void {
+    image.classList.remove('is-spinning');
+    // Force reflow to restart the CSS animation on repeated clicks.
+    void image.offsetWidth;
+    image.classList.add('is-spinning');
+  }
+
+  private bindLandingScrollTracking(): void {
+    this.removeLandingScrollListener?.();
+    this.removeLandingScrollListener = null;
+
+    const landingContainer = document.querySelector('.landing') as HTMLElement | null;
+    if (!landingContainer) {
+      this.landingUiState.reset();
+      return;
+    }
+
+    const sectionIds = this.landingUiState.sectionIds;
+
+    const updateScrollUI = () => {
+      const maxScroll = Math.max(landingContainer.scrollHeight - landingContainer.clientHeight, 1);
+      const progress = (landingContainer.scrollTop / maxScroll) * 100;
+      this.landingUiState.setScrollProgress(progress);
+
+      const containerTop = landingContainer.getBoundingClientRect().top;
+      let activeId: string = 'entrar';
+      let bestDistance = Number.POSITIVE_INFINITY;
+
+      sectionIds.forEach((id) => {
+        const section = document.getElementById(id);
+        if (!section) {
+          return;
+        }
+
+        const relativeTop = section.getBoundingClientRect().top - containerTop;
+        const distance = Math.abs(relativeTop - 110);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          activeId = id;
+        }
+      });
+
+      if (this.landingUiState.activeSection() !== activeId) {
+        this.landingUiState.setActiveSection(activeId);
+        window.history.replaceState(null, '', `#${activeId}`);
+      }
+    };
+
+    landingContainer.addEventListener('scroll', updateScrollUI, { passive: true });
+    this.removeLandingScrollListener = () => {
+      landingContainer.removeEventListener('scroll', updateScrollUI);
+    };
+
+    updateScrollUI();
+  }
+
+  private initRevealAnimations(): void {
+    const landingContainer = document.querySelector('.landing');
+    if (!landingContainer) {
+      return;
+    }
+
+    const revealTargets = document.querySelectorAll<HTMLElement>('.reveal-card');
+    if (revealTargets.length === 0) {
+      return;
+    }
+
+    this.revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            this.revealObserver?.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        root: landingContainer,
+        threshold: 0.12,
+        rootMargin: '0px 0px -8% 0px',
+      },
+    );
+
+    revealTargets.forEach((target) => this.revealObserver?.observe(target));
+  }
+}

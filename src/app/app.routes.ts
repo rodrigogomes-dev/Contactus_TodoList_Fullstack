@@ -7,8 +7,8 @@ import { taskResolver } from './guards/task-resolver';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'tarefas-abertas',
-    pathMatch: 'full'
+    loadComponent: () =>
+      import('./components/landing/landing').then(m => m.Landing)
   },
   {
     path: 'login',

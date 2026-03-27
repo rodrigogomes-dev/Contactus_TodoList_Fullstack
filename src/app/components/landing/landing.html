@@ -1,0 +1,126 @@
+<section class="landing">
+	<div id="landing-vanta-bg" class="landing-vanta-bg" aria-hidden="true"></div>
+	<div class="landing-bg-shape shape-left" aria-hidden="true"></div>
+	<div class="landing-bg-shape shape-right" aria-hidden="true"></div>
+
+	<section id="entrar" class="hero reveal-section" aria-labelledby="hero-title">
+		<div class="hero-content reveal-card">
+			<p class="hero-kicker">Produtividade com foco</p>
+			<h2 id="hero-title">Organiza as tuas tarefas e acompanha o teu progresso em tempo real.</h2>
+			<p class="hero-text">
+				Uma SPA simples e eficiente para planear o dia, definir prioridades e evoluir com sistema de badges.
+			</p>
+			<div class="hero-actions">
+				<a class="btn btn-enter" routerLink="/login">Entrar</a>
+				<a class="btn btn-secondary" href="#badges">Ver badges</a>
+			</div>
+		</div>
+
+		
+	</section>
+
+	<section id="vantagens" class="benefits reveal-section" aria-label="Beneficios">
+		<h3 class="section-title-glow">
+			<span class="section-title-icon material-symbols-rounded" aria-hidden="true">checklist</span>
+			<span>Vantagens</span>
+		</h3>
+		<div class="benefit-grid">
+			<article class="benefit-card reveal-card">
+				<span class="material-symbols-rounded">checklist</span>
+				<h4>Organiza tarefas</h4>
+				<p>Regista, edita e conclui tarefas num fluxo claro, sem sair da aplicacao.</p>
+			</article>
+			<article class="benefit-card reveal-card">
+				<span class="material-symbols-rounded">flag</span>
+				<h4>Prioridades e foco</h4>
+				<p>Diferencia o que e urgente e concentra-te no que gera mais impacto.</p>
+			</article>
+			<article class="benefit-card reveal-card">
+				<span class="material-symbols-rounded">workspace_premium</span>
+				<h4>Progresso com badges</h4>
+				<p>Acompanha metas e desbloqueia recompensas conforme evoluis no sistema.</p>
+			</article>
+		</div>
+	</section>
+
+	<section id="workflow" class="steps reveal-section" aria-label="Como funciona">
+		<h3 class="section-title-glow">
+			<span class="section-title-icon material-symbols-rounded" aria-hidden="true">hub</span>
+			<span>Workflow</span>
+		</h3>
+		<div class="steps-grid">
+			<article class="step-card reveal-card">
+				<span class="step-index">1</span>
+				<h4>Criar</h4>
+				<p>Adiciona tarefas em segundos com prioridade e data de vencimento.</p>
+			</article>
+			<article class="step-card reveal-card">
+				<span class="step-index">2</span>
+				<h4>Acompanhar</h4>
+				<p>Consulta tarefas abertas e concluidas com visao clara do teu progresso.</p>
+			</article>
+			<article class="step-card reveal-card">
+				<span class="step-index">3</span>
+				<h4>Concluir</h4>
+				<p>Marca objetivos como concluidos e fortalece consistencia diaria.</p>
+			</article>
+		</div>
+	</section>
+
+	<section id="badges" class="badges reveal-section" aria-label="Sistema de badges">
+		<h3 class="section-title-glow">
+			<span class="section-title-icon material-symbols-rounded" aria-hidden="true">workspace_premium</span>
+			<span>Badges</span>
+		</h3>
+		<div class="badges-wrap">
+			@if (currentBadge(); as badge) {
+				<div class="badges-carousel reveal-card" aria-label="Carrossel de badges">
+					<div class="badges-carousel-shell">
+						@if (!isFirstBadge()) {
+							<button type="button" class="badge-nav-btn badge-nav-prev" (click)="goPreviousBadge()" aria-label="Badge anterior">
+								<span aria-hidden="true">&#10094;</span>
+							</button>
+						}
+
+						<div class="badge-placeholder" aria-label="Badge em destaque">
+							<img
+								#badgeImage
+								class="badge-image"
+								[src]="badge.icon_url"
+								[alt]="badge.nome"
+								width="220"
+								height="220"
+								loading="lazy"
+								(click)="spinBadgeImage(badgeImage)"
+							/>
+							<h4>{{ badge.nome }}</h4>
+							<p class="badges-shortcopy">{{ getBadgeShortDescription(badge) }}</p>
+						</div>
+
+						@if (!isLastBadge()) {
+							<button type="button" class="badge-nav-btn badge-nav-next" (click)="goNextBadge()" aria-label="Proxima badge">
+								<span aria-hidden="true">&#10095;</span>
+							</button>
+						}
+					</div>
+				</div>
+			}
+		</div>
+	</section>
+
+	<section id="about" class="about reveal-section" aria-label="Sobre a aplicacao">
+		<article class="about-card reveal-card">
+			<span class="material-symbols-rounded">rocket_launch</span>
+			<h4>Sobre a Aplicação</h4>
+			<p>
+				Uma SPA moderna para organização pessoal e produtividade: permite planear o trabalho, acompanhar prioridades e
+				medir progresso com uma experiencia visual limpa e rápida.
+			</p>
+			<div class="about-pill-list" aria-label="Destaques da aplicacao">
+				<span>Gestão simples de tarefas</span>
+				<span>Fluxo rapido e intuitivo</span>
+				<span>Progresso com badges</span>
+			</div>
+		</article>
+	</section>
+</section>
