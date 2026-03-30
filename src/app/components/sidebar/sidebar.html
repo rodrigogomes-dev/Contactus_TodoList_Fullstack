@@ -2,31 +2,31 @@
     <h2>Menu</h2>
     <nav class="menu-nav">
         @if (role() === 'user') {
-            <a routerLink="/tarefas-abertas" routerLinkActive="active" (click)="onLinkClick()">
-                <span class="material-symbols-rounded">assignment</span>
-                Tarefas Abertas
-            </a>
-            <a routerLink="/tarefas-concluidas" routerLinkActive="active" (click)="onLinkClick()">
-                <span class="material-symbols-rounded">task_alt</span>
-                Tarefas Concluídas
-            </a>
-            <a routerLink="/mybadges" routerLinkActive="active" (click)="onLinkClick()">
-                <span class="material-symbols-rounded">military_tech</span>
-                As Minhas Badges
-            </a>
-            <a routerLink="/perfil" routerLinkActive="active" (click)="onLinkClick()">
-                <span class="material-symbols-rounded">account_circle</span>
-                Perfil
-            </a>
+        <a routerLink="/tarefas-abertas" routerLinkActive="active" (click)="onLinkClick()">
+            <span class="material-symbols-rounded">assignment</span>
+            Tarefas Abertas
+        </a>
+        <a routerLink="/tarefas-concluidas" routerLinkActive="active" (click)="onLinkClick()">
+            <span class="material-symbols-rounded">task_alt</span>
+            Tarefas Concluídas
+        </a>
+        <a routerLink="/mybadges" routerLinkActive="active" (click)="onLinkClick()">
+            <span class="material-symbols-rounded">military_tech</span>
+            As Minhas Badges
+        </a>
+        <a routerLink="/perfil" routerLinkActive="active" (click)="onLinkClick()">
+            <span class="material-symbols-rounded">account_circle</span>
+            Perfil
+        </a>
         } @else if (role() === 'admin') {
-            <a routerLink="/admin/categorias" routerLinkActive="active" (click)="onLinkClick()">
-                <span class="material-symbols-rounded">category</span>
-                Gerir Categorias
-            </a>
-            <a routerLink="/admin/estatisticas" routerLinkActive="active" (click)="onLinkClick()">
-                <span class="material-symbols-rounded">analytics</span>
-                Estatísticas Globais
-            </a>
+        <a routerLink="/admin/categorias" routerLinkActive="active" (click)="onLinkClick()">
+            <span class="material-symbols-rounded">category</span>
+            Gerir Categorias
+        </a>
+        <a routerLink="/admin/estatisticas" routerLinkActive="active" (click)="onLinkClick()">
+            <span class="material-symbols-rounded">analytics</span>
+            Estatísticas Globais
+        </a>
         }
     </nav>
     <div class="sidebar-footer">
