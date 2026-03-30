@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TaskService, Tarefa } from '../../services/task';
 import { HasUnsavedChanges } from '../../guards/save-guard';
@@ -8,7 +9,7 @@ import { TaskformComponent } from '../taskform/taskform';
 @Component({
   selector: 'app-task-list',
   standalone: true,
-  imports: [CommonModule, DatePipe, TaskformComponent],
+  imports: [CommonModule, DatePipe, FormsModule, TaskformComponent],
   templateUrl: './task-list.html',
   styleUrls: ['./task-list.css']
 })
@@ -23,9 +24,49 @@ export class TaskListComponent implements HasUnsavedChanges {
   showModal = signal<boolean>(false);
   editingTask = signal<Tarefa | null>(null);
   isDirty = false;
-  filteredTasks = computed(() =>
-    this.tasks().filter(task => task.estado === this.currentView())
-  );
+
+  // Filtros
+  searchQuery = signal<string>('');
+  priorityFilter = signal<string>('todas');
+  categoryFilter = signal<number | 'todas'>('todas');
+
+  // Categorias únicas (baseado nos IDs porque o mock não tem nomes de categorias reais)
+  categories = computed(() => {
+    const cats = this.tasks().map(t => t.id_categoria).filter(c => c !== null);
+    return [...new Set(cats)];
+  });
+
+  filteredTasks = computed(() => {
+    let result = this.tasks().filter(task => task.estado === this.currentView());
+
+    if (this.searchQuery().trim() !== '') {
+      const q = this.searchQuery().toLowerCase();
+      result = result.filter(t => t.titulo.toLowerCase().includes(q) || t.descricao?.toLowerCase().includes(q));
+    }
+
+    if (this.priorityFilter() !== 'todas') {
+      result = result.filter(t => t.prioridade === this.priorityFilter());
+    }
+
+    if (this.categoryFilter() !== 'todas') {
+      result = result.filter(t => t.id_categoria === Number(this.categoryFilter()));
+    }
+
+    return result;
+  });
+
+  // Paginação
+  currentPage = signal<number>(1);
+  itemsPerPage = signal<number>(4);
+
+  totalFiltered = computed(() => this.filteredTasks().length);
+  totalPages = computed(() => Math.ceil(this.totalFiltered() / this.itemsPerPage()) || 1);
+
+  paginatedTasks = computed(() => {
+    const start = (this.currentPage() - 1) * this.itemsPerPage();
+    const end = start + this.itemsPerPage();
+    return this.filteredTasks().slice(start, end);
+  });
 
   totalConcluidas = computed(() =>
     this.tasks().filter(task => task.estado === 'concluido').length
@@ -40,7 +81,10 @@ export class TaskListComponent implements HasUnsavedChanges {
     effect(() => {
       this.route.data.subscribe(data => {
         const view = data['view'];
-        if (view) this.currentView.set(view);
+        if (view) {
+          this.currentView.set(view);
+          this.currentPage.set(1); // Reset de página na mudança de view
+        }
       });
     });
   }
@@ -72,5 +116,34 @@ export class TaskListComponent implements HasUnsavedChanges {
 
   onModalClose() {
     this.showModal.set(false);
+  }
+
+  // Handlers para os filtros
+  onSearchChange(val: string) {
+    this.searchQuery.set(val);
+    this.currentPage.set(1);
+  }
+
+  onPriorityChange(val: string) {
+    this.priorityFilter.set(val);
+    this.currentPage.set(1);
+  }
+
+  onCategoryChange(val: string | number) {
+    this.categoryFilter.set(val === 'todas' ? 'todas' : Number(val));
+    this.currentPage.set(1);
+  }
+
+  // Handlers navegação da paginação
+  nextPage() {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.update(p => p + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage() > 1) {
+      this.currentPage.update(p => p - 1);
+    }
   }
 }

@@ -1,3 +1,26 @@
+<!-- Landing Header -->
+<header class="landing-glass-header">
+  <div class="header-left">
+    <div class="header-brand">
+      <span class="material-symbols-rounded">check_circle</span>
+      <h1>Todo List App</h1>
+    </div>
+  </div>
+  <div class="header-right">
+    <nav class="landing-nav" aria-label="Navegacao da landing">
+      <a href="#entrar" [class.active]="activeLandingSection() === 'entrar'" (click)="scrollToSection('entrar', $event)">Entrar</a>
+      <a href="#vantagens" [class.active]="activeLandingSection() === 'vantagens'" (click)="scrollToSection('vantagens', $event)">Vantagens</a>
+      <a href="#workflow" [class.active]="activeLandingSection() === 'workflow'" (click)="scrollToSection('workflow', $event)">Workflow</a>
+      <a href="#badges" [class.active]="activeLandingSection() === 'badges'" (click)="scrollToSection('badges', $event)">Badges</a>
+      <a href="#about" [class.active]="activeLandingSection() === 'about'" (click)="scrollToSection('about', $event)">About</a>
+    </nav>
+  </div>
+</header>
+
+<div class="landing-progress-track" aria-hidden="true">
+  <div class="landing-progress-fill" [style.width.%]="landingScrollProgress()"></div>
+</div>
+
 <section class="landing">
 	<div id="landing-vanta-bg" class="landing-vanta-bg" aria-hidden="true"></div>
 	<div class="landing-bg-shape shape-left" aria-hidden="true"></div>
@@ -15,8 +38,6 @@
 				<a class="btn btn-secondary" href="#badges">Ver badges</a>
 			</div>
 		</div>
-
-		
 	</section>
 
 	<section id="vantagens" class="benefits reveal-section" aria-label="Beneficios">
@@ -124,3 +145,7 @@
 		</article>
 	</section>
 </section>
+
+<footer>
+  <p>Desenvolvido por Rodrigo Gomes - Contexto Formativo Estágio Contactus - 2026</p>
+</footer>

@@ -1,0 +1,19 @@
+# Contexto do Projeto: Contactus (Frontend)
+Tu és um Especialista Sénior em Angular 18 e estás a ajudar-me a integrar este frontend com uma API Laravel 11.
+
+## Stack Tecnológica
+- Framework: Angular 18+ (usando Signals e RxJS).
+- Estilização: Tailwind CSS.
+- Backend: API REST em Laravel (Laravel Sanctum para Auth).
+
+## Regras de Integração (Frontend -> Backend)
+1. **Comunicação:** Usa sempre o `HttpClient` do Angular.
+2. **Ambientes:** Todas as chamadas devem usar `environment.apiUrl`. Nunca hardcode de URLs nos services.
+3. **Modelagem:** Para cada resposta da API Laravel, cria uma `interface` TypeScript correspondente. Lembra-te que o Laravel envia `snake_case` (ex: user_id), mas no Angular preferimos `camelCase`.
+4. **Segurança:** Implementa um `AuthInterceptor` para anexar o Bearer Token (Sanctum) em todos os pedidos para o backend.
+5. **Estado:** Prefere o uso de **Signals** para estados simples e **RxJS** para fluxos de dados complexos ou eventos do sistema de Badges.
+
+## Padrões de Código
+- Mantém os Controllers (Components) "skinny". A lógica de HTTP deve estar nos **Services**.
+- Trata os erros de API (401, 422, 500) de forma centralizada.
+- Para a feature de **Badges**, espera um objeto `meta` ou `new_badges` no JSON de resposta das tarefas.

@@ -1,0 +1,113 @@
+<section class="badges-page">
+
+  <h2>As Minhas Badges</h2>
+
+  <!-- Stats resumo -->
+  <div class="badges-stats">
+    <div class="stat-card">
+      <span class="material-symbols-rounded stat-icon total">military_tech</span>
+      <div class="stat-value">{{ totalBadges() }}</div>
+      <div class="stat-label">Total</div>
+    </div>
+    <div class="stat-card">
+      <span class="material-symbols-rounded stat-icon concluidas">lock_open</span>
+      <div class="stat-value">{{ unlockedBadges() }}</div>
+      <div class="stat-label">Desbloqueadas</div>
+    </div>
+    <div class="stat-card">
+      <span class="material-symbols-rounded stat-icon pendentes">lock</span>
+      <div class="stat-value">{{ lockedBadges() }}</div>
+      <div class="stat-label">Bloqueadas</div>
+    </div>
+  </div>
+
+  <!-- Controlos (Filtros + Paginação) -->
+  <div class="badges-controls">
+    
+    <!-- Filtros -->
+    <div class="badges-filters">
+      <div class="filter-group">
+        <label for="status-filter">
+          <span class="material-symbols-rounded">filter_list</span>
+          Estado
+        </label>
+        <select id="status-filter" [ngModel]="statusFilter()" (ngModelChange)="onStatusChange($event)">
+          <option value="todas">Todas</option>
+          <option value="obtidas">Obtidas</option>
+          <option value="nao-obtidas">Não Obtidas</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="category-filter">
+          <span class="material-symbols-rounded">category</span>
+          Categoria
+        </label>
+        <select id="category-filter" [ngModel]="categoryFilter()" (ngModelChange)="onCategoryChange($event)">
+          <option value="todas">Todas</option>
+          @for (cat of categories(); track cat) {
+            <option [value]="cat">{{ cat }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="milestone-filter">
+          <span class="material-symbols-rounded">stars</span>
+          Nível
+        </label>
+        <select id="milestone-filter" [ngModel]="milestoneFilter()" (ngModelChange)="onMilestoneChange($event)">
+          <option value="todos">Todos</option>
+          @for (mile of milestones(); track mile) {
+            <option [value]="mile">{{ mile | titlecase }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Paginação Mini -->
+    <div class="badges-pagination-mini">
+      <button class="nav-bubble" [disabled]="currentPage() === 1" (click)="prevPage()" aria-label="Página anterior">
+        <span class="material-symbols-rounded">chevron_left</span>
+      </button>
+      
+      <span class="page-indicator">{{ currentPage() }}/{{ totalPages() }}</span>
+      
+      <button class="nav-bubble" [disabled]="currentPage() === totalPages()" (click)="nextPage()" aria-label="Página seguinte">
+        <span class="material-symbols-rounded">chevron_right</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Grelha de badges -->
+  <div class="badges-grid">
+    @for (badge of paginatedBadges(); track badge.id) {
+      <div class="badge-card" [class.badge-locked]="!badge.unlocked">
+        <div class="badge-icon-wrapper">
+          <img [src]="badge.icon_url" [alt]="badge.nome" class="badge-icon" />
+          @if (!badge.unlocked) {
+            <div class="badge-lock-overlay">
+              <span class="material-symbols-rounded">lock</span>
+            </div>
+          }
+        </div>
+        <div class="badge-info">
+          <span class="badge-milestone milestone-{{ badge.milestone }}">{{ badge.milestone }}</span>
+          <h3>{{ badge.nome }}</h3>
+          <p>{{ badge.descricao }}</p>
+        </div>
+        <div class="badge-footer">
+          <div class="badge-rarity">
+            <span class="material-symbols-rounded">group</span>
+            {{ badge.percentage }}% dos utilizadores
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="badges-empty">
+        <span class="material-symbols-rounded">search_off</span>
+        <p>Nenhuma badge encontrada com os filtros selecionados.</p>
+      </div>
+    }
+  </div>
+
+</section>

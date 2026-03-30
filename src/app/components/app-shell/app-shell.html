@@ -1,0 +1,26 @@
+<header>
+    <div class="header-left">
+        <button class="hamburger" (click)="menuToggled.emit()" [class.active]="menuOpen()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="header-brand">
+            <span class="material-symbols-rounded">check_circle</span>
+            <h1>Todo List App</h1>
+        </div>
+    </div>
+    <div class="header-right">
+        <span class="header-badge">Angular 19</span>
+    </div>
+</header>
+
+<main>
+    <app-sidebar [menuOpen]="menuOpen()" [role]="role()" (menuToggled)="menuToggled.emit()"
+        (logoutClicked)="logoutClicked.emit()" />
+    <ng-content></ng-content>
+</main>
+
+<footer>
+    <p>Desenvolvido por Rodrigo Gomes - Contexto Formativo Estágio Contactus - 2026</p>
+</footer>

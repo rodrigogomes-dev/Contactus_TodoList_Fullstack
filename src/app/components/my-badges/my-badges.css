@@ -1,0 +1,344 @@
+.badges-page {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.badges-page h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* STATS (reutiliza o padrão do profile) */
+.badges-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    font-variation-settings: 'FILL' 1;
+}
+
+.stat-icon.total {
+    color: #6b7280;
+}
+
+.stat-icon.concluidas {
+    color: #059669;
+}
+
+.stat-icon.pendentes {
+    color: #d97706;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+/* CONTROLS (Filters + Pagination) */
+.badges-controls {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.badges-filters {
+    display: flex;
+    justify-content: flex-start;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 180px;
+}
+
+.filter-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.filter-group label .material-symbols-rounded {
+    font-size: 1.1rem;
+    color: var(--clr-primary);
+}
+
+.filter-group select {
+    padding: 0.65rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: #1a1a1a;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2.25rem;
+}
+
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* BADGE GRID */
+.badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+}
+
+/* BADGE CARD */
+.badge-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.badge-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    border-color: #007bff;
+}
+
+.badge-card.badge-locked {
+    opacity: 0.55;
+}
+
+.badge-card.badge-locked:hover {
+    border-color: #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* BADGE ICON */
+.badge-icon-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.badge-icon {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid #e0e0e0;
+    object-fit: cover;
+}
+
+.badge-lock-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.badge-lock-overlay .material-symbols-rounded {
+    font-size: 1.75rem;
+    color: #6b7280;
+}
+
+/* BADGE INFO */
+.badge-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.badge-info h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.badge-info p {
+    font-size: 0.85rem;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+/* MILESTONE TAG */
+.badge-milestone {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    align-self: center;
+}
+
+.milestone-iniciante {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.milestone-intermediario {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.milestone-avancado {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.milestone-especialista {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* BADGE FOOTER */
+.badge-footer {
+    width: 100%;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.badge-rarity {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.badge-rarity .material-symbols-rounded {
+    font-size: 1rem;
+}
+
+/* EMPTY STATE */
+.badges-empty {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 3rem;
+    color: #6b7280;
+}
+
+.badges-empty .material-symbols-rounded {
+    font-size: 3rem;
+    color: #d97706;
+}
+
+.badges-empty p {
+    font-size: 1.1rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 767px) {
+    .badges-page {
+        padding: 1.25rem 1rem;
+    }
+
+    .badges-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .badges-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* MINI PAGINATION BUBBLES */
+.badges-pagination-mini {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.nav-bubble {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: #eef2ff;
+    color: var(--clr-primary, #007bff);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+
+.nav-bubble .material-symbols-rounded {
+    font-size: 1.25rem;
+}
+
+.nav-bubble:hover:not(:disabled) {
+    background: var(--clr-primary, #007bff);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+}
+
+.nav-bubble:active:not(:disabled) {
+    transform: translateY(0) scale(0.95);
+}
+
+.nav-bubble:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f3f4f6;
+    color: #9ca3af;
+    box-shadow: none;
+    transform: none;
+}
+
+.page-indicator {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #4b5563;
+    min-width: 40px;
+    text-align: center;
+}

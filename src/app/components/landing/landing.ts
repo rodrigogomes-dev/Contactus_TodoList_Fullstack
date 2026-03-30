@@ -56,6 +56,8 @@ export class Landing implements AfterViewInit, OnDestroy {
 
   badges = this.badgeService.getBadgesSignal();
   activeBadgeIndex = signal(0);
+  activeLandingSection = this.landingUiState.activeSection;
+  landingScrollProgress = this.landingUiState.scrollProgress;
 
   currentBadge = computed(() => this.badges()[this.activeBadgeIndex()] ?? null);
   isFirstBadge = computed(() => this.activeBadgeIndex() === 0);
@@ -171,6 +173,17 @@ export class Landing implements AfterViewInit, OnDestroy {
     // Force reflow to restart the CSS animation on repeated clicks.
     void image.offsetWidth;
     image.classList.add('is-spinning');
+  }
+
+  scrollToSection(fragment: string, event: Event): void {
+    if (typeof document === 'undefined' || typeof window === 'undefined') {
+      return;
+    }
+    event.preventDefault();
+    const target = document.getElementById(fragment);
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    this.landingUiState.setActiveSection(fragment);
+    window.history.replaceState(null, '', `#${fragment}`);
   }
 
   private bindLandingScrollTracking(): void {

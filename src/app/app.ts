@@ -1,23 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from './services/auth';
-import { LandingUiStateService } from './services/landing-ui-state';
+import { AppShell } from './components/app-shell/app-shell';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, AppShell],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })
 export class App {
-  auth   = inject(AuthService);
+  auth = inject(AuthService);
   router = inject(Router);
-  private landingUiState = inject(LandingUiStateService);
   menuOpen = signal<boolean>(false);
-  activeLandingSection = this.landingUiState.activeSection;
-  landingScrollProgress = this.landingUiState.scrollProgress;
 
   toggleMenu() { this.menuOpen.update(v => !v); }
 
@@ -26,16 +23,9 @@ export class App {
     return cleanUrl === '' || cleanUrl === '/';
   }
 
-  scrollToLandingSection(fragment: string, event: Event) {
-    if (typeof document === 'undefined' || typeof window === 'undefined') {
-      return;
-    }
-
-    event.preventDefault();
-    const target = document.getElementById(fragment);
-    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    this.landingUiState.setActiveSection(fragment);
-    window.history.replaceState(null, '', `#${fragment}`);
+  isPublicPage() {
+    const cleanUrl = this.router.url.split('?')[0].split('#')[0];
+    return cleanUrl === '/login' || cleanUrl === '/register';
   }
 
   logout() {

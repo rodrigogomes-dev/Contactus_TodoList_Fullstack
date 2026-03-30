@@ -1,75 +1,29 @@
-<header [class.landing-glass-header]="isLandingPage()">
-  <div class="header-left">
-    @if (!isLandingPage()) {
-      <button class="hamburger" (click)="toggleMenu()" [class.active]="menuOpen()">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    }
-    <div class="header-brand">
-      <span class="material-symbols-rounded">check_circle</span>
-      <h1>Todo List App</h1>
-    </div>
-  </div>
-  <div class="header-right">
-    @if (isLandingPage()) {
-      <nav class="landing-nav" aria-label="Navegacao da landing">
-        <a href="#entrar" [class.active]="activeLandingSection() === 'entrar'" (click)="scrollToLandingSection('entrar', $event)">Entrar</a>
-        <a href="#vantagens" [class.active]="activeLandingSection() === 'vantagens'" (click)="scrollToLandingSection('vantagens', $event)">Vantagens</a>
-        <a href="#workflow" [class.active]="activeLandingSection() === 'workflow'" (click)="scrollToLandingSection('workflow', $event)">Workflow</a>
-        <a href="#badges" [class.active]="activeLandingSection() === 'badges'" (click)="scrollToLandingSection('badges', $event)">Badges</a>
-        <a href="#about" [class.active]="activeLandingSection() === 'about'" (click)="scrollToLandingSection('about', $event)">About</a>
-      </nav>
-    }
-    @if (!isLandingPage()) {
-      <span class="header-badge">Angular 19</span>
-    }
-    @if (auth.authenticated()) {
-      <button class="logout-btn" (click)="logout()">
-        <span class="material-symbols-rounded">logout</span> Logout
-      </button>
-    }
-  </div>
-</header>
-
 @if (isLandingPage()) {
-  <div class="landing-progress-track" aria-hidden="true">
-    <div class="landing-progress-fill" [style.width.%]="landingScrollProgress()"></div>
-  </div>
-}
-
-@if (!auth.authenticated()) {
   <router-outlet></router-outlet>
-} @else {
-  <main>
-    <aside [class.open]="menuOpen()">
-      <h2>Menu</h2>
-      <nav class="menu-nav">
-        <a routerLink="/tarefas-abertas" routerLinkActive="active" (click)="toggleMenu()">
-          <span class="material-symbols-rounded">assignment</span>
-          Tarefas Abertas
-        </a>
-        <a routerLink="/tarefas-concluidas" routerLinkActive="active" (click)="toggleMenu()">
-          <span class="material-symbols-rounded">task_alt</span>
-          Tarefas Concluídas
-        </a>
-        @if (auth.role() === 'admin') {
-          <a routerLink="/admin" routerLinkActive="active" (click)="toggleMenu()">
-            <span class="material-symbols-rounded">shield_person</span>
-            Admin
-          </a>
-        }
-        <a routerLink="/perfil" routerLinkActive="active" (click)="toggleMenu()">
-          <span class="material-symbols-rounded">account_circle</span>
-          Perfil
-        </a>
-      </nav>
-    </aside>
+} @else if (auth.authenticated() && !isPublicPage()) {
+  <app-shell
+    [menuOpen]="menuOpen()"
+    [role]="auth.role()"
+    (menuToggled)="toggleMenu()"
+    (logoutClicked)="logout()"
+  >
     <router-outlet></router-outlet>
-  </main>
+  </app-shell>
+} @else {
+  <!-- Páginas públicas (login, register, etc.) com header e footer simples -->
+  <header>
+    <div class="header-left">
+      <div class="header-brand">
+        <span class="material-symbols-rounded">check_circle</span>
+        <h1>Todo List App</h1>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="header-badge">Angular 19</span>
+    </div>
+  </header>
+  <router-outlet></router-outlet>
+  <footer>
+    <p>Desenvolvido por Rodrigo Gomes - Contexto Formativo Estágio Contactus - 2026</p>
+  </footer>
 }
-
-<footer>
-  <p>Desenvolvido por Rodrigo Gomes - Contexto Formativo Estágio Contactus - 2026</p>
-</footer>

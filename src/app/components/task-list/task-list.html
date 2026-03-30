@@ -18,9 +18,59 @@
     <app-taskform [task]="editingTask()" (close)="onModalClose()" />
   }
 
+  <!-- Filtros -->
+  <div class="task-controls">
+    <div class="task-filters">
+      <div class="filter-group search-group">
+        <label for="search-filter">
+          <span class="material-symbols-rounded">search</span>
+          Procurar
+        </label>
+        <input id="search-filter" type="text" placeholder="Pesquisar tarefas..." [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)">
+      </div>
+      <div class="filter-group">
+        <label for="priority-filter">
+          <span class="material-symbols-rounded">low_priority</span>
+          Prioridade
+        </label>
+        <select id="priority-filter" [ngModel]="priorityFilter()" (ngModelChange)="onPriorityChange($event)">
+          <option value="todas">Todas</option>
+          <option value="baixa">Baixa</option>
+          <option value="media">Média</option>
+          <option value="alta">Alta</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="category-filter">
+          <span class="material-symbols-rounded">category</span>
+          Categoria
+        </label>
+        <select id="category-filter" [ngModel]="categoryFilter()" (ngModelChange)="onCategoryChange($event)">
+          <option value="todas">Todas</option>
+          @for (cat of categories(); track cat) {
+            <option [value]="cat">Categoria {{ cat }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Paginação Mini -->
+    <div class="task-pagination-mini">
+      <button class="nav-bubble" [disabled]="currentPage() === 1" (click)="prevPage()" aria-label="Página anterior">
+        <span class="material-symbols-rounded">chevron_left</span>
+      </button>
+      
+      <span class="page-indicator">{{ currentPage() }}/{{ totalPages() }}</span>
+      
+      <button class="nav-bubble" [disabled]="currentPage() === totalPages()" (click)="nextPage()" aria-label="Página seguinte">
+        <span class="material-symbols-rounded">chevron_right</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Container da Lista de Tarefas -->
   <div class="task-list-container">
-      @for (task of filteredTasks(); track task.id) {
+      @for (task of paginatedTasks(); track task.id) {
         <div class="task-card task-priority-{{ task.prioridade }}" (click)="selectTask(task)">
           <div class="task-left">
             <div class="task-info">

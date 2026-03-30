@@ -1,6 +1,6 @@
 .landing {
 	position: relative;
-	height: calc(100svh - 70px);
+	height: calc(100svh - 70px - 56px);
 	overflow-y: auto;
 	overflow-x: hidden;
 	scroll-snap-type: y mandatory;

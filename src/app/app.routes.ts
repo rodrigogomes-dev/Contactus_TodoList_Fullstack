@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth-guard';
 import { saveGuard } from './guards/save-guard';
 import { roleGuard } from './guards/role-guard';
+import { userGuard } from './guards/user-guard';
 import { taskResolver } from './guards/task-resolver';
 
 export const routes: Routes = [
@@ -19,7 +20,7 @@ export const routes: Routes = [
     path: 'tarefas-abertas',
     loadComponent: () =>
       import('./components/task-list/task-list').then(m => m.TaskListComponent),
-    canActivate: [authGuard],
+    canActivate: [authGuard, userGuard],
     canDeactivate: [saveGuard],
     data: { view: 'pendente' }
   },
@@ -27,14 +28,26 @@ export const routes: Routes = [
     path: 'tarefas-concluidas',
     loadComponent: () =>
       import('./components/task-list/task-list').then(m => m.TaskListComponent),
-    canActivate: [authGuard],
+    canActivate: [authGuard, userGuard],
     canDeactivate: [saveGuard],
     data: { view: 'concluido' }
   },
   {
     path: 'admin',
+    redirectTo: 'admin/estatisticas',
+    pathMatch: 'full'
+  },
+  {
+    path: 'admin/categorias',
     loadComponent: () =>
-      import('./components/admin/admin').then(m => m.AdminComponent),
+      import('./components/admin/categories/categories').then(m => m.Categories),
+    canActivate: [authGuard],
+    canMatch: [roleGuard]
+  },
+  {
+    path: 'admin/estatisticas',
+    loadComponent: () =>
+      import('./components/admin/statistics/statistics').then(m => m.Statistics),
     canActivate: [authGuard],
     canMatch: [roleGuard]
   },
@@ -42,7 +55,13 @@ export const routes: Routes = [
     path: 'perfil',
     loadComponent: () =>
       import('./components/profile/profile').then(m => m.ProfileComponent),
-    canActivate: [authGuard]
+    canActivate: [authGuard, userGuard]
+  },
+  {
+    path: 'mybadges',
+    loadComponent: () =>
+      import('./components/my-badges/my-badges').then(m => m.MyBadges),
+    canActivate: [authGuard, userGuard]
   },
   {
     path: '**',
