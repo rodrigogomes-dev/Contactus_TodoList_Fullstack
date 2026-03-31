@@ -454,7 +454,8 @@ export interface Task {
 // models/category.model.ts
 export interface Category {
   id: number;
-  nome_categoria: string;
+  nome: string;
+  cor: string;
   created_at: string;
   updated_at: string;
 }
@@ -631,8 +632,8 @@ export class ErrorInterceptor implements HttpInterceptor {
 
 ### Categorias (CRUD)
 - [ ] **Listar Categorias** (`/categories`) - Gestão de categorias
-- [ ] **Criar Categoria** (modal/form) - Adicionar categoria
-- [ ] **Editar Categoria** (modal/form) - Atualizar categoria
+- [ ] **Criar Categoria** (modal/form) - Adicionar categoria com escolha de Cor Hexadecimal
+- [ ] **Editar Categoria** (modal/form) - Atualizar detalhes da categoria
 
 ### Badges & Gamificação
 - [ ] **Badges** (`/badges`) - Listar todas as badges com progresso

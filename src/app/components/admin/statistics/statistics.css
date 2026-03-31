@@ -1,0 +1,140 @@
+.admin-page {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.admin-header h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 0.4rem;
+}
+
+.admin-header p {
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+/* STATS OVERVIEW CARDS */
+.stats-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); 
+    text-align: center;
+}
+
+.stat-icon {
+    font-size: 2rem;
+    font-variation-settings: 'FILL' 1;
+    color: var(--clr-primary, #007bff);
+}
+
+.stat-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+/* CHART CONTAINER MAIN CARD */
+.chart-container-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.chart-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 1.5rem;
+    gap: 1.25rem;
+}
+
+.chart-header h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 180px;
+}
+
+.filter-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.filter-group label .material-symbols-rounded {
+    font-size: 1.1rem;
+    color: var(--clr-primary, #007bff);
+}
+
+.filter-group select {
+    padding: 0.65rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: #1a1a1a;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2.25rem;
+}
+
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--clr-primary, #007bff);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* 
+ * Canvas Wrapper rules are strict because Chart.js needs a wrapping div
+ * with explicit instructions so that it respects responsive size dynamically
+ */
+.canvas-wrapper {
+    position: relative;
+    width: 100%;
+    height: 350px; 
+}
+
+@media (max-width: 767px) {
+    .admin-page { padding: 1.25rem 1rem; }
+    .chart-header { flex-direction: column; align-items: flex-start; }
+    .canvas-wrapper { height: 260px; }
+}

@@ -1,0 +1,32 @@
+<div class="modal-backdrop" (click)="onCancel()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2>{{ category() ? 'Editar Categoria' : 'Nova Categoria' }}</h2>
+      <button class="close-btn" (click)="onCancel()" aria-label="Fechar modal">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="cat-nome">Nome da Categoria</label>
+        <input id="cat-nome" type="text" [ngModel]="nome()" (ngModelChange)="nome.set($event)" placeholder="Ex: Finanças..." autofocus>
+      </div>
+
+      <div class="form-group color-picker-group">
+        <label for="cat-cor">Cor da Categoria</label>
+        <div class="color-input-wrapper">
+          <input id="cat-cor" type="color" [ngModel]="cor()" (ngModelChange)="cor.set($event)">
+          <span class="color-hex">{{ cor() | uppercase }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
+      <button class="btn btn-primary" (click)="onSave()" [disabled]="!nome().trim()">Guardar</button>
+    </div>
+    
+  </div>
+</div>

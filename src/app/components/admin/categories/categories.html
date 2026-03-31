@@ -1,1 +1,100 @@
-<p>categories works!</p>
+<section class="admin-page">
+  <div class="admin-header-actions">
+    <div class="header-text">
+      <h2>Gestão de Categorias</h2>
+      <p>Cria e organiza as categorias para agrupar as tarefas do sistema.</p>
+    </div>
+    <button class="btn btn-primary btn-add" (click)="openNewCategoryModal()">
+      <span class="material-symbols-rounded">add</span>
+      Nova Categoria
+    </button>
+  </div>
+
+  <div class="task-controls">
+    <div class="task-filters">
+      <div class="filter-group search-group">
+        <label for="search-filter">
+          <span class="material-symbols-rounded">search</span>
+          Procurar Categoria
+        </label>
+        <input id="search-filter" type="text" placeholder="Pesquisar por nome ou ID..." 
+               list="category-suggestions" 
+               [ngModel]="searchQuery()" 
+               (ngModelChange)="onSearchChange($event)">
+        <!-- Autocomplete dinâmico com datalist -->
+        <datalist id="category-suggestions">
+          @for (cat of categories(); track cat.id) {
+            <option [value]="cat.nome"></option>
+          }
+        </datalist>
+      </div>
+    </div>
+
+    <!-- Paginação Mini -->
+    <div class="task-pagination-mini">
+      <button class="nav-bubble" [disabled]="currentPage() === 1" (click)="prevPage()" aria-label="Página anterior">
+        <span class="material-symbols-rounded">chevron_left</span>
+      </button>
+      
+      <span class="page-indicator">{{ currentPage() }}/{{ totalPages() }}</span>
+      
+      <button class="nav-bubble" [disabled]="currentPage() === totalPages()" (click)="nextPage()" aria-label="Página seguinte">
+        <span class="material-symbols-rounded">chevron_right</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="categories-list-card">
+    @if (filteredCategories().length === 0) {
+      <div class="empty-state">
+        <span class="material-symbols-rounded">category</span>
+        <p>Não foram encontradas categorias.</p>
+        @if (!searchQuery().trim()) {
+          <button class="btn btn-secondary" (click)="openNewCategoryModal()">Criar Categoria</button>
+        }
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="categories-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome da Categoria</th>
+              <th>Cor / Badge</th>
+              <th class="actions-col">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cat of paginatedCategories(); track cat.id) {
+              <tr>
+                <td class="id-cell">#{{ cat.id }}</td>
+                <td class="name-cell">{{ cat.nome }}</td>
+                <td>
+                  <div class="color-badge" [style.background-color]="cat.cor">
+                    {{ cat.cor | uppercase }}
+                  </div>
+                </td>
+                <td class="actions-cell">
+                  <button class="action-btn edit-btn" title="Editar" (click)="openEditCategoryModal(cat)">
+                    <span class="material-symbols-rounded">edit</span>
+                  </button>
+                  <button class="action-btn delete-btn" title="Eliminar" (click)="deleteCategory(cat)">
+                    <span class="material-symbols-rounded">delete</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  @if (showFormModal()) {
+    <app-category-form 
+      [category]="editingCategory()" 
+      (close)="onModalClose()" 
+      (save)="onSaveCategory($event)" 
+    />
+  }
+</section>
