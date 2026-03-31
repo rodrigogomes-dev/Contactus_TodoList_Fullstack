@@ -14,12 +14,12 @@ class CategoryObserver
     public function created(Category $category): void
     {
         // Gera seed para o icon (a partir do nome da categoria)
-        $iconSeed = Str::slug($category->nome_categoria);
+        $iconSeed = Str::slug($category->nome);
         
         // Cria badge principal da categoria
         Badge::create([
-            'nome' => $category->nome_categoria . ' Badge',
-            'descricao' => 'Ganhe esta badge completando tarefas em ' . $category->nome_categoria,
+            'nome' => $category->nome . ' Badge',
+            'descricao' => 'Ganhe esta badge completando tarefas em ' . $category->nome,
             'icon' => $iconSeed . '-badge',
             'category_id' => $category->id,
             'milestone' => null,
@@ -27,10 +27,10 @@ class CategoryObserver
 
         // Cria badges de milestone para a categoria
         $milestones = [
-            'iniciante' => 'Iniciante em ' . $category->nome_categoria,
-            'intermediário' => 'Intermediário em ' . $category->nome_categoria,
-            'avançado' => 'Avançado em ' . $category->nome_categoria,
-            'especialista' => 'Especialista em ' . $category->nome_categoria,
+            'iniciante' => 'Iniciante em ' . $category->nome,
+            'intermediário' => 'Intermediário em ' . $category->nome,
+            'avançado' => 'Avançado em ' . $category->nome,
+            'especialista' => 'Especialista em ' . $category->nome,
         ];
 
         foreach ($milestones as $milestoneType => $milestoneName) {

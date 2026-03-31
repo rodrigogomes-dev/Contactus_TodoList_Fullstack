@@ -6,40 +6,33 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\Auth\RegisterUserRequest;
+use App\Http\Requests\Auth\LoginUserRequest;
+use App\Http\Resources\UserResource;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(RegisterUserRequest $request)
     {
-        $validated = $request->validate([
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
-
         $user = User::create([
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'name' => $validated['email'],
+            'email' => $request->validated()['email'],
+            'password' => Hash::make($request->validated()['password']),
+            'name' => $request->validated()['email'],
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => new UserResource($user),
             'token' => $token,
         ], 201);
     }
 
-    public function login(Request $request)
+    public function login(LoginUserRequest $request)
     {
-        $validated = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
+        $user = User::where('email', $request->validated()['email'])->first();
 
-        $user = User::where('email', $validated['email'])->first();
-
-        if (!$user || !Hash::check($validated['password'], $user->password)) {
+        if (!$user || !Hash::check($request->validated()['password'], $user->password)) {
             return response()->json([
                 'message' => 'Credenciais inválidas',
             ], 401);
@@ -48,7 +41,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => new UserResource($user),
             'token' => $token,
         ], 200);
     }
@@ -65,7 +58,7 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         return response()->json([
-            'user' => $request->user()->load('tasks', 'badges'),
+            'user' => new UserResource($request->user()->load('tasks', 'badges')),
         ], 200);
     }
 }

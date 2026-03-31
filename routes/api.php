@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\BadgeController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\StatsController;
 
 //Rotas públicas
 Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
@@ -27,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin routes
     Route::middleware('admin')->group(function () {
         Route::get('/admin/stats', [AdminController::class, 'stats']);
+        Route::get('/stats/users-growth', [StatsController::class, 'userGrowth']);
     });
 
 });

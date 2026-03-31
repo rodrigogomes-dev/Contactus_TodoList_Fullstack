@@ -266,6 +266,60 @@ export class BadgeService {
 }
 ```
 
+## Como Funciona o Sistema de Badges
+
+### Visão Geral
+
+O sistema de badges combina 3 partes no backend:
+
+- **Catálogo de badges** (`/api/badges`): lista de todas as badges possíveis.
+- **Atribuição automática** (Observers): badges são atribuídas quando o utilizador conclui tarefas e atinge marcos.
+- **Badges do utilizador autenticado** (`/api/me`): devolve o utilizador com relações `tasks` e `badges` carregadas.
+
+### Fluxo de Criação e Ganho de Badges
+
+1. Quando uma categoria é criada, o backend cria automaticamente badges dessa categoria.
+2. Quando uma tarefa muda para estado concluído, o backend calcula o progresso do utilizador.
+3. Se o utilizador atingir um milestone, o backend associa a badge na relação many-to-many (`badge_user`).
+4. O frontend volta a chamar `/api/me` (ou atualiza estado local) para refletir as novas badges no ecrã.
+
+### Regras de Atribuição (Atual)
+
+- **Globais por tarefas concluídas**: 1, 10, 50, 100 tarefas.
+- **Por categoria**: badge de especialista ao completar 10 tarefas na mesma categoria.
+- **Sem duplicação**: o backend verifica se o utilizador já possui a badge antes de associar.
+
+### Endpoints que o Frontend Deve Usar
+
+- `GET /api/badges`: catálogo completo de badges (com `percentage`).
+- `GET /api/me`: dados do utilizador autenticado com `badges` ganhas.
+- `PUT /api/tasks/{id}`: atualizar tarefa para estado concluído e disparar lógica de badges.
+
+### Exemplo de Sincronização no Frontend
+
+Depois de concluir uma tarefa com sucesso:
+
+1. Atualizar lista de tarefas.
+2. Recarregar perfil do utilizador com `AuthService.getMe()`.
+3. Atualizar widgets de badges (ex.: contador total, últimas badges ganhas, progresso por categoria).
+
+### Campos Úteis para UI
+
+No objeto de badge retornado pela API, use estes campos para renderização:
+
+- `nome` e `descricao`: texto da badge.
+- `icon`: seed base do ícone.
+- `icon_url` (accessor): URL pronta para exibir imagem.
+- `milestone`: nível (`iniciante`, `intermediário`, `avançado`, `especialista` ou `null`).
+- `percentage`: percentagem de utilizadores que já ganharam a badge.
+
+### Boas Práticas de UX
+
+- Mostrar feedback imediato quando uma nova badge é desbloqueada (toast/modal).
+- Destacar badges recém-conquistadas em "Minhas Badges".
+- Exibir progresso por categoria para incentivar continuidade.
+- Usar `percentage` para comunicar raridade da badge.
+
 ### AdminService
 
 Funcionalidades administrativas.
@@ -400,7 +454,8 @@ export interface Task {
 // models/category.model.ts
 export interface Category {
   id: number;
-  nome_categoria: string;
+  nome: string;
+  cor: string;
   created_at: string;
   updated_at: string;
 }
@@ -561,6 +616,50 @@ export class ErrorInterceptor implements HttpInterceptor {
 - [ ] Testar CRUD de tarefas
 - [ ] Testar listagem de badges com percentage
 - [ ] Testar painel admin (se aplicável)
+
+## Páginas a Criar
+
+### Autenticação
+- [ ] **Login** (`/login`) - Página de entrada com email e password
+- [ ] **Registro** (`/register`) - Página de criação de conta nova
+
+### Tarefas (CRUD)
+- [ ] **Dashboard/Home** (`/dashboard`) - Visão geral com tarefas do utilizador
+- [ ] **Listar Tarefas** (`/tasks`) - Lista todas as tarefas com filtros
+- [ ] **Criar Tarefa** (`/tasks/new` ou modal) - Formulário para nova tarefa
+- [ ] **Editar Tarefa** (`/tasks/:id/edit` ou modal) - Formulário para editar tarefa
+- [ ] **Detalhe Tarefa** (`/tasks/:id`) - Visualizar tarefa completa
+
+### Categorias (CRUD)
+- [ ] **Listar Categorias** (`/categories`) - Gestão de categorias
+- [ ] **Criar Categoria** (modal/form) - Adicionar categoria com escolha de Cor Hexadecimal
+- [ ] **Editar Categoria** (modal/form) - Atualizar detalhes da categoria
+
+### Badges & Gamificação
+- [ ] **Badges** (`/badges`) - Listar todas as badges com progresso
+- [ ] **Minhas Badges** (`/my-badges`) - Badges do utilizador autenticado
+
+### Utilizador
+- [ ] **Perfil** (`/profile`) - Ver e editar dados pessoais
+- [ ] **Avatar** - Upload/edição de avatar
+
+###  Admin
+- [ ] **Painel Admin** (`/admin`) - Estatísticas e gestão
+- [ ] **Gestão de Utilizadores** (`/admin/users`) - CRUD de utilizadores
+- [ ] **Gestão de Badges** (`/admin/badges`) - CRUD de badges
+- [ ] **Gestão de Categorias** (`/admin/categories`) - CRUD de categorias
+
+###  Páginas de Erro
+- [ ] **404 - Não Encontrada**
+- [ ] **403 - Acesso Proibido**
+- [ ] **401 - Não Autenticado** (redireciona para login)
+
+### Prioridade de Implementação
+1. Login + Registro
+2. Dashboard + Lista de Tarefas (CRUD básico)
+3. Perfil + Logout
+4. Badges + Categorias
+5. Painel Admin
 
 ## Dicas Úteis
 

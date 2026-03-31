@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Task;
+use App\Http\Requests\Task\StoreTaskRequest;
+use App\Http\Requests\Task\UpdateTaskRequest;
+use App\Http\Resources\TaskResource;
 
 class TaskController extends Controller
 {
@@ -26,25 +29,20 @@ class TaskController extends Controller
             $query->where('user_id', $request->user()->id);
         }
         
-        return $query->paginate(15);
+        return TaskResource::collection($query->paginate(15));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreTaskRequest $request)
     {
-        $validated = $request->validate([
-            'titulo' => 'required|string|max:255',
-            'descricao' => 'nullable|string',
-            'prioridade' => 'required|in:baixa,média,alta',
-            'data_vencimento' => 'nullable|date',
-            'user_id' => 'required|exists:users,id',
-            'category_id' => 'required|exists:categories,id',
-            'estado' => 'required|in:pendente,concluído',
-        ]);
-        $task = Task::create($validated);
-        return response()->json($task->load('user', 'category'), 201);
+        $data = $request->validated();
+        $data['user_id'] = $request->user()->id;
+        $task = Task::create($data);
+        $task->load('user', 'category');
+        
+        return response()->json(['data' => new TaskResource($task)], 201);
     }
 
     /**
@@ -59,13 +57,13 @@ class TaskController extends Controller
             abort(403, 'Unauthorized');
         }
         
-        return $task;
+        return new TaskResource($task);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateTaskRequest $request, string $id)
     {
         $task = Task::with('user', 'category')->findOrFail($id);
         
@@ -74,17 +72,8 @@ class TaskController extends Controller
             abort(403, 'Unauthorized');
         }
         
-        $validated = $request->validate([
-            'titulo' => 'required|string|max:255',
-            'descricao' => 'nullable|string',
-            'prioridade' => 'required|in:baixa,média,alta',
-            'data_vencimento' => 'nullable|date',
-            'user_id' => 'required|exists:users,id',
-            'category_id' => 'required|exists:categories,id',
-            'estado' => 'required|in:pendente,concluído',
-        ]);
-        $task->update($validated);
-        return response()->json($task->load('user', 'category'), 200);
+        $task->update($request->validated());
+        return response()->json(new TaskResource($task->load('user', 'category')), 200);
     }
 
     /**

@@ -14,17 +14,17 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            'Informática',
-            'RH',
-            'Marketing',
-            'Vendas',
-            'Financeiro',
-            'Administração',
-            'Logística',
+            ['nome' => 'Informática', 'cor' => '#3B82F6'], // Azul
+            ['nome' => 'RH', 'cor' => '#EC4899'], // Rosa
+            ['nome' => 'Marketing', 'cor' => '#8B5CF6'], // Roxo
+            ['nome' => 'Vendas', 'cor' => '#10B981'], // Verde
+            ['nome' => 'Financeiro', 'cor' => '#F59E0B'], // Laranja
+            ['nome' => 'Administração', 'cor' => '#6B7280'], // Cinzento
+            ['nome' => 'Logística', 'cor' => '#EF4444'], // Vermelho
         ];
 
         foreach ($categories as $category) {
-            Category::create(['nome_categoria' => $category]);
+            Category::create($category);
         }
     }
 }

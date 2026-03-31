@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
         $badges = Badge::all();
 
         // Criar 5 users com Factory
-        User::factory()->count(5)->create()->each(function ($user) use ($categories, $badges) {
+        User::factory()->count(5)->create()->each(function (User $user) use ($categories, $badges) {
             
             // Criar 3-5 tasks por user
             for ($i = 0; $i < random_int(3, 5); $i++) {
@@ -30,7 +30,7 @@ class UserSeeder extends Seeder
                     'descricao' => fake()->paragraph(),
                     'category_id' => $categories->random()->id,
                     'prioridade' => fake()->randomElement(['baixa', 'média', 'alta']),
-                    'estado' => fake()->randomElement(['pendente', 'concluído']),
+                    'estado' => fake()->randomElement(['pendente', 'concluída']),
                 ]);
             }
 

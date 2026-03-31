@@ -54,7 +54,7 @@ class TaskObserver
                     ->count();
 
                 if ($categoryCompletedCount === 10) {
-                    $categoryBadgeName = "Especialista em {$category->nome_categoria}";
+                    $categoryBadgeName = "Especialista em {$category->nome}";
                     $badge = Badge::where('nome', $categoryBadgeName)->first();
 
                     if ($badge && !$user->badges()->where('badge_id', $badge->id)->exists()) {
