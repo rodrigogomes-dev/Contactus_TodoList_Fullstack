@@ -1,6 +1,7 @@
-import { Injectable, signal } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Categoria {
   id: number;
@@ -8,37 +9,76 @@ export interface Categoria {
   cor: string;
 }
 
+interface CategoryApiResponse {
+  id: number;
+  nome: string;
+  cor: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface CategoriesPaginatedResponse {
+  data: CategoryApiResponse[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class CategoryService {
-  private categoriesMock = signal<Categoria[]>([
-    { id: 1, nome: 'Trabalho', cor: '#007bff' },
-    { id: 2, nome: 'Pessoal', cor: '#10b981' },
-    { id: 3, nome: 'Urgente', cor: '#ef4444' },
-    { id: 4, nome: 'Projetos', cor: '#8b5cf6' },
-  ]);
+  private http = inject(HttpClient);
+  private categories = signal<Categoria[]>([]);
 
   getCategories(): Observable<Categoria[]> {
-    return of(this.categoriesMock()).pipe(delay(500));
-  }
-
-  getCategoriesSignal() {
-    return this.categoriesMock;
-  }
-
-  addCategory(cat: Omit<Categoria, 'id'>) {
-    const newId = Math.max(...this.categoriesMock().map(c => c.id), 0) + 1;
-    this.categoriesMock.update(list => [...list, { id: newId, ...cat }]);
-  }
-
-  updateCategory(updatedCat: Categoria) {
-    this.categoriesMock.update(list => 
-      list.map(c => c.id === updatedCat.id ? updatedCat : c)
+    return this.http.get<CategoriesPaginatedResponse>(`${environment.apiUrl}/categories`).pipe(
+      map((response) => response.data.map((cat) => ({
+        id: cat.id,
+        nome: cat.nome,
+        cor: cat.cor,
+      }))),
+      tap((categories) => this.categories.set(categories))
     );
   }
 
-  deleteCategory(id: number) {
-    this.categoriesMock.update(list => list.filter(c => c.id !== id));
+  getCategoriesSignal() {
+    return this.categories;
+  }
+
+  addCategory(cat: Omit<Categoria, 'id'>): Observable<Categoria> {
+    return this.http.post<CategoryApiResponse>(`${environment.apiUrl}/categories`, cat).pipe(
+      map((created) => ({
+        id: created.id,
+        nome: created.nome,
+        cor: created.cor,
+      })),
+      tap((createdCategory) => {
+        this.categories.update((list) => [...list, createdCategory]);
+      })
+    );
+  }
+
+  updateCategory(updatedCat: Categoria): Observable<Categoria> {
+    return this.http.put<CategoryApiResponse>(`${environment.apiUrl}/categories/${updatedCat.id}`, {
+      nome: updatedCat.nome,
+      cor: updatedCat.cor,
+    }).pipe(
+      map((updated) => ({
+        id: updated.id,
+        nome: updated.nome,
+        cor: updated.cor,
+      })),
+      tap((category) => {
+        this.categories.update((list) =>
+          list.map((c) => (c.id === category.id ? category : c))
+        );
+      })
+    );
+  }
+
+  deleteCategory(id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/categories/${id}`).pipe(
+      tap(() => {
+        this.categories.update((list) => list.filter((c) => c.id !== id));
+      })
+    );
   }
 }

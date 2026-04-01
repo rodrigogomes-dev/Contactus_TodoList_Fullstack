@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BadgeService } from '../../services/badge';
@@ -10,10 +10,17 @@ import { BadgeService } from '../../services/badge';
   templateUrl: './my-badges.html',
   styleUrl: './my-badges.css',
 })
-export class MyBadges {
+export class MyBadges implements OnInit {
   private badgeService = inject(BadgeService);
 
   badges = this.badgeService.getBadgesSignal();
+  loadError = this.badgeService.getLoadErrorSignal();
+
+  ngOnInit() {
+    this.badgeService.loadBadges().subscribe({
+      error: (err) => console.error('Error loading badges:', err),
+    });
+  }
 
   // Filtros
   statusFilter = signal<'todas' | 'obtidas' | 'nao-obtidas'>('todas');
@@ -32,7 +39,9 @@ export class MyBadges {
 
   // Lista de níveis únicos (extraída dos dados)
   milestones = computed(() => {
-    const miles = this.badges().map(b => b.milestone);
+    const miles = this.badges()
+      .map((b) => b.milestone)
+      .filter((m): m is Exclude<typeof m, null> => m !== null);
     return [...new Set(miles)];
   });
 

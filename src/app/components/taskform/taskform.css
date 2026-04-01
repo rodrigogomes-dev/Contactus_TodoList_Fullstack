@@ -27,6 +27,16 @@
   color: #1a1a1a;
 }
 
+.form-error-message {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;

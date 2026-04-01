@@ -21,15 +21,22 @@
           <p>Inicia sessão para aceder às tuas tarefas</p>
         </div>
 
+        @if (errorMessage()) {
+          <p class="error">{{ errorMessage() }}</p>
+        }
+
         <form [formGroup]="loginForm" (ngSubmit)="login()">
           <div class="form-group">
-            <label>Utilizador</label>
-            <div class="input-wrapper" [class.invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
-              <span class="material-symbols-rounded">person</span>
-              <input type="text" placeholder="O teu utilizador" formControlName="username" />
+            <label>Email</label>
+            <div class="input-wrapper" [class.invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+              <span class="material-symbols-rounded">email</span>
+              <input type="email" placeholder="o.teu@email.com" formControlName="email" />
             </div>
-            @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
-              <span class="error">Campo obrigatório</span>
+            @if (loginForm.get('email')?.errors?.['required'] && loginForm.get('email')?.touched) {
+              <span class="error">Email obrigatório</span>
+            }
+            @if (loginForm.get('email')?.errors?.['email'] && loginForm.get('email')?.touched) {
+              <span class="error">Email inválido</span>
             }
           </div>
 
@@ -44,23 +51,31 @@
             }
           </div>
 
-          <button type="submit" class="btn-login" [disabled]="loginForm.invalid">
+          <button type="submit" class="btn-login" [disabled]="loginForm.invalid || isSubmitting()">
             <span class="material-symbols-rounded">login</span>
-            Entrar
+            @if (isSubmitting()) { A entrar... } @else { Entrar }
           </button>
         </form>
 
+        <!-- Sample credentials info -->
+        <div class="sample-credentials">
+          <p class="credentials-label">Credenciais para teste:</p>
+          <div class="credentials-option">
+            <span class="credentials-role admin">Admin</span>
+            <code>testadmin@example.com / password123</code>
+          </div>
+          <div class="credentials-option">
+            <span class="credentials-role user">User</span>
+            <code>testuser@example.com / password123</code>
+          </div>
+        </div>
+
         <div class="divider"><span>ou</span></div>
 
-        <button class="btn-register" (click)="toggleView()">
+        <button class="btn-register" (click)="toggleView()" [disabled]="isSubmitting()">
           <span class="material-symbols-rounded">person_add</span>
           Criar conta
         </button>
-
-        <p class="login-hint">
-          <span class="material-symbols-rounded">info</span>
-          <strong>user</strong> ou <strong>admin</strong> / password: <strong>password</strong>
-        </p>
 
       } @else {
 
@@ -121,7 +136,7 @@
             }
           </div>
 
-          <button type="submit" class="btn-login" [disabled]="registerForm.invalid">
+          <button type="submit" class="btn-login" [disabled]="registerForm.invalid || isSubmitting()">
             <span class="material-symbols-rounded">person_add</span>
             Registar
           </button>
@@ -129,7 +144,7 @@
 
         <div class="divider"><span>ou</span></div>
 
-        <button class="btn-register" (click)="toggleView()">
+        <button class="btn-register" (click)="toggleView()" [disabled]="isSubmitting()">
           <span class="material-symbols-rounded">login</span>
           Já tenho conta
         </button>

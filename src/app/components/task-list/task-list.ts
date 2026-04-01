@@ -1,8 +1,10 @@
-import { Component, inject, signal, computed, effect } from '@angular/core';
+import { Component, inject, signal, computed, effect, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { TaskService, Tarefa } from '../../services/task';
+import { TaskService } from '../../services/task';
+import { CategoryService } from '../../services/category';
+import { Tarefa } from '../../types/task';
 import { HasUnsavedChanges } from '../../guards/save-guard';
 import { TaskformComponent } from '../taskform/taskform';
 
@@ -13,9 +15,10 @@ import { TaskformComponent } from '../taskform/taskform';
   templateUrl: './task-list.html',
   styleUrls: ['./task-list.css']
 })
-export class TaskListComponent implements HasUnsavedChanges {
+export class TaskListComponent implements HasUnsavedChanges, OnInit {
   private route = inject(ActivatedRoute);
   private taskService = inject(TaskService);
+  private categoryService = inject(CategoryService);
 
   tasks = this.taskService.getTasksSignal();
 
@@ -30,11 +33,7 @@ export class TaskListComponent implements HasUnsavedChanges {
   priorityFilter = signal<string>('todas');
   categoryFilter = signal<number | 'todas'>('todas');
 
-  // Categorias únicas (baseado nos IDs porque o mock não tem nomes de categorias reais)
-  categories = computed(() => {
-    const cats = this.tasks().map(t => t.id_categoria).filter(c => c !== null);
-    return [...new Set(cats)];
-  });
+  categories = this.categoryService.getCategoriesSignal();
 
   filteredTasks = computed(() => {
     let result = this.tasks().filter(task => task.estado === this.currentView());
@@ -49,7 +48,7 @@ export class TaskListComponent implements HasUnsavedChanges {
     }
 
     if (this.categoryFilter() !== 'todas') {
-      result = result.filter(t => t.id_categoria === Number(this.categoryFilter()));
+      result = result.filter(t => t.categoryId === Number(this.categoryFilter()));
     }
 
     return result;
@@ -89,14 +88,41 @@ export class TaskListComponent implements HasUnsavedChanges {
     });
   }
 
+  ngOnInit() {
+    // Load tasks from API when component initializes
+    this.taskService.getTasks().subscribe({
+      next: () => {
+        // Tasks have been loaded and signal updated
+      },
+      error: (err) => console.error('Error loading tasks:', err)
+    });
+
+    this.categoryService.getCategories().subscribe({
+      error: (err) => console.error('Error loading categories:', err),
+    });
+  }
+
   deleteTask(id: number) {
-    this.taskService.deleteTask(id);
+    this.taskService.deleteTask(id).subscribe({
+      next: () => {
+        // Task deleted successfully
+      },
+      error: (err) => console.error('Error deleting task:', err)
+    });
   }
 
   toggleStatus(id: number) {
     const task = this.taskService.getTasksSignal()().find(t => t.id === id);
     if (task) {
-      this.taskService.updateTask({ ...task, estado: task.estado === 'pendente' ? 'concluido' : 'pendente' });
+      this.taskService.updateTask({
+        ...task,
+        estado: task.estado === 'pendente' ? 'concluido' : 'pendente'
+      }).subscribe({
+        next: () => {
+          // Task updated successfully
+        },
+        error: (err) => console.error('Error updating task:', err)
+      });
     }
   }
 

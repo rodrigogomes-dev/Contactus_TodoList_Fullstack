@@ -1,56 +1,158 @@
-import { Injectable, signal } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap, finalize, map } from 'rxjs';
+import { environment } from '../../environments/environment';
+import {
+  Tarefa,
+  TaskApiResponse,
+  TasksPaginatedResponse,
+  CreateTaskRequest,
+  UpdateTaskRequest,
+  mapApiTaskToFrontend,
+  mapApiTasksToFrontend,
+  TaskStateApi,
+  TaskPriorityApi,
+} from '../types/task';
 
-export interface Tarefa {
-  id: number;
-  id_utilizador: number;
-  titulo: string;
-  descricao: string | null;
-  estado: 'pendente' | 'concluido';
-  prioridade: 'baixa' | 'media' | 'alta';
-  data_vencimento: Date | null;
-  data_criacao: Date;
-  id_categoria: number | null;
-}
+type TaskApiEnvelope =
+  | TaskApiResponse
+  | { data: TaskApiResponse }
+  | { task: TaskApiResponse };
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskService {
-  private tarefas = signal<Tarefa[]>([
-    { id: 1, id_utilizador: 1, titulo: 'Estudar o novo Control Flow do Angular', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl eu nisl.', prioridade: 'alta', estado: 'pendente', data_vencimento: new Date('2026-03-20'), data_criacao: new Date(), id_categoria: 1 },
-    { id: 2, id_utilizador: 1, titulo: 'Implementar o @for com a cláusula track', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl eu nisl.', prioridade: 'alta', estado: 'concluido', data_vencimento: null, data_criacao: new Date(), id_categoria: 1 },
-    { id: 3, id_utilizador: 1, titulo: 'Verificar a renderização condicional', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl eu nisl.', prioridade: 'media', estado: 'pendente', data_vencimento: new Date('2026-03-10'), data_criacao: new Date(), id_categoria: 2 },
-    { id: 4, id_utilizador: 1, titulo: 'Analisar Class Binding para prioridades', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl eu nisl.', prioridade: 'baixa', estado: 'pendente', data_vencimento: null, data_criacao: new Date(), id_categoria: 2 },
-  ]);
+  private http = inject(HttpClient);
 
+  // Signal to store all user's tasks
+  private tarefas = signal<Tarefa[]>([]);
+
+  // Loading state for UI indicators
+  private isLoading = signal(false);
+
+  /**
+   * Fetch all tasks for current user from API
+   * GET /api/tasks - returns paginated response
+   * Updates the tarefas signal with fetched data
+   */
   getTasks(): Observable<Tarefa[]> {
-    return of(this.tarefas()).pipe(
-      delay(2000),
-      map(tasks => tasks.map(t => ({ ...t, titulo: t.titulo.toUpperCase() })))
+    this.isLoading.set(true);
+    return this.http.get<TasksPaginatedResponse>(`${environment.apiUrl}/tasks`).pipe(
+      map((response) => {
+        // Map API responses to frontend format
+        const mappedTasks = mapApiTasksToFrontend(response.data);
+        // Update signal
+        this.tarefas.set(mappedTasks);
+        // Return mapped tasks
+        return mappedTasks;
+      }),
+      finalize(() => this.isLoading.set(false))
     );
   }
 
+  /**
+   * Get the reactive signal accessor for tasks
+   * Use this for template binding and reactive updates
+   */
   getTasksSignal() {
     return this.tarefas;
   }
 
-  addTask(task: Tarefa) {
-    this.tarefas.update(list => [...list, task]);
-  }
+  /**
+   * Create a new task via POST /api/tasks
+   * Removes id since server will assign it
+   * Normalizes frontend values to API format
+   */
+  addTask(task: Omit<Tarefa, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Observable<TaskApiResponse> {
+    // Convert frontend task to API format expected by backend
+    const apiRequest: CreateTaskRequest = {
+      titulo: task.titulo,
+      descricao: task.descricao,
+      estado: task.estado === 'concluido' ? TaskStateApi.COMPLETED : TaskStateApi.PENDING,
+      prioridade: task.prioridade === 'media' ? TaskPriorityApi.MEDIUM : task.prioridade,
+      data_vencimento: task.dataVencimento || undefined,
+      category_id: Number(task.categoryId),
+    };
 
-  deleteTask(id: number) {
-    this.tarefas.update(list => list.filter(task => task.id !== id));
-  }
-
-  updateTask(updatedTask: Tarefa) {
-    this.tarefas.update(list =>
-      list.map(task => task.id === updatedTask.id ? updatedTask : task)
+    return this.http.post<TaskApiEnvelope>(`${environment.apiUrl}/tasks`, apiRequest).pipe(
+      map((response) => this.extractTaskPayload(response)),
+      tap((apiResponse) => {
+        // Map response to frontend format and add to signal
+        const newTask = mapApiTaskToFrontend(apiResponse);
+        this.tarefas.update((list) => [...list, newTask]);
+      })
     );
   }
 
-  getById(id: number): Tarefa | undefined {
-    return this.tarefas().find(task => task.id === id);
+  /**
+   * Update existing task via PUT /api/tasks/{id}
+   * Normalizes frontend values to API format
+   */
+  updateTask(task: Tarefa): Observable<TaskApiResponse> {
+    const { id, ...updateData } = task;
+
+    // Convert to API format (excluding id, createdAt, updatedAt, userId)
+    const apiRequest: UpdateTaskRequest = {
+      titulo: updateData.titulo,
+      descricao: updateData.descricao,
+      estado: updateData.estado === 'concluido' ? TaskStateApi.COMPLETED : TaskStateApi.PENDING,
+      prioridade: updateData.prioridade === 'media' ? TaskPriorityApi.MEDIUM : updateData.prioridade,
+      data_vencimento: updateData.dataVencimento || undefined,
+      category_id: updateData.categoryId,
+    };
+
+    return this.http.put<TaskApiEnvelope>(`${environment.apiUrl}/tasks/${id}`, apiRequest).pipe(
+      map((response) => this.extractTaskPayload(response)),
+      tap((apiResponse) => {
+        // Map response to frontend format and update signal
+        const updatedTask = mapApiTaskToFrontend(apiResponse);
+        this.tarefas.update((list) =>
+          list.map((t) => (t.id === updatedTask.id ? updatedTask : t))
+        );
+      })
+    );
+  }
+
+  /**
+   * Delete task via DELETE /api/tasks/{id}
+   * Updates signal to remove deleted task
+   */
+  deleteTask(id: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${environment.apiUrl}/tasks/${id}`).pipe(
+      tap(() => {
+        // Remove from signal
+        this.tarefas.update((list) => list.filter((task) => task.id !== id));
+      })
+    );
+  }
+
+  /**
+   * Get single task by ID
+   * Used by route resolver when user navigates to task details
+   */
+  getById(id: number): Observable<TaskApiResponse> {
+    return this.http
+      .get<TaskApiEnvelope>(`${environment.apiUrl}/tasks/${id}`)
+      .pipe(map((response) => this.extractTaskPayload(response)));
+  }
+
+  /**
+   * Get loading state signal
+   */
+  getLoadingState() {
+    return this.isLoading;
+  }
+
+  private extractTaskPayload(response: TaskApiEnvelope): TaskApiResponse {
+    if ('data' in response) {
+      return response.data;
+    }
+
+    if ('task' in response) {
+      return response.task;
+    }
+
+    return response;
   }
 }

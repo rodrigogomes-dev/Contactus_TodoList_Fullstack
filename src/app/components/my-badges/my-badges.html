@@ -2,6 +2,13 @@
 
   <h2>As Minhas Badges</h2>
 
+  @if (loadError()) {
+    <div class="badges-empty">
+      <span class="material-symbols-rounded">error</span>
+      <p>{{ loadError() }}</p>
+    </div>
+  }
+
   <!-- Stats resumo -->
   <div class="badges-stats">
     <div class="stat-card">

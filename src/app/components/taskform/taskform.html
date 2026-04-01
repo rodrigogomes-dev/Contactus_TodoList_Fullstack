@@ -2,6 +2,10 @@
   <div class="modal-content" (click)="$event.stopPropagation()">
     <h2>{{ task ? 'Editar Tarefa' : 'Nova Tarefa' }}</h2>
 
+    @if (errorMessage) {
+      <p class="form-error-message">{{ errorMessage }}</p>
+    }
+
     <form [formGroup]="form" (ngSubmit)="saveTask()">
       <div class="form-grid">
 
@@ -24,9 +28,9 @@
             <label>Categoria</label>
             <select formControlName="categoria">
               <option value="">Seleciona...</option>
-              <option value="Informática">Informática</option>
-              <option value="Gestão">Gestão</option>
-              <option value="Recursos Humanos">Recursos Humanos</option>
+              @for (category of categories(); track category.id) {
+                <option [value]="category.id">{{ category.nome }}</option>
+              }
             </select>
             @if (form.get('categoria')?.invalid && form.get('categoria')?.touched) {
               <span class="error">Categoria obrigatória</span>
@@ -52,8 +56,14 @@
       </div>
 
       <div class="form-actions">
-        <button type="submit" [disabled]="form.invalid">Guardar</button>
-        <button type="button" (click)="cancel()">Cancelar</button>
+        <button type="submit" [disabled]="form.invalid || isSubmitting">
+          @if (isSubmitting) {
+            A guardar...
+          } @else {
+            Guardar
+          }
+        </button>
+        <button type="button" (click)="cancel()" [disabled]="isSubmitting">Cancelar</button>
       </div>
     </form>
   </div>

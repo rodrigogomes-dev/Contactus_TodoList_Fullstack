@@ -355,8 +355,8 @@
 	width: var(--badge-image-size);
 	height: var(--badge-image-size);
 	border-radius: 34px;
-	border: 1px solid rgba(147, 197, 253, 0.72);
-	background: rgba(233, 243, 255, 0.96);
+	border: none;
+	background: transparent;
 	box-shadow: 0 22px 46px rgba(0, 16, 34, 0.32);
 	cursor: pointer;
 }

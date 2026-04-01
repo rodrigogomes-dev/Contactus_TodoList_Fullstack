@@ -93,6 +93,9 @@
 			<span class="section-title-icon material-symbols-rounded" aria-hidden="true">workspace_premium</span>
 			<span>Badges</span>
 		</h3>
+		@if (badgesLoadError()) {
+			<p class="badges-shortcopy">{{ badgesLoadError() }}</p>
+		}
 		<div class="badges-wrap">
 			@if (currentBadge(); as badge) {
 				<div class="badges-carousel reveal-card" aria-label="Carrossel de badges">
@@ -104,16 +107,18 @@
 						}
 
 						<div class="badge-placeholder" aria-label="Badge em destaque">
-							<img
-								#badgeImage
-								class="badge-image"
-								[src]="badge.icon_url"
-								[alt]="badge.nome"
-								width="220"
-								height="220"
-								loading="lazy"
-								(click)="spinBadgeImage(badgeImage)"
-							/>
+							<div class="badge-symbol-wrapper">
+								<img
+									#badgeImage
+									class="badge-image"
+									[src]="badge.icon_url"
+									[alt]="badge.nome"
+									width="220"
+									height="220"
+									loading="lazy"
+									(click)="spinBadgeImage(badgeImage)"
+								/>
+							</div>
 							<h4>{{ badge.nome }}</h4>
 							<p class="badges-shortcopy">{{ getBadgeShortDescription(badge) }}</p>
 						</div>

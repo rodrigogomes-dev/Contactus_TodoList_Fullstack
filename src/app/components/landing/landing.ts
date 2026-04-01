@@ -1,5 +1,5 @@
 import { isPlatformBrowser } from '@angular/common';
-import { AfterViewInit, Component, OnDestroy, PLATFORM_ID, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { BadgeItem, BadgeService } from '../../services/badge';
 import { LandingUiStateService } from '../../services/landing-ui-state';
@@ -46,7 +46,7 @@ type VantaNetInstance = {
   templateUrl: './landing.html',
   styleUrl: './landing.css',
 })
-export class Landing implements AfterViewInit, OnDestroy {
+export class Landing implements OnInit, AfterViewInit, OnDestroy {
   private platformId = inject(PLATFORM_ID);
   private badgeService = inject(BadgeService);
   private landingUiState = inject(LandingUiStateService);
@@ -54,7 +54,52 @@ export class Landing implements AfterViewInit, OnDestroy {
   private revealObserver: IntersectionObserver | null = null;
   private removeLandingScrollListener: (() => void) | null = null;
 
-  badges = this.badgeService.getBadgesSignal();
+  // Mock badges for landing page (no backend calls until user is logged in)
+  private mockBadges: BadgeItem[] = [
+    {
+      id: 1,
+      nome: 'Iniciante',
+      descricao: '1 tarefa concluída',
+      categoria: 'Geral',
+      milestone: 'iniciante',
+      percentage: 0,
+      icon_url: 'https://api.iconify.design/lsicon:refresh-done-filled.svg?color=%230056CC&width=220&height=220',
+      unlocked: false,
+    },
+    {
+      id: 2,
+      nome: 'Intermediário',
+      descricao: '10 tarefas concluídas',
+      categoria: 'Geral',
+      milestone: 'intermediario',
+      percentage: 50,
+      icon_url: 'https://api.iconify.design/lsicon:radar-chart-filled.svg?color=%230056CC&width=220&height=220',
+      unlocked: false,
+    },
+    {
+      id: 3,
+      nome: 'Avançado',
+      descricao: '50 tarefas concluídas',
+      categoria: 'Geral',
+      milestone: 'avancado',
+      percentage: 75,
+      icon_url: 'https://api.iconify.design/lsicon:vip-filled.svg?color=%230056CC&width=220&height=220',
+      unlocked: false,
+    },
+    {
+      id: 4,
+      nome: 'Especialista',
+      descricao: '100 tarefas concluídas',
+      categoria: 'Geral',
+      milestone: 'especialista',
+      percentage: 100,
+      icon_url: 'https://api.iconify.design/lsicon:education-filled.svg?color=%230056CC&width=220&height=220',
+      unlocked: false,
+    },
+  ];
+
+  badges = signal<BadgeItem[]>(this.mockBadges);
+  badgesLoadError = this.badgeService.getLoadErrorSignal();
   activeBadgeIndex = signal(0);
   activeLandingSection = this.landingUiState.activeSection;
   landingScrollProgress = this.landingUiState.scrollProgress;
@@ -62,6 +107,19 @@ export class Landing implements AfterViewInit, OnDestroy {
   currentBadge = computed(() => this.badges()[this.activeBadgeIndex()] ?? null);
   isFirstBadge = computed(() => this.activeBadgeIndex() === 0);
   isLastBadge = computed(() => this.activeBadgeIndex() >= this.badges().length - 1);
+
+  ngOnInit(): void {
+    // No backend calls until user is logged in
+    // Badges will be loaded after authentication in the main app
+
+    // Reset scroll to top when component initializes (fixes issue when returning from login page)
+    if (isPlatformBrowser(this.platformId)) {
+      const landingContainer = document.querySelector('.landing') as HTMLElement | null;
+      if (landingContainer) {
+        landingContainer.scrollTop = 0;
+      }
+    }
+  }
 
   async ngAfterViewInit(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) {
@@ -156,16 +214,7 @@ export class Landing implements AfterViewInit, OnDestroy {
   }
 
   getBadgeShortDescription(badge: BadgeItem): string {
-    const goalByMilestone: Record<BadgeItem['milestone'], number> = {
-      iniciante: 1,
-      intermediario: 10,
-      avancado: 50,
-      especialista: 100,
-    };
-
-    const target = goalByMilestone[badge.milestone];
-    const taskLabel = target === 1 ? 'tarefa' : 'tarefas';
-    return `Completa ${target} ${taskLabel} de uma categoria para ganhar este badge.`;
+    return badge.descricao;
   }
 
   spinBadgeImage(image: HTMLImageElement): void {

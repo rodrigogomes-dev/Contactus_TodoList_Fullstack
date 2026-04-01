@@ -239,3 +239,64 @@ form {
   }
   .login-image { display: none; }
 }
+
+/* Sample credentials section */
+.sample-credentials {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f0f4ff;
+  border-radius: 8px;
+  border-left: 4px solid #0056cc;
+}
+
+.credentials-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #004399;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 0.75rem 0;
+}
+
+.credentials-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.credentials-option:last-child {
+  margin-bottom: 0;
+}
+
+.credentials-role {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+  min-width: 50px;
+  text-align: center;
+}
+
+.credentials-role.admin {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+.credentials-role.user {
+  background-color: #51cf66;
+  color: white;
+}
+
+.credentials-option code {
+  font-family: 'Courier New', monospace;
+  color: #1a1a1a;
+  background: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}

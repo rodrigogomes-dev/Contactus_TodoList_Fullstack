@@ -47,8 +47,8 @@
         </label>
         <select id="category-filter" [ngModel]="categoryFilter()" (ngModelChange)="onCategoryChange($event)">
           <option value="todas">Todas</option>
-          @for (cat of categories(); track cat) {
-            <option [value]="cat">Categoria {{ cat }}</option>
+          @for (cat of categories(); track cat.id) {
+            <option [value]="cat.id">{{ cat.nome }}</option>
           }
         </select>
       </div>
@@ -85,8 +85,8 @@
               <span class="priority-badge priority-badge-{{ task.prioridade }}">
                 <span class="priority-label">{{ task.prioridade | titlecase }}</span>
               </span>
-              @if (task.data_vencimento) {
-                <span class="due-date">{{ task.data_vencimento | date:'dd/MM/yyyy' }}</span>
+              @if (task.dataVencimento) {
+                <span class="due-date">{{ task.dataVencimento | date:'dd/MM/yyyy' }}</span>
               }
             </div>
           </div>
@@ -98,7 +98,7 @@
         @if (selectedTask() === task) {
           <div class="task-details">
             <div class="task-details-content">
-              <p><strong>Descrição:</strong> {{ task.descricao || 'N/A' }} | <strong>Criado:</strong> {{ task.data_criacao | date:'dd/MM/yyyy' }}</p>
+              <p><strong>Descrição:</strong> {{ task.descricao || 'N/A' }} | <strong>Criado:</strong> {{ task.createdAt | date:'dd/MM/yyyy' }}</p>
             </div>
             <button class="close-button" (click)="selectTask(task)">Fechar</button>
           </div>

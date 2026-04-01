@@ -1,7 +1,8 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CategoryService, Categoria } from '../../../services/category';
+import { BadgeService } from '../../../services/badge';
 import { CategoryFormComponent } from './category-form/category-form';
 
 @Component({
@@ -11,8 +12,9 @@ import { CategoryFormComponent } from './category-form/category-form';
   templateUrl: './categories.html',
   styleUrl: './categories.css'
 })
-export class Categories {
+export class Categories implements OnInit {
   private categoryService = inject(CategoryService);
+  private badgeService = inject(BadgeService);
 
   // Expose the signal containing all categories
   categories = this.categoryService.getCategoriesSignal();
@@ -45,6 +47,12 @@ export class Categories {
     return this.filteredCategories().slice(start, end);
   });
 
+  ngOnInit() {
+    this.categoryService.getCategories().subscribe({
+      error: (err) => console.error('Error loading categories:', err),
+    });
+  }
+
   // Handlers
   onSearchChange(val: string) {
     this.searchQuery.set(val);
@@ -75,7 +83,12 @@ export class Categories {
 
   deleteCategory(cat: Categoria) {
     if(confirm(`Tens a certeza que queres eliminar a categoria "${cat.nome}"?`)) {
-      this.categoryService.deleteCategory(cat.id);
+      this.categoryService.deleteCategory(cat.id).subscribe({
+        next: () => {
+          this.badgeService.loadBadges().subscribe();
+        },
+        error: (err) => console.error('Error deleting category:', err),
+      });
     }
   }
 
@@ -86,11 +99,24 @@ export class Categories {
   onSaveCategory(catData: Categoria | Omit<Categoria, 'id'>) {
     if ('id' in catData) {
       // is editing
-      this.categoryService.updateCategory(catData as Categoria);
+      this.categoryService.updateCategory(catData as Categoria).subscribe({
+        next: () => {
+          this.badgeService.loadBadges().subscribe();
+          this.showFormModal.set(false);
+        },
+        error: (err) => console.error('Error updating category:', err),
+      });
     } else {
       // is creating
-      this.categoryService.addCategory(catData);
+      this.categoryService.addCategory(catData).subscribe({
+        next: () => {
+          // Backend creates badges automatically when category is created.
+          // Reload badges so the UI reflects newly generated badges immediately.
+          this.badgeService.loadBadges().subscribe();
+          this.showFormModal.set(false);
+        },
+        error: (err) => console.error('Error creating category:', err),
+      });
     }
-    this.showFormModal.set(false);
   }
 }
