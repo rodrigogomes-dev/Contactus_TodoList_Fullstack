@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Category;
@@ -16,11 +15,26 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // Criar users de teste com credenciais fixas (OBRIGATÓRIO)
+        User::create([
+            'name' => 'Test Admin',
+            'email' => 'testadmin@example.com',
+            'password' => bcrypt('password123'),
+            'is_admin' => 1,
+        ]);
+
+        User::create([
+            'name' => 'Test User',
+            'email' => 'testuser@example.com',
+            'password' => bcrypt('password123'),
+            'is_admin' => 0,
+        ]);
+
         // Buscar dados necessários
         $categories = Category::all();
         $badges = Badge::all();
 
-        // Criar 5 users com Factory
+        // Criar 5 users aleatórios com Factory
         User::factory()->count(5)->create()->each(function (User $user) use ($categories, $badges) {
             
             // Criar 3-5 tasks por user

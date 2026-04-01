@@ -10,22 +10,16 @@ class CategoryObserver
 {
     /**
      * Handle the Category "created" event.
+     * 
+     * Cria badges de milestone para a categoria de forma segura (sem duplicação).
+     * O campo 'icon' é usável como fallback mas não é crítico - o match() do Badge model prevalece.
      */
     public function created(Category $category): void
     {
-        // Gera seed para o icon (a partir do nome da categoria)
+        // Normaliza o slug da categoria para uso em fallback de ícone
         $iconSeed = Str::slug($category->nome);
         
-        // Cria badge principal da categoria
-        Badge::create([
-            'nome' => $category->nome . ' Badge',
-            'descricao' => 'Ganhe esta badge completando tarefas em ' . $category->nome,
-            'icon' => $iconSeed . '-badge',
-            'category_id' => $category->id,
-            'milestone' => null,
-        ]);
-
-        // Cria badges de milestone para a categoria
+        // Define milestones válidos (deve ser exato com Badge model)
         $milestones = [
             'iniciante' => 'Iniciante em ' . $category->nome,
             'intermediário' => 'Intermediário em ' . $category->nome,
@@ -33,14 +27,19 @@ class CategoryObserver
             'especialista' => 'Especialista em ' . $category->nome,
         ];
 
+        // Usa firstOrCreate para evitar duplicação se este observer rodar múltiplas vezes
         foreach ($milestones as $milestoneType => $milestoneName) {
-            Badge::create([
-                'nome' => $milestoneName,
-                'descricao' => 'Alcance o marco de ' . $milestoneName,
-                'icon' => $iconSeed . '-' . $milestoneType,
-                'category_id' => $category->id,
-                'milestone' => $milestoneType,
-            ]);
+            Badge::firstOrCreate(
+                [
+                    'nome' => $milestoneName,
+                    'category_id' => $category->id,
+                    'milestone' => $milestoneType,
+                ],
+                [
+                    'descricao' => 'Alcance o marco de ' . $milestoneName,
+                    'icon' => $iconSeed . '-' . $milestoneType, // Fallback visual
+                ]
+            );
         }
     }
 

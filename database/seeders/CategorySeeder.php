@@ -2,14 +2,20 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Category;
+use App\Models\Badge;
+use Illuminate\Support\Str;
 
 class CategorySeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * 
+     * NOTA: Em produção, CategoryObserver::created() dispara automaticamente
+     * quando uma categoria é criada via API, gerando as 4 badges.
+     * 
+     * Durante seeding, criamos manualmente para garantir dados de teste.
      */
     public function run(): void
     {
@@ -23,8 +29,42 @@ class CategorySeeder extends Seeder
             ['nome' => 'Logística', 'cor' => '#EF4444'], // Vermelho
         ];
 
-        foreach ($categories as $category) {
-            Category::create($category);
+        foreach ($categories as $categoryData) {
+            $category = Category::create($categoryData);
+            
+            // Cria as 4 badges de milestone para esta categoria
+            // (Em produção, CategoryObserver faz isto automaticamente)
+            $this->createCategoryBadges($category);
+        }
+    }
+
+    /**
+     * Cria as 4 badges de milestone para uma categoria.
+     * Espelha exatamente o que CategoryObserver::created() faz.
+     */
+    private function createCategoryBadges(Category $category): void
+    {
+        $iconSeed = Str::slug($category->nome);
+        
+        $milestones = [
+            'iniciante' => 'Iniciante em ' . $category->nome,
+            'intermediário' => 'Intermediário em ' . $category->nome,
+            'avançado' => 'Avançado em ' . $category->nome,
+            'especialista' => 'Especialista em ' . $category->nome,
+        ];
+
+        foreach ($milestones as $milestoneType => $milestoneName) {
+            Badge::firstOrCreate(
+                [
+                    'nome' => $milestoneName,
+                    'category_id' => $category->id,
+                    'milestone' => $milestoneType,
+                ],
+                [
+                    'descricao' => 'Alcance o marco de ' . $milestoneName,
+                    'icon' => $iconSeed . '-' . $milestoneType,
+                ]
+            );
         }
     }
 }

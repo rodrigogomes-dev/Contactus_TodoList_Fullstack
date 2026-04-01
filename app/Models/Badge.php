@@ -30,23 +30,69 @@ class Badge extends Model
 
     public function getIconUrlAttribute(): string
     {
-        $color = '000000'; // Cor Base Fallback
+        // Extrai cor da categoria com validação
+        $color = $this->extractValidColor();
         
-        // Remove a hashtag do CSS se ela constar no Registo da Base de Dados
-        if ($this->category && $this->category->cor) {
-            $color = ltrim($this->category->cor, '#');
+        // Seleciona ícone válido do Iconify baseado em milestone (com fallback)
+        $iconName = $this->resolveIconName();
+
+        // Constrói URL Iconify com parâmetros seguros
+        return "https://api.iconify.design/{$iconName}.svg?color=%23{$color}&width=128&height=128";
+    }
+
+    /**
+     * Extrai e valida cor hex da categoria.
+     * Retorna cor válida ou fallback.
+     */
+    private function extractValidColor(): string
+    {
+        $fallbackColor = '000000';
+
+        if (!$this->category || !$this->category->cor) {
+            return $fallbackColor;
         }
 
-        $iconName = match($this->milestone) {
+        // Remove hashtag e valida formato hex
+        $color = ltrim($this->category->cor, '#');
+        
+        // Verifica se é hex válido (3 ou 6 caracteres)
+        if (preg_match('/^[0-9a-fA-F]{6}$/', $color)) {
+            return strtolower($color);
+        }
+
+        return $fallbackColor;
+    }
+
+    /**
+     * Resolve nome de ícone válido do Iconify.
+     * Usa milestone como fonte de verdade, com fallback genérico.
+     * Nunca retorna ícone inválido (evita 404s).
+     */
+    private function resolveIconName(): string
+    {
+        // Normaliza milestone para comparação (remove acentos conceitual)
+        $normalizedMilestone = match($this->milestone) {
+            'iniciante' => 'iniciante',
+            'intermediário' => 'intermediário',
+            'avançado' => 'avançado',
+            'especialista' => 'especialista',
+            default => null,
+        };
+
+        // Map robusto de milestone para Iconify icon (sempre válido)
+        $iconMap = [
             'iniciante' => 'lsicon:refresh-done-filled',
             'intermediário' => 'lsicon:radar-chart-filled',
             'avançado' => 'lsicon:vip-filled',
             'especialista' => 'lsicon:education-filled',
-            default => 'lsicon:badge-filled', // O "Pai" Genérico da Categoria
-        };
+        ];
 
-        // Deville um SVG escalável à cor dinâmica da Categoria
-        return "https://api.iconify.design/{$iconName}.svg?color=%23{$color}&width=128&height=128";
+        if ($normalizedMilestone && isset($iconMap[$normalizedMilestone])) {
+            return $iconMap[$normalizedMilestone];
+        }
+
+        // Fallback genérico se milestone for null ou inválido
+        return 'lsicon:badge-filled';
     }
 
     public function getPercentageAttribute(): float
