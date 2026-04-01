@@ -17,14 +17,24 @@ class StatsController extends Controller
         $year = $request->validated()['year'];
         $month = $request->validated()['month'] ?? null;
         
+        \Log::info('Stats request', [
+            'period' => $period,
+            'year' => $year,
+            'month' => $month
+        ]);
+        
         $now = now();
         
         if ($period === 'year') {
-            return $this->getYearData($year, $now);
+            $result = $this->getYearData($year, $now);
+            \Log::info('Year response sent', ['data' => $result->getData(true)]);
+            return $result;
         }
         
         if ($period === 'month') {
-            return $this->getMonthData($year, $month, $now);
+            $result = $this->getMonthData($year, $month, $now);
+            \Log::info('Month response sent', ['data' => $result->getData(true)]);
+            return $result;
         }
     }
     
@@ -32,6 +42,12 @@ class StatsController extends Controller
     {
         // Obtém o mês atual
         $currentMonth = $now->month;
+        
+        \Log::info('Getting year data', [
+            'year' => $year,
+            'currentMonth' => $currentMonth,
+            'nowYear' => $now->year
+        ]);
         
         // Query: agrupa por mês (1-12) apenas até mês atual
         $users = User::whereYear('created_at', $year)
@@ -43,6 +59,11 @@ class StatsController extends Controller
                      )
                      ->orderBy('month')
                      ->get();
+        
+        \Log::info('Year data query result', [
+            'total_records' => $users->count(),
+            'users' => $users->toArray()
+        ]);
         
         // Mapear para labels (Jan, Feb, Mar, etc)
         $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
@@ -56,13 +77,21 @@ class StatsController extends Controller
             $data[] = $user->count;
         }
         
-        return response()->json(new StatsResource([
+        $response = [
             'period' => 'year',
             'year' => $year,
             'current_month' => $currentMonth,
             'labels' => $labels,
             'data' => $data,
-        ]));
+        ];
+        
+        \Log::info('Year response data constructed', [
+            'response' => $response,
+            'labels_count' => count($labels),
+            'data_count' => count($data)
+        ]);
+        
+        return response()->json(new StatsResource($response));
     }
     
     private function getMonthData($year, $month, $now)
@@ -74,7 +103,7 @@ class StatsController extends Controller
         
         // Se estamos em mês futuro, retornar vazio
         if ($year === $now->year && $month > $now->month) {
-            return response()->json(new StatsResource([
+            $response = [
                 'period' => 'month',
                 'year' => $year,
                 'month' => $month,
@@ -83,7 +112,11 @@ class StatsController extends Controller
                 'total_weeks' => ceil($daysInMonth / 7),
                 'labels' => [],
                 'data' => [],
-            ]));
+            ];
+            
+            \Log::info('Month is in future, returning empty', ['response' => $response]);
+            
+            return response()->json(new StatsResource($response));
         }
         
         // Query: agrupa por semana dentro do mês
@@ -97,6 +130,8 @@ class StatsController extends Controller
                      ->orderBy('week')
                      ->get();
         
+        \Log::info('Month data query result', ['users' => $users->toArray()]);
+        
         // Calcular semanas totais
         $totalWeeks = ceil($daysInMonth / 7);
         
@@ -109,7 +144,7 @@ class StatsController extends Controller
             $data[] = $user->count;
         }
         
-        return response()->json(new StatsResource([
+        $response = [
             'period' => 'month',
             'year' => $year,
             'month' => $month,
@@ -118,6 +153,10 @@ class StatsController extends Controller
             'total_weeks' => $totalWeeks,
             'labels' => $labels,
             'data' => $data,
-        ]));
+        ];
+        
+        \Log::info('Month response data', ['response' => $response]);
+        
+        return response()->json(new StatsResource($response));
     }
 }

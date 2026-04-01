@@ -39,7 +39,13 @@ class TaskController extends Controller
     {
         $data = $request->validated();
         $data['user_id'] = $request->user()->id;
+        
+        \Log::info('Creating task with data:', $data);
+        
         $task = Task::create($data);
+        
+        \Log::info('Task created:', ['id' => $task->id, 'task' => $task->toArray()]);
+        
         $task->load('user', 'category');
         
         return response()->json(['data' => new TaskResource($task)], 201);

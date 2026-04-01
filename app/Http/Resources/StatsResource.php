@@ -15,17 +15,17 @@ class StatsResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'period' => $this['period'],
-            'year' => $this['year'],
-            'month' => $this['month'] ?? null,
-            'days_in_month' => $this['days_in_month'] ?? null,
-            'current_day' => $this['current_day'] ?? null,
-            'total_weeks' => $this['total_weeks'] ?? null,
-            'labels' => $this['labels'],
+            'period' => $this->resource['period'],
+            'year' => $this->resource['year'],
+            'month' => $this->resource['month'] ?? null,
+            'days_in_month' => $this->resource['days_in_month'] ?? null,
+            'current_day' => $this->resource['current_day'] ?? null,
+            'total_weeks' => $this->resource['total_weeks'] ?? null,
+            'labels' => $this->resource['labels'],
             'datasets' => [
                 [
                     'label' => 'Novos Users',
-                    'data' => $this['data'],
+                    'data' => $this->resource['data'],
                     'borderColor' => '#FF5733',
                     'backgroundColor' => 'rgba(255, 87, 51, 0.1)',
                     'tension' => 0.1,

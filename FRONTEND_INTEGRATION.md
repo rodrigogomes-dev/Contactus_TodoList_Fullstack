@@ -685,3 +685,48 @@ ENVIRONMENT=development
 ## Suporte
 
 Para dúvidas sobre a API, consulte o README.md deste projeto.
+
+## Integração de Estatísticas (Stats)
+
+Para integrar o dashboard de estatísticas com gráficos de crescimento de utilizadores, consulte o guia detalhado em [STATS_INTEGRATION.md](STATS_INTEGRATION.md).
+
+### Resumo Rápido
+
+1. Instale Chart.js:
+```bash
+npm install chart.js ng2-charts
+```
+
+2. Crie o `StatsService` para consumir `/api/stats/users-growth`
+
+3. Crie um componente `StatsComponent` que exibe os dados em gráficos
+
+4. Use o componente na página administrativa
+
+### Exemplo Simples
+
+```typescript
+// stats.service.ts
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
+
+@Injectable({ providedIn: 'root' })
+export class StatsService {
+  constructor(private http: HttpClient) {}
+
+  getUsersGrowthYear(year: number) {
+    return this.http.get(
+      `${environment.apiUrl}/stats/users-growth?period=year&year=${year}`
+    );
+  }
+
+  getUsersGrowthMonth(year: number, month: number) {
+    return this.http.get(
+      `${environment.apiUrl}/stats/users-growth?period=month&year=${year}&month=${month}`
+    );
+  }
+}
+```
+
+Ver [STATS_INTEGRATION.md](STATS_INTEGRATION.md) para implementação completa com Chart.js.

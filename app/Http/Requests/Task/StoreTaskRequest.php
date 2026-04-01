@@ -29,7 +29,7 @@ class StoreTaskRequest extends FormRequest
             'prioridade' => 'required|in:baixa,média,alta',
             'data_vencimento' => 'nullable|date',
             'category_id' => 'required|exists:categories,id',
-            'estado' => 'required|in:pendente,concluído',
+            'estado' => 'required|in:pendente,concluída',
         ];
     }
 }

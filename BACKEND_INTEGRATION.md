@@ -48,7 +48,10 @@ A API do Laravel deve devolver as respostas padrão de JSON em `routes/api.php`.
 
 ### Badges e Dashboards (`/api/badges`, `/api/stats`)
 - `GET /my-badges` -> Lista o cruzamento entre as badges e o `User` em questão.
-- `GET /stats/users-growth` -> (Apenas Admin) Devolve os arrays agrupados por Mês/Ano para alimentar de forma nativa e limpa o `lineChartData` do Chart.js.
+- `GET /stats/users-growth?period=year&year=2026` -> (Apenas Admin) Devolve os arrays agrupados por Mês para um ano específico.
+- `GET /stats/users-growth?period=month&year=2026&month=4` -> (Apenas Admin) Devolve os arrays agrupados por Semana para um mês específico.
+
+Os dados são formatados nativamente para Chart.js com campos `labels` e `datasets` preenchidos automaticamente.
 
 ---
 

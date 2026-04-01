@@ -23,15 +23,14 @@ class UpdateTaskRequest extends FormRequest
      */
     public function rules(): array
     {
-        // PATCH: todos os campos opcionais
+        // PUT/PATCH: todos os campos opcionais
         return [
-            'titulo' => 'sometimes|required|string|max:255',
+            'titulo' => 'sometimes|string|max:255',
             'descricao' => 'nullable|string',
-            'prioridade' => 'sometimes|required|in:baixa,média,alta',
+            'prioridade' => 'sometimes|in:baixa,média,alta',
             'data_vencimento' => 'nullable|date',
-            'user_id' => 'sometimes|required|exists:users,id',
-            'category_id' => 'sometimes|required|exists:categories,id',
-            'estado' => 'sometimes|required|in:pendente,concluído',
+            'category_id' => 'sometimes|exists:categories,id',
+            'estado' => 'sometimes|in:pendente,concluída',
         ];
     }
 }

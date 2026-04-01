@@ -134,6 +134,7 @@ Resposta inclui um token Bearer para utilizar em requisições autenticadas.
 | GET | /api/badges | Listar badges com percentagem |
 | GET | /api/badges/{id} | Obter badge específica |
 | POST | /api/users/avatar | Upload de avatar |
+| GET | /api/stats/users-growth | Estatísticas de crescimento (por ano/mês) |
 
 ### Administrativo
 
@@ -146,6 +147,51 @@ Resposta inclui um token Bearer para utilizar em requisições autenticadas.
 | PUT | /api/badges/{id} | Atualizar badge | Admin |
 | DELETE | /api/badges/{id} | Deletar badge | Admin |
 | GET | /api/admin/stats | Obter estatísticas | Admin |
+| GET | /api/stats/users-growth?period=year&year=2026 | Crescimento users por ano | Admin |
+| GET | /api/stats/users-growth?period=month&year=2026&month=4 | Crescimento users por mês | Admin |
+
+## Estatísticas de Utilizadores
+
+A API fornece um endpoint dedicado para obter estatísticas de crescimento de utilizadores para painéis administrativos.
+
+### Crescimento por Ano
+
+```
+GET /api/stats/users-growth?period=year&year=2026
+Authorization: Bearer {token}
+```
+
+Retorna um array com contagem de utilizadores criados em cada mês do ano, formatado para Chart.js:
+
+```json
+{
+  "period": "year",
+  "year": 2026,
+  "labels": ["Jan", "Feb", "Mar", "Apr"],
+  "datasets": [{
+    "label": "Novos Users",
+    "data": [0, 0, 0, 7],
+    "borderColor": "#FF5733",
+    "backgroundColor": "rgba(255, 87, 51, 0.1)",
+    "tension": 0.1
+  }]
+}
+```
+
+### Crescimento por Mês
+
+```
+GET /api/stats/users-growth?period=month&year=2026&month=4
+Authorization: Bearer {token}
+```
+
+Retorna um array com contagem de utilizadores criados em cada semana do mês.
+
+**Requisitos:**
+- Autenticação com token Sanctum
+- Utilizador com flag `is_admin = 1`
+
+Ver [STATS_INTEGRATION.md](STATS_INTEGRATION.md) para integração completa no frontend com Chart.js.
 
 ## Gamificação
 
@@ -237,6 +283,27 @@ Para criar uma nova migração:
 php artisan make:migration create_table_name
 php artisan make:model ModelName -m
 ```
+
+## Documentação Adicional
+
+📚 **Guias de Integração:**
+
+- **[API_CONTRACTS.md](API_CONTRACTS.md)** ⭐ - Exemplos JSON reais de TODOS os endpoints (200/401/403/404/422)
+- **[QUICK_START_FRONTEND.md](QUICK_START_FRONTEND.md)** ⭐ - Guia rápido para começar com o frontend Angular (START HERE!)
+- **[BACKEND_INTEGRATION.md](BACKEND_INTEGRATION.md)** - Arquitetura completa da API
+- **[FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md)** - Guia detalhado de integração Angular com a API
+- **[STATS_INTEGRATION.md](STATS_INTEGRATION.md)** - Integração de dashboard de estatísticas com Chart.js
+
+### Para Desenvolvedores Frontend
+
+Se está a trabalhar num repositório **frontend separado**, comece por:
+
+1. Ler [API_CONTRACTS.md](API_CONTRACTS.md) para entender cada endpoint
+2. Ler [QUICK_START_FRONTEND.md](QUICK_START_FRONTEND.md) para setup inicial
+3. Seguir [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) para detalhes completos
+4. Para gráficos e estatísticas, consultar [STATS_INTEGRATION.md](STATS_INTEGRATION.md)
+
+**URL da API (desenvolvimento):** `http://localhost:8000/api`
 
 ## Licença
 
