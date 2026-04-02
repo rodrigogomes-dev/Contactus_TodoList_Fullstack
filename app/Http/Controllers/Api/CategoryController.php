@@ -16,7 +16,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        return CategoryResource::collection(Category::withCount('tasks')->paginate(15));
+        return CategoryResource::collection(Category::with('badges')->withCount('tasks')->paginate(15));
     }
 
     /**
@@ -33,7 +33,7 @@ class CategoryController extends Controller
      */
     public function show(string $id)
     {
-        return new CategoryResource(Category::withCount('tasks')->findOrFail($id));
+        return new CategoryResource(Category::with('badges')->withCount('tasks')->findOrFail($id));
     }
 
     /**

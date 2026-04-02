@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\Auth\RegisterUserRequest;
 use App\Http\Requests\Auth\LoginUserRequest;
+use App\Http\Resources\BadgeResource;
 use App\Http\Resources\UserResource;
 
 class AuthController extends Controller
@@ -60,5 +61,12 @@ class AuthController extends Controller
         return response()->json([
             'user' => new UserResource($request->user()->load('tasks', 'badges')),
         ], 200);
+    }
+
+    public function meBadges(Request $request)
+    {
+        return BadgeResource::collection(
+            $request->user()->badges()->with('category')->get()
+        );
     }
 }

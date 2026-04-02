@@ -53,7 +53,15 @@ class CategorySeeder extends Seeder
             'especialista' => 'Especialista em ' . $category->nome,
         ];
 
+        $thresholds = [
+            'iniciante' => 1,
+            'intermediário' => 10,
+            'avançado' => 50,
+            'especialista' => 100,
+        ];
+
         foreach ($milestones as $milestoneType => $milestoneName) {
+            $taskCount = $thresholds[$milestoneType];
             Badge::firstOrCreate(
                 [
                     'nome' => $milestoneName,
@@ -61,7 +69,7 @@ class CategorySeeder extends Seeder
                     'milestone' => $milestoneType,
                 ],
                 [
-                    'descricao' => 'Alcance o marco de ' . $milestoneName,
+                    'descricao' => $taskCount . ' tarefa' . ($taskCount > 1 ? 's' : '') . ' na categoria ' . $category->nome . ' para ganhar este badge.',
                     'icon' => $iconSeed . '-' . $milestoneType,
                 ]
             );

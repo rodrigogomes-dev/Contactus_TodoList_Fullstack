@@ -15,4 +15,9 @@ class Category extends Model
     {
         return $this->hasMany(Task::class);
     }
+
+    public function badges()
+    {
+        return $this->hasMany(Badge::class);
+    }
 }

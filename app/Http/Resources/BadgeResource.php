@@ -18,11 +18,14 @@ class BadgeResource extends JsonResource
             'id' => $this->id,
             'nome' => $this->nome,
             'descricao' => $this->descricao,
-            'icon' => $this->icon,
-            'category_id' => $this->category_id,
-            'milestone' => $this->milestone,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'category_id' => $this->category_id,
+            'milestone' => $this->milestone,
+            'icon' => $this->icon,
+            'icon_url' => $this->icon_url,
+            'percentage' => $this->percentage,
+            'category' => $this->whenLoaded('category'),
         ];
     }
 }

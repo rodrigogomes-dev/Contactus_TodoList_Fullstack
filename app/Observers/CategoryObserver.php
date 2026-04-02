@@ -27,8 +27,16 @@ class CategoryObserver
             'especialista' => 'Especialista em ' . $category->nome,
         ];
 
+        $thresholds = [
+            'iniciante' => 1,
+            'intermediário' => 10,
+            'avançado' => 50,
+            'especialista' => 100,
+        ];
+
         // Usa firstOrCreate para evitar duplicação se este observer rodar múltiplas vezes
         foreach ($milestones as $milestoneType => $milestoneName) {
+            $taskCount = $thresholds[$milestoneType];
             Badge::firstOrCreate(
                 [
                     'nome' => $milestoneName,
@@ -36,7 +44,7 @@ class CategoryObserver
                     'milestone' => $milestoneType,
                 ],
                 [
-                    'descricao' => 'Alcance o marco de ' . $milestoneName,
+                    'descricao' => $taskCount . ' tarefa' . ($taskCount > 1 ? 's' : '') . ' na categoria ' . $category->nome . ' para ganhar este badge.',
                     'icon' => $iconSeed . '-' . $milestoneType, // Fallback visual
                 ]
             );

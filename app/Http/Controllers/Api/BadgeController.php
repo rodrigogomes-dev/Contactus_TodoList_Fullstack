@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Badge;
+use App\Http\Resources\BadgeResource;
 
 class BadgeController extends Controller
 {
@@ -13,7 +14,7 @@ class BadgeController extends Controller
      */
     public function index()
     {
-        return Badge::paginate(15);
+        return BadgeResource::collection(Badge::with('category')->paginate(15));
     }
 
     /**
@@ -37,7 +38,7 @@ class BadgeController extends Controller
      */
     public function show(string $id)
     {
-        return Badge::findOrFail($id);
+        return new BadgeResource(Badge::with('category')->findOrFail($id));
     }
 
     /**

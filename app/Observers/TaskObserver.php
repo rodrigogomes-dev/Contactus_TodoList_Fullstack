@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Task;
 use App\Models\Badge;
 use App\Models\Category;
+use App\Models\User;
 
 class TaskObserver
 {
@@ -69,7 +70,7 @@ class TaskObserver
 
     /**
      * Atualiza badges por categoria.
-     * Emitida quando 10 tarefas da categoria são concluídas.
+     * Emitidas quando atingem os thresholds (1, 3, 7, 10 tarefas concluídas).
      */
     private function updateCategoryBadges(User $user, ?Category $category): void
     {
@@ -82,15 +83,24 @@ class TaskObserver
             ->where('category_id', $category->id)
             ->count();
 
-        // Especialista da categoria é emitida ao 10º completamento
-        if ($categoryCompletedCount === 10) {
-            // Busca a badge "Especialista em {nome}" da categoria específica
-            $badge = Badge::where('category_id', $category->id)
-                ->where('milestone', 'especialista')
-                ->first();
+        // Mapeamento de milestones de categoria por contador
+        $milestoneThresholds = [
+            1 => 'iniciante',
+            10 => 'intermediário',
+            50 => 'avançado',
+            100 => 'especialista',
+        ];
 
-            if ($badge && !$user->badges()->where('badge_id', $badge->id)->exists()) {
-                $user->badges()->attach($badge->id);
+        foreach ($milestoneThresholds as $threshold => $milestoneType) {
+            if ($categoryCompletedCount === $threshold) {
+                // Busca a badge da categoria específica com este milestone
+                $badge = Badge::where('category_id', $category->id)
+                    ->where('milestone', $milestoneType)
+                    ->first();
+
+                if ($badge && !$user->badges()->where('badge_id', $badge->id)->exists()) {
+                    $user->badges()->attach($badge->id);
+                }
             }
         }
     }

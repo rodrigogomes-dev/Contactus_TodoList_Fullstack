@@ -18,6 +18,7 @@ Route::get('/rankings', [UserController::class, 'rankings']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
     Route::get('/me', [\App\Http\Controllers\Api\AuthController::class, 'me']);
+    Route::get('/me/badges', [\App\Http\Controllers\Api\AuthController::class, 'meBadges']);
 
     Route::apiResource('tasks', TaskController::class);
     Route::apiResource('badges', BadgeController::class);
