@@ -85,14 +85,23 @@
               <span class="priority-badge priority-badge-{{ task.prioridade }}">
                 <span class="priority-label">{{ task.prioridade | titlecase }}</span>
               </span>
+              @if (getCategoryById(task.categoryId); as category) {
+                <span class="category-badge" [style.background-color]="category.cor" [style.color]="getContrastColor(category.cor)">
+                  {{ category.nome }}
+                </span>
+              }
               @if (task.dataVencimento) {
                 <span class="due-date">{{ task.dataVencimento | date:'dd/MM/yyyy' }}</span>
               }
             </div>
           </div>
           <div class="task-actions">
-            <button class="edit-button" (click)="$event.stopPropagation(); openEditModal(task)">Editar</button>
-            <button class="delete-button" (click)="$event.stopPropagation(); deleteTask(task.id)">Excluir</button>
+            <button class="action-btn edit-btn" title="Editar" (click)="$event.stopPropagation(); openEditModal(task)">
+              <span class="material-symbols-rounded">edit</span>
+            </button>
+            <button class="action-btn delete-btn" title="Eliminar" (click)="$event.stopPropagation(); deleteTask(task.id)">
+              <span class="material-symbols-rounded">delete</span>
+            </button>
           </div>
         </div>
         @if (selectedTask() === task) {

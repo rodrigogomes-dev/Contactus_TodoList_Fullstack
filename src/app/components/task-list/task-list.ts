@@ -2,8 +2,11 @@ import { Component, inject, signal, computed, effect, OnInit } from '@angular/co
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { catchError, map, of, switchMap } from 'rxjs';
 import { TaskService } from '../../services/task';
 import { CategoryService } from '../../services/category';
+import { BadgeService } from '../../services/badge';
+import { BadgeToastService } from '../../services/badge-toast';
 import { Tarefa } from '../../types/task';
 import { HasUnsavedChanges } from '../../guards/save-guard';
 import { TaskformComponent } from '../taskform/taskform';
@@ -19,6 +22,8 @@ export class TaskListComponent implements HasUnsavedChanges, OnInit {
   private route = inject(ActivatedRoute);
   private taskService = inject(TaskService);
   private categoryService = inject(CategoryService);
+  private badgeService = inject(BadgeService);
+  private badgeToastService = inject(BadgeToastService);
 
   tasks = this.taskService.getTasksSignal();
 
@@ -76,6 +81,22 @@ export class TaskListComponent implements HasUnsavedChanges, OnInit {
     return total === 0 ? 0 : Math.round((this.totalConcluidas() / total) * 100);
   });
 
+  getCategoryById(categoryId: number | null | undefined) {
+    if (!categoryId) return null;
+    return this.categories().find(cat => cat.id === categoryId);
+  }
+
+  getContrastColor(hexColor: string): string {
+    // Parse hex color and calculate luminance
+    const hex = hexColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5 ? '#000000' : '#ffffff';
+  }
+
   constructor() {
     effect(() => {
       this.route.data.subscribe(data => {
@@ -100,6 +121,11 @@ export class TaskListComponent implements HasUnsavedChanges, OnInit {
     this.categoryService.getCategories().subscribe({
       error: (err) => console.error('Error loading categories:', err),
     });
+
+    // Keep badge state synchronized with user ownership for unlock notifications.
+    this.badgeService.loadBadges().subscribe({
+      error: (err) => console.error('Error loading badges:', err),
+    });
   }
 
   deleteTask(id: number) {
@@ -114,14 +140,47 @@ export class TaskListComponent implements HasUnsavedChanges, OnInit {
   toggleStatus(id: number) {
     const task = this.taskService.getTasksSignal()().find(t => t.id === id);
     if (task) {
+      const nextState = task.estado === 'pendente' ? 'concluido' : 'pendente';
+
+      if (nextState === 'concluido') {
+        this.badgeService.getUserBadgeIds().pipe(
+          catchError((err) => {
+            console.warn('Could not read /me/badges before update, proceeding without baseline.', err);
+            return of(new Set<number>());
+          }),
+          switchMap((previousUnlockedIds) =>
+            this.taskService.updateTask({
+              ...task,
+              estado: nextState,
+            }).pipe(
+              switchMap(() =>
+                this.badgeService.loadBadges().pipe(
+                  map((updatedBadges) => ({ updatedBadges, previousUnlockedIds }))
+                )
+              )
+            )
+          )
+        ).subscribe({
+          next: ({ updatedBadges, previousUnlockedIds }) => {
+            const newlyUnlocked = updatedBadges.filter(
+              (badge) => badge.unlocked && !previousUnlockedIds.has(badge.id)
+            );
+
+            newlyUnlocked.forEach((badge) => {
+              this.badgeToastService.showBadgeUnlocked(badge);
+            });
+          },
+          error: (err) => console.error('Error updating task or badges:', err),
+        });
+
+        return;
+      }
+
       this.taskService.updateTask({
         ...task,
-        estado: task.estado === 'pendente' ? 'concluido' : 'pendente'
+        estado: nextState,
       }).subscribe({
-        next: () => {
-          // Task updated successfully
-        },
-        error: (err) => console.error('Error updating task:', err)
+        error: (err) => console.error('Error updating task:', err),
       });
     }
   }

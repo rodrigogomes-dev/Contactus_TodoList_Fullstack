@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, tap, catchError, of, forkJoin } from 'rxjs';
+import { Observable, map, tap, catchError, of, forkJoin, expand, reduce } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export type BadgeMilestone = 'iniciante' | 'intermediario' | 'avancado' | 'especialista' | null;
@@ -28,13 +28,49 @@ interface BadgeApiResponse {
   unlocked?: boolean;
 }
 
+interface UserBadgeApiResponse {
+  id: number;
+}
+
 interface CategoryApiResponse {
   id: number;
   nome: string;
 }
 
-type BadgeListResponse = { data: BadgeApiResponse[] } | BadgeApiResponse[];
-type CategoryListResponse = { data: CategoryApiResponse[] } | CategoryApiResponse[];
+interface PaginatedResponse<T> {
+  data: T[];
+  links: {
+    first: string;
+    last: string;
+    prev: string | null;
+    next: string | null;
+  };
+  meta: {
+    current_page: number;
+    from: number;
+    last_page: number;
+    per_page: number;
+    to: number;
+    total: number;
+  };
+}
+
+interface DataEnvelopeResponse<T> {
+  data: T[];
+}
+
+type BadgeListResponse =
+  | PaginatedResponse<BadgeApiResponse>
+  | DataEnvelopeResponse<BadgeApiResponse>
+  | BadgeApiResponse[];
+type CategoryListResponse =
+  | PaginatedResponse<CategoryApiResponse>
+  | DataEnvelopeResponse<CategoryApiResponse>
+  | CategoryApiResponse[];
+type UserBadgeListResponse =
+  | PaginatedResponse<UserBadgeApiResponse>
+  | DataEnvelopeResponse<UserBadgeApiResponse>
+  | UserBadgeApiResponse[];
 
 @Injectable({
   providedIn: 'root',
@@ -52,17 +88,27 @@ export class BadgeService {
     return this.loadError;
   }
 
+  getUserBadgeIds(): Observable<Set<number>> {
+    return this.loadAllUserBadgesPages(`${environment.apiUrl}/me/badges`).pipe(
+      map((badges) => new Set(badges.map((badge) => badge.id)))
+    );
+  }
+
   loadBadges(): Observable<BadgeItem[]> {
     return forkJoin({
-      badges: this.http.get<BadgeListResponse>(`${environment.apiUrl}/badges`),
+      badges: this.loadAllBadgesPages(`${environment.apiUrl}/badges`),
       // Keep badges visible even if categories endpoint fails in some profiles.
       categories: this.http
         .get<CategoryListResponse>(`${environment.apiUrl}/categories`)
         .pipe(catchError(() => of([] as CategoryApiResponse[]))),
+      userBadges: this.loadAllUserBadgesPages(`${environment.apiUrl}/me/badges`).pipe(
+        catchError(() => of([] as UserBadgeApiResponse[]))
+      ),
     }).pipe(
-      map(({ badges, categories }) => {
+      map(({ badges, categories, userBadges }) => {
         const badgeList = this.unwrapData(badges);
         const categoryList = this.unwrapData(categories);
+        const unlockedBadgeIds = new Set(userBadges.map((badge) => badge.id));
 
         const categoryNameById = new Map<number, string>(
           categoryList.map((category) => [category.id, category.nome])
@@ -85,7 +131,7 @@ export class BadgeService {
             milestone: normalizedMilestone,
             percentage: badge.percentage,
             icon_url: iconUrl,
-            unlocked: badge.unlocked ?? false,
+            unlocked: unlockedBadgeIds.has(badge.id),
           };
         });
 
@@ -99,6 +145,46 @@ export class BadgeService {
         this.loadError.set('Não foi possível carregar badges válidas do backend. Verifica o payload de /api/badges.');
         return of([]);
       })
+    );
+  }
+
+  private loadAllBadgesPages(url: string): Observable<BadgeApiResponse[]> {
+    return this.http.get<BadgeListResponse>(url).pipe(
+      expand((response) => {
+        const nextUrl = this.getNextPageUrl(response);
+
+        // If there's a next page, fetch it; otherwise stop expanding
+        if (nextUrl) {
+          return this.http.get<BadgeListResponse>(nextUrl);
+        }
+
+        return of();
+      }),
+      map((response) => this.unwrapData(response)),
+      // Accumulate all pages into a single array
+      reduce((allBadges: BadgeApiResponse[], pageBadges: BadgeApiResponse[]) => [
+        ...allBadges,
+        ...pageBadges,
+      ])
+    );
+  }
+
+  private loadAllUserBadgesPages(url: string): Observable<UserBadgeApiResponse[]> {
+    return this.http.get<UserBadgeListResponse>(url).pipe(
+      expand((response) => {
+        const nextUrl = this.getNextPageUrl(response);
+
+        if (nextUrl) {
+          return this.http.get<UserBadgeListResponse>(nextUrl);
+        }
+
+        return of();
+      }),
+      map((response) => this.unwrapData(response)),
+      reduce((allBadges: UserBadgeApiResponse[], pageBadges: UserBadgeApiResponse[]) => [
+        ...allBadges,
+        ...pageBadges,
+      ])
     );
   }
 
@@ -156,19 +242,33 @@ export class BadgeService {
     return Array.isArray(response) ? response : response.data;
   }
 
+  private getNextPageUrl<T>(response: PaginatedResponse<T> | DataEnvelopeResponse<T> | T[]): string | null {
+    if (Array.isArray(response)) {
+      return null;
+    }
+
+    const maybePaginated = response as Partial<PaginatedResponse<T>>;
+    return maybePaginated.links?.next ?? null;
+  }
+
   private dedupeByCategoryAndMilestone(badges: BadgeItem[]): BadgeItem[] {
-    const seen = new Set<string>();
-    const deduped: BadgeItem[] = [];
+    const byKey = new Map<string, BadgeItem>();
 
     for (const badge of badges) {
       const key = `${badge.categoria}::${badge.milestone ?? 'base'}`;
-      if (seen.has(key)) {
+      const existing = byKey.get(key);
+
+      if (!existing) {
+        byKey.set(key, badge);
         continue;
       }
-      seen.add(key);
-      deduped.push(badge);
+
+      // Prefer unlocked variants when duplicate keys are returned by API.
+      if (!existing.unlocked && badge.unlocked) {
+        byKey.set(key, badge);
+      }
     }
 
-    return deduped;
+    return Array.from(byKey.values());
   }
 }

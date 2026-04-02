@@ -204,8 +204,45 @@ Authorization: Bearer 3|nZlb8jCedPXqRdbItvXbiEmVDp3wYw0TcM0jiT8Q4e0a7b8
 }
 ```
 
-❓ **Pergunta:** Deve incluir badges do utilizador? 
-**Resposta:** Atualmente NÃO inclui. Endpoint separado: `GET /api/badges` para badges
+**Nota:** Este endpoint devolve apenas o perfil do utilizador. Para as badges obtidas, usar `GET /api/me/badges`.
+
+---
+
+### GET /api/me/badges
+
+#### ✅ Success (200 OK)
+
+```http
+GET /api/me/badges HTTP/1.1
+Authorization: Bearer 3|nZlb8jCedPXqRdbItvXbiEmVDp3wYw0TcM0jiT8Q4e0a7b8
+```
+
+**Resposta:**
+```json
+{
+  "data": [
+    {
+      "id": 13,
+      "nome": "Iniciante em Vendas",
+      "descricao": "1 tarefa na categoria Vendas para ganhar este badge.",
+      "created_at": "2026-04-02T08:30:42.000000Z",
+      "updated_at": "2026-04-02T08:30:42.000000Z",
+      "category_id": 4,
+      "milestone": "iniciante",
+      "icon": "vendas-iniciante",
+      "icon_url": "https://api.iconify.design/lsicon:refresh-done-filled.svg?color=%2310b981&width=128&height=128",
+      "percentage": 14.29,
+      "category": {
+        "id": 4,
+        "nome": "Vendas",
+        "cor": "#10B981",
+        "created_at": "2026-04-02T08:30:42.000000Z",
+        "updated_at": "2026-04-02T08:30:42.000000Z"
+      }
+    }
+  ]
+}
+```
 
 ---
 
@@ -705,7 +742,7 @@ Authorization: Bearer 3|nZlb8jCedPXqRdbItvXbiEmVDp3wYw0TcM0jiT8Q4e0a7b8
 ```
 
 **Pergunta:** Deve `GET /api/me` incluir badges?  
-**Resposta Confirmada:** NÃO, mas seria útil adicionar um campo `user_badges` em `GET /api/me` com as badges que o utilizador possui.
+**Resposta Confirmada:** NÃO. Foi criado o endpoint dedicado `GET /api/me/badges` com as badges que o utilizador possui.
 
 ---
 
@@ -1006,7 +1043,8 @@ Exemplos:
 
 | Aspecto | Resposta |
 |--------|----------|
-| `GET /api/me` inclui badges? | ❌ NÃO (seria útil adicionar) |
+| `GET /api/me` inclui badges? | ❌ NÃO |
+| `GET /api/me/badges` existe? | ✅ SIM |
 | Update tarefa retorna badges? | ❌ NÃO (seria útil retornar `new_badges`) |
 | Paginação {data, links, meta}? | ✅ SIM (exceto singular como POST create) |
 | Datas em ISO 8601? | ✅ SIM |

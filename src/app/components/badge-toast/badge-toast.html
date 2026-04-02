@@ -1,0 +1,15 @@
+<div class="badge-toast-stack" aria-live="polite" aria-atomic="true">
+  @for (toast of toasts(); track toast.id) {
+    <article class="badge-toast-card">
+      <img class="badge-toast-icon" [src]="toast.iconUrl" [alt]="toast.title" width="56" height="56" />
+      <div class="badge-toast-content">
+        <p class="badge-toast-title">{{ toast.title }}</p>
+        <p class="badge-toast-message">{{ toast.message }}</p>
+        <p class="badge-toast-meta">{{ toast.category }} • {{ toast.milestone | titlecase }}</p>
+      </div>
+      <button class="badge-toast-close" type="button" aria-label="Fechar" (click)="dismiss(toast.id)">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </article>
+  }
+</div>

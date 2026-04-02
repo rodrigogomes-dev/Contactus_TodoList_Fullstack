@@ -3,11 +3,12 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from './services/auth';
 import { AppShell } from './components/app-shell/app-shell';
+import { BadgeToastComponent } from './components/badge-toast/badge-toast';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, AppShell],
+  imports: [CommonModule, RouterOutlet, AppShell, BadgeToastComponent],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })
