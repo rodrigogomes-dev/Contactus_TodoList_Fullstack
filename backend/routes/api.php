@@ -9,6 +9,11 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\StatsController;
 
+// Handle CORS preflight requests
+Route::options('/{any}', function () {
+    return response()->noContent(204);
+})->where('any', '.*');
+
 //Rotas públicas
 Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
 Route::post('/register', [\App\Http\Controllers\Api\AuthController::class, 'register']);

@@ -1,53 +1,332 @@
-1. Listar todas as tarefas de um utilizador específico (com o nome da categoria)
-SQL
+================================================================================
+    QUERIES RELEVANTES - PROJETO TODOLIST CONTACTUS (ATUAL)
+    Laravel 11 + MySQL + Angular 21
+    Data: Abril 2026
+================================================================================
 
-SELECT t.titulo, t.estado, t.prioridade, c.nome_categoria, u.nome AS dono
-FROM tarefas t
-LEFT JOIN categorias c ON t.id_categoria = c.id
-JOIN utilizadores u ON t.id_utilizador = u.id
-WHERE u.id = 1; -- Substituir pelo ID do utilizador
--------------------------------------------------------------------
+═════════════════════════════════════════════════════════════════════════════
+1. ESTRUTURA DE TABELAS - DATABASE SCHEMA
+═════════════════════════════════════════════════════════════════════════════
 
-2. Contagem de tarefas por estado (Pendente vs Concluído)
-SQL
+TABELA: users
+├── id (INT PRIMARY KEY AUTO_INCREMENT)
+├── name (VARCHAR 255)
+├── email (VARCHAR 255 UNIQUE)
+├── password (VARCHAR 255)
+├── avatar_path (VARCHAR 255 NULLABLE)
+├── is_admin (INT DEFAULT 0)
+├── remember_token (VARCHAR 100 NULLABLE)
+├── created_at (TIMESTAMP)
+├── updated_at (TIMESTAMP)
+└── Indexes: id, email
 
-SELECT estado, COUNT(*) AS total 
-FROM tarefas 
-GROUP BY estado;
+TABELA: tasks
+├── id (INT PRIMARY KEY AUTO_INCREMENT)
+├── user_id (INT FOREIGN KEY → users)
+├── titulo (VARCHAR 255)
+├── descricao (TEXT NULLABLE)
+├── estado (ENUM: 'pendente', 'concluída')
+├── prioridade (ENUM: 'baixa', 'média', 'alta')
+├── data_vencimento (DATE NULLABLE)
+├── category_id (INT FOREIGN KEY → categories NULLABLE)
+├── created_at (TIMESTAMP)
+└── updated_at (TIMESTAMP)
 
--------------------------------------------------------------------
+TABELA: categories
+├── id (INT PRIMARY KEY AUTO_INCREMENT)
+├── nome (VARCHAR 255)
+├── cor (VARCHAR 7 HEX COLOR)
+├── created_at (TIMESTAMP)
+└── updated_at (TIMESTAMP)
 
-3. Ver tarefas com alta prioridade que ainda estão pendentes
-SQL
+TABELA: badges
+├── id (INT PRIMARY KEY AUTO_INCREMENT)
+├── nome (VARCHAR 255)
+├── descricao (TEXT NULLABLE)
+├── icon_name (VARCHAR 50 NULLABLE)
+├── category_id (INT FOREIGN KEY → categories NULLABLE)
+├── milestone (INT NULLABLE: 1, 10, 50, 100)
+├── created_at (TIMESTAMP)
+└── updated_at (TIMESTAMP)
 
-SELECT titulo, data_vencimento 
-FROM tarefas 
+TABELA: badge_user (PIVOT - Many-to-Many)
+├── user_id (INT FOREIGN KEY → users)
+├── badge_id (INT FOREIGN KEY → badges)
+└── awarded_at (TIMESTAMP)
+
+TABELA: personal_access_tokens (Sanctum)
+├── id (INT PRIMARY KEY AUTO_INCREMENT)
+├── tokenable_type (VARCHAR 255)
+├── tokenable_id (INT)
+├── name (VARCHAR 255)
+├── token (VARCHAR 80 UNIQUE)
+├── abilities (TEXT NULLABLE)
+└── created_at (TIMESTAMP)
+
+═════════════════════════════════════════════════════════════════════════════
+2. QUERIES PRINCIPAIS - AUTENTICAÇÃO
+═════════════════════════════════════════════════════════════════════════════
+
+LOGIN - Buscar utilizador por email:
+SELECT * FROM users WHERE email = ? LIMIT 1
+
+REGISTER - Criar novo utilizador:
+INSERT INTO users (name, email, password, created_at, updated_at) 
+VALUES (?, ?, ?, NOW(), NOW())
+
+GET ME - Dados do utilizador autenticado:
+SELECT * FROM users WHERE id = ?
+
+LOGOUT - Eliminar token de acesso:
+DELETE FROM personal_access_tokens WHERE tokenable_id = ? AND tokenable_type = 'App\\Models\\User'
+
+═════════════════════════════════════════════════════════════════════════════
+3. QUERIES PRINCIPAIS - TAREFAS
+═════════════════════════════════════════════════════════════════════════════
+
+LISTAR TAREFAS - Por utilizador com paginação (15 por página):
+SELECT t.*, u.name, c.nome as category_nome
+FROM tasks t
+LEFT JOIN users u ON t.user_id = u.id
+LEFT JOIN categories c ON t.category_id = c.id
+WHERE t.user_id = ?
+LIMIT 15 OFFSET 0
+
+CRIAR TAREFA:
+INSERT INTO tasks (user_id, titulo, descricao, estado, prioridade, data_vencimento, category_id, created_at, updated_at)
+VALUES (?, ?, ?, 'pendente', ?, ?, ?, NOW(), NOW())
+
+VER TAREFA ESPECÍFICA:
+SELECT t.*, u.name, c.nome as category_nome
+FROM tasks t
+LEFT JOIN users u ON t.user_id = u.id
+LEFT JOIN categories c ON t.category_id = c.id
+WHERE t.id = ? LIMIT 1
+
+ATUALIZAR TAREFA:
+UPDATE tasks SET titulo=?, descricao=?, estado=?, prioridade=?, data_vencimento=?, category_id=?, updated_at=NOW()
+WHERE id = ? AND user_id = ?
+
+ELIMINAR TAREFA:
+DELETE FROM tasks WHERE id = ?
+
+TAREFAS COM ALTA PRIORIDADE PENDENTES:
+SELECT titulo, data_vencimento FROM tasks 
 WHERE prioridade = 'alta' AND estado = 'pendente'
-ORDER BY data_vencimento ASC;
+ORDER BY data_vencimento ASC
 
--------------------------------------------------------------------
+CONTAGEM POR ESTADO:
+SELECT estado, COUNT(*) as total FROM tasks GROUP BY estado
 
+═════════════════════════════════════════════════════════════════════════════
+4. QUERIES PRINCIPAIS - CATEGORIAS
+═════════════════════════════════════════════════════════════════════════════
 
-4. Listar tarefas que terminam o prazo hoje
-SQL
+LISTAR CATEGORIAS COM BADGES ASSOCIADOS:
+SELECT c.*, COUNT(DISTINCT b.id) as badges_count, COUNT(DISTINCT t.id) as tasks_count
+FROM categories c
+LEFT JOIN badges b ON c.id = b.category_id
+LEFT JOIN tasks t ON c.id = t.category_id
+GROUP BY c.id
+LIMIT 15 OFFSET 0
 
-SELECT titulo, prioridade 
-FROM tarefas 
-WHERE DATE(data_vencimento) = CURDATE();
+CRIAR CATEGORIA:
+INSERT INTO categories (nome, cor, created_at, updated_at)
+VALUES (?, ?, NOW(), NOW())
 
--------------------------------------------------------------------
+VER CATEGORIA ESPECÍFICA:
+SELECT c.* FROM categories c WHERE c.id = ? LIMIT 1
 
-5. Encontrar tarefas "Órfãs" (Sem categoria)
-SQL
+ATUALIZAR CATEGORIA:
+UPDATE categories SET nome=?, cor=?, updated_at=NOW() WHERE id = ?
 
-SELECT titulo, data_criacao 
-FROM tarefas 
-WHERE id_categoria IS NULL;
+ELIMINAR CATEGORIA:
+DELETE FROM categories WHERE id = ?
+(Nota: Tasks com referência a esta categoria terão category_id = NULL)
 
--------------------------------------------------------------------
+═════════════════════════════════════════════════════════════════════════════
+5. QUERIES PRINCIPAIS - BADGES & GAMIFICAÇÃO
+═════════════════════════════════════════════════════════════════════════════
 
-6. Procurar tarefas por uma palavra-chave no título ou descrição
-SQL
+LISTAR BADGES COM CATEGORIAS:
+SELECT b.*, c.nome as category_nome FROM badges b
+LEFT JOIN categories c ON b.category_id = c.id
+LIMIT 15 OFFSET 0
+
+BADGES DO UTILIZADOR AUTENTICADO:
+SELECT b.*, c.nome as category_nome FROM badge_user bu
+JOIN badges b ON bu.badge_id = b.id
+LEFT JOIN categories c ON b.category_id = c.id
+WHERE bu.user_id = ?
+
+CONTAR TASKS POR CATEGORIA (para awards de milestones):
+SELECT COUNT(*) as total FROM tasks
+WHERE user_id = ? AND category_id = ? AND estado = 'concluída'
+
+ATRIBUIR BADGE A UTILIZADOR:
+INSERT IGNORE INTO badge_user (user_id, badge_id, awarded_at)
+VALUES (?, ?, NOW())
+
+VERIFICAR BADGES DUPLICADOS (para cleanup):
+SELECT category_id, milestone, nome, COUNT(*) as cnt FROM badges
+GROUP BY category_id, milestone, nome
+HAVING cnt > 1
+
+═════════════════════════════════════════════════════════════════════════════
+6. QUERIES PRINCIPAIS - RANKING & ESTATÍSTICAS
+═════════════════════════════════════════════════════════════════════════════
+
+RANKING DE UTILIZADORES (por badges e tasks concluídas):
+SELECT u.id, u.name, u.avatar_path,
+       COUNT(DISTINCT bu.badge_id) as badges_count,
+       COUNT(DISTINCT t.id) as tasks_completed
+FROM users u
+LEFT JOIN badge_user bu ON u.id = bu.user_id
+LEFT JOIN tasks t ON u.id = t.user_id AND t.estado = 'concluída'
+GROUP BY u.id
+ORDER BY badges_count DESC, tasks_completed DESC
+
+ESTATÍSTICAS ADMIN - CONTAGENS GLOBAIS:
+SELECT 
+  (SELECT COUNT(*) FROM users) as total_users,
+  (SELECT COUNT(*) FROM categories) as total_categories,
+  (SELECT COUNT(*) FROM badges) as total_badges,
+  (SELECT COUNT(*) FROM tasks) as total_tasks
+
+CRESCIMENTO DE UTILIZADORES POR MÊS:
+SELECT YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count
+FROM users
+WHERE YEAR(created_at) = ? AND MONTH(created_at) <= ?
+GROUP BY YEAR(created_at), MONTH(created_at)
+ORDER BY month
+
+ANOS COM DADOS DE UTILIZADORES:
+SELECT DISTINCT YEAR(created_at) as year FROM users
+ORDER BY year DESC
+
+═════════════════════════════════════════════════════════════════════════════
+7. QUERIES PRINCIPAIS - AVATAR & FICHEIROS
+═════════════════════════════════════════════════════════════════════════════
+
+UPLOAD DE AVATAR - Armazenar path:
+UPDATE users SET avatar_path = ?, updated_at = NOW() WHERE id = ?
+
+RECUPERAR AVATAR URL:
+SELECT avatar_path FROM users WHERE id = ?
+(Convertido em: http://localhost:8000/storage/{avatar_path} no recurso)
+
+ELIMINAR AVATAR ANTIGO:
+DELETE FROM storage.avatars WHERE user_id = ?
+(Realizado via Laravel Storage facade)
+
+═════════════════════════════════════════════════════════════════════════════
+8. QUERIES IMPORTANTES - INTEGRIDADE & CONSTRAINTS
+═════════════════════════════════════════════════════════════════════════════
+
+CASCATA DE ELIMINAÇÃO:
+- Quando DELETE FROM users: todas as tasks do user são eliminadas (ONDELETE CASCADE)
+- Quando DELETE FROM users: todos os badge_user do user são eliminados (CASCADE)
+- Quando DELETE FROM categories: tasks perdem category_id = NULL (ONDELETE SET NULL)
+- Quando DELETE FROM badges: badge_user associations eliminadas (CASCADE)
+
+UNIQUE CONSTRAINTS:
+- users.email (UNIQUE)
+- badge_user (UNIQUE KEY: user_id + badge_id) - previne duplicatas
+- personal_access_tokens.token (UNIQUE)
+
+FOREIGN KEYS COM INTEGRIDADE:
+- tasks.user_id → users.id (DELETE CASCADE)
+- tasks.category_id → categories.id (DELETE SET NULL)
+- badge_user.user_id → users.id (DELETE CASCADE)
+- badge_user.badge_id → badges.id (DELETE CASCADE)
+- badges.category_id → categories.id (DELETE SET NULL)
+
+═════════════════════════════════════════════════════════════════════════════
+9. ELOQUENT RELATIONSHIPS (ORM)
+═════════════════════════════════════════════════════════════════════════════
+
+User Model:
+├── hasMany: Task (1 user → muitas tasks)
+├── belongsToMany: Badge (muitos-para-muitos via badge_user)
+└── hasMany: PersonalAccessToken (tokens Sanctum)
+
+Task Model:
+├── belongsTo: User
+├── belongsTo: Category (nullable)
+└── Observers: TaskObserver (verifica milestones para badges)
+
+Category Model:
+├── hasMany: Task
+├── hasMany: Badge
+└── Observers: CategoryObserver (cria 4 badges automáticas)
+
+Badge Model:
+├── belongsTo: Category (nullable)
+├── belongsToMany: User (via badge_user)
+├── Appends: avatar_url (computed from icon_name)
+└── Appends: percentage (% de users com badge)
+
+═════════════════════════════════════════════════════════════════════════════
+10. FLUXOS CRÍTICOS - GAMIFICAÇÃO & AUTOMAÇÃO
+═════════════════════════════════════════════════════════════════════════════
+
+FLUXO: Utilizador Conclui Task
+1. PUT /api/tasks/{id} → estado = 'concluída'
+2. TaskObserver->updated() dispara
+3. SELECT COUNT(*) FROM tasks WHERE user_id = ? AND category_id = ? AND estado = 'concluída'
+4. Compara: [1, 10, 50, 100] milestones
+5. Se match: INSERT INTO badge_user (user_id, badge_id) para cada milestone atingido
+6. Frontend recarrega badges via GET /api/me/badges
+
+FLUXO: Admin Cria Categoria
+1. POST /api/categories → nova categoria
+2. CategoryObserver->created() dispara
+3. INSERT INTO badges (category_id, milestone, nome) × 4:
+   - Milestone 1: 'Iniciante em [Categoria]'
+   - Milestone 10: 'Intermédio em [Categoria]'
+   - Milestone 50: 'Avançado em [Categoria]'
+   - Milestone 100: 'Especialista em [Categoria]'
+
+LIMPEZA: Badge Deduplication (Migration 2026_04_01)
+1. SELECT * FROM badges WHERE COUNT(*) > 1
+2. DELETE duplicatas, manter a mais antiga
+3. DELETE badges com category_id inválida
+
+═════════════════════════════════════════════════════════════════════════════
+11. QUERIES ÚTEIS PARA DEBUG
+═════════════════════════════════════════════════════════════════════════════
+
+Ver todos os badges de um utilizador:
+SELECT u.name, b.nome, b.milestone, c.nome as category
+FROM users u
+JOIN badge_user bu ON u.id = bu.user_id
+JOIN badges b ON bu.badge_id = b.id
+LEFT JOIN categories c ON b.category_id = c.id
+WHERE u.id = ?
+
+Ver tasks de um utilizador com categoria:
+SELECT t.id, t.titulo, t.estado, t.prioridade, c.nome as categoria
+FROM tasks t
+LEFT JOIN categories c ON t.category_id = c.id
+WHERE t.user_id = ? AND t.estado = 'pendente'
+ORDER BY t.data_vencimento ASC
+
+Ver badges elegíveis para próximos milestones:
+SELECT u.id, u.name, c.nome as categoria, COUNT(t.id) as tarefas_concluidas
+FROM users u
+JOIN tasks t ON u.id = t.user_id AND t.estado = 'concluída'
+JOIN categories c ON t.category_id = c.id
+WHERE COUNT(t.id) NOT IN (1, 10, 50, 100)
+GROUP BY u.id, c.id
+
+Ver utilizador mais ativo:
+SELECT u.id, u.name, COUNT(t.id) as total_tasks, COUNT(DISTINCT bu.badge_id) as badges
+FROM users u
+LEFT JOIN tasks t ON u.id = t.user_id
+LEFT JOIN badge_user bu ON u.id = bu.user_id
+GROUP BY u.id
+ORDER BY total_tasks DESC
+LIMIT 10
 
 SELECT * FROM tarefas 
 WHERE titulo LIKE '%reunião%' OR descricao LIKE '%reunião%';
