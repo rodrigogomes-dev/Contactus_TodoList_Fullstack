@@ -24,20 +24,26 @@
       <h3>Crescimento ao Longo do Tempo</h3>
       
       <div class="filter-group">
-        <label for="period-filter">
-          <span class="material-symbols-rounded">calendar_month</span>
-          Período
+        <label for="year-filter">
+          <span class="material-symbols-rounded">date_range</span>
+          Ano
         </label>
-        <select id="period-filter" [ngModel]="period()" (ngModelChange)="onPeriodChange($event)">
-          <option value="ultimo-mes">Último Mês</option>
-          <option value="ano-2026">Ano de 2026</option>
-          <option value="tudo">Todo o Tempo</option>
+        <select id="year-filter" [ngModel]="selectedYear()" (ngModelChange)="onYearChange($event)">
+          <option *ngFor="let year of availableYears()" [value]="year">{{ year }}</option>
         </select>
       </div>
     </div>
-    
+
     <div class="canvas-wrapper">
-      <canvas baseChart
+      <div *ngIf="isLoading()" class="loading-spinner">
+        <span class="material-symbols-rounded spin">hourglass_empty</span>
+        <p>Carregando dados...</p>
+      </div>
+      <div *ngIf="error()" class="error-message">
+        <span class="material-symbols-rounded">error</span>
+        <p>{{ error() }}</p>
+      </div>
+      <canvas *ngIf="!isLoading() && !error()" baseChart
         [data]="lineChartData()"
         [options]="lineChartOptions"
         [type]="lineChartType">

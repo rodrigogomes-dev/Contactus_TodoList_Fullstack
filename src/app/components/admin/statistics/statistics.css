@@ -123,6 +123,13 @@
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
+/* Filter Group Row (for side-by-side month/year filters) */
+.filter-group-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
 /* 
  * Canvas Wrapper rules are strict because Chart.js needs a wrapping div
  * with explicit instructions so that it respects responsive size dynamically
@@ -131,10 +138,54 @@
     position: relative;
     width: 100%;
     height: 350px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: var(--clr-primary, #007bff);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.loading-spinner .material-symbols-rounded {
+    font-size: 2rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Error Message */
+.error-message {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #dc2626;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 1rem;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+}
+
+.error-message .material-symbols-rounded {
+    font-size: 1.5rem;
 }
 
 @media (max-width: 767px) {
     .admin-page { padding: 1.25rem 1rem; }
     .chart-header { flex-direction: column; align-items: flex-start; }
     .canvas-wrapper { height: 260px; }
+    .filter-group-row { flex-direction: column; }
 }

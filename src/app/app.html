@@ -1,8 +1,15 @@
 <app-badge-toast></app-badge-toast>
 
-@if (isLandingPage()) {
+@if (!auth.isInitialized()) {
+  <div class="app-loader">
+    <div class="loader-container">
+      <div class="spinner"></div>
+      <p>Inicializando aplicação...</p>
+    </div>
+  </div>
+} @else if (isLandingPage()) {
   <router-outlet></router-outlet>
-} @else if (auth.authenticated() && !isPublicPage()) {
+} @else if (auth.sessionValid() && auth.authenticated() && !isPublicPage()) {
   <app-shell
     [menuOpen]="menuOpen()"
     [role]="auth.role()"

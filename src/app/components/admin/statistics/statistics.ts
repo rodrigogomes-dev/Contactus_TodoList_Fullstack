@@ -1,8 +1,9 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
+import { StatsService, StatsResponse, AvailableYearsAndMonths } from '../../../services/stats.service';
 
 interface UserStats {
   date: string; // 'YYYY-MM-DD'
@@ -16,47 +17,99 @@ interface UserStats {
   templateUrl: './statistics.html',
   styleUrl: './statistics.css',
 })
-export class Statistics {
-  period = signal<'ultimo-mes' | 'ano-2026' | 'tudo'>('ultimo-mes');
+export class Statistics implements OnInit {
+  private statsService = inject(StatsService);
 
-  // Dados simulados de novas inscrições na plataforma (Mock)
-  mockData: UserStats[] = [
-    { date: '2025-11-15', count: 12 },
-    { date: '2025-12-05', count: 8 },
-    { date: '2025-12-20', count: 25 },
-    { date: '2026-01-10', count: 15 },
-    { date: '2026-01-22', count: 30 },
-    { date: '2026-02-05', count: 18 },
-    { date: '2026-02-14', count: 42 },
-    { date: '2026-02-28', count: 20 },
-    // "Último mês" relativo a Março/Abril 2026
-    { date: '2026-03-01', count: 5 },
-    { date: '2026-03-05', count: 14 },
-    { date: '2026-03-10', count: 22 },
-    { date: '2026-03-15', count: 35 },
-    { date: '2026-03-20', count: 19 },
-    { date: '2026-03-25', count: 40 },
-    { date: '2026-03-29', count: 55 },
-    { date: '2026-03-31', count: 62 },
-  ];
+  // Available years and months with data
+  availableYearsAndMonths = signal<AvailableYearsAndMonths>({});
+  availableYears = computed(() => {
+    const data = this.availableYearsAndMonths();
+    return Object.keys(data)
+      .map(y => parseInt(y, 10))
+      .sort((a, b) => b - a); // Sort descending (newest first)
+  });
 
-  // Filtramos os dados reativamente
+  selectedYear = signal<number>(new Date().getFullYear());
+
+  // API Response data
+  apiData = signal<StatsResponse | null>(null);
+  isLoading = signal<boolean>(false);
+  error = signal<string | null>(null);
+
+  ngOnInit() {
+    this.loadAvailableData();
+  }
+
+  loadAvailableData() {
+    this.statsService.getAvailableYearsAndMonths().subscribe({
+      next: (data) => {
+        console.log('Available years and months:', data);
+        
+        // Convert string keys to numbers
+        const convertedData: AvailableYearsAndMonths = {};
+        Object.keys(data).forEach(yearStr => {
+          const year = parseInt(yearStr, 10);
+          convertedData[year] = (data as any)[yearStr];
+        });
+        
+        this.availableYearsAndMonths.set(convertedData);
+        
+        // Set initial year to first available year
+        const firstYear = this.availableYears()[0];
+        console.log('Available years:', this.availableYears(), 'First year:', firstYear);
+        
+        if (firstYear) {
+          this.selectedYear.set(firstYear);
+        }
+        
+        // Load initial stats
+        this.loadStats();
+      },
+      error: (err) => {
+        console.error('Error loading available years/months:', err);
+        this.error.set('Falha ao carregar opções de datas');
+      }
+    });
+  }
+
+  loadStats() {
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    this.statsService.getUsersGrowthByYear(this.selectedYear()).subscribe({
+      next: (response) => {
+        console.log('Stats response:', response);
+        this.apiData.set(response);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading stats:', err);
+        this.error.set('Falha ao carregar dados de estatísticas');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  // Convert API response to local UserStats format
   filteredData = computed(() => {
-    // Usamos uma data fixa para simular o "Hoje" caso o projeto seja visto noutras datas.
-    // Assim o filtro de 'Último Mês' tem sempre dados no nosso mock.
-    const today = new Date('2026-03-31'); 
-    let result = this.mockData;
+    const response = this.apiData();
+    if (!response) return [];
 
-    if (this.period() === 'ultimo-mes') {
-      const oneMonthAgo = new Date(today);
-      oneMonthAgo.setMonth(today.getMonth() - 1);
-      result = result.filter(d => new Date(d.date) >= oneMonthAgo);
-    } else if (this.period() === 'ano-2026') {
-      result = result.filter(d => d.date.startsWith('2026'));
-    }
+    // Map all 12 months, filling with 0 for months without data
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    // Create a map of existing data from response
+    const dataMap = new Map<string, number>();
+    response.labels.forEach((label, index) => {
+      dataMap.set(label, response.datasets[0]?.data[index] || 0);
+    });
 
-    // Ordenar por data cronológicamente
-    return result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Return all 12 months with data or 0
+    return monthNames.map(month => ({
+      date: month,
+      count: dataMap.get(month) || 0
+    }));
   });
 
   // Estatísticas no topo
@@ -90,11 +143,7 @@ export class Statistics {
           tension: 0.4 // Torna a linha curva em vez de pontiaguda
         }
       ],
-      labels: data.map(d => {
-        // Formata as labels de data do eixo-x (ex: "15 Mar")
-        const dateObj = new Date(d.date);
-        return dateObj.toLocaleDateString('pt-PT', { day: 'numeric', month: 'short' });
-      })
+      labels: data.map(d => d.date) // Use labels directly (Jan, Feb, Mar, etc)
     };
   });
 
@@ -129,7 +178,9 @@ export class Statistics {
     }
   };
 
-  onPeriodChange(val: string) {
-    this.period.set(val as any);
+  onYearChange(year: number) {
+    this.selectedYear.set(year);
+    this.loadStats();
   }
 }
+

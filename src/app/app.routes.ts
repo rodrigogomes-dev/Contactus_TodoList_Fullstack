@@ -41,15 +41,13 @@ export const routes: Routes = [
     path: 'admin/categorias',
     loadComponent: () =>
       import('./components/admin/categories/categories').then(m => m.Categories),
-    canActivate: [authGuard],
-    canMatch: [roleGuard]
+    canActivate: [authGuard, roleGuard]
   },
   {
     path: 'admin/estatisticas',
     loadComponent: () =>
       import('./components/admin/statistics/statistics').then(m => m.Statistics),
-    canActivate: [authGuard],
-    canMatch: [roleGuard]
+    canActivate: [authGuard, roleGuard]
   },
   {
     path: 'perfil',

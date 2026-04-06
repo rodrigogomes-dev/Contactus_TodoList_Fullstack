@@ -87,6 +87,7 @@ export class LoginComponent {
       name: this.registerForm.value.nome?.trim() ?? '',
       email: this.registerForm.value.email?.trim() ?? '',
       password: this.registerForm.value.senha ?? '',
+      password_confirmation: this.registerForm.value.confirmarSenha ?? '',
     };
 
     this.auth.register(payload)
