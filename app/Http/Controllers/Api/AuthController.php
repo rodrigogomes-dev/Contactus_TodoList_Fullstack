@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\Auth\RegisterUserRequest;
 use App\Http\Requests\Auth\LoginUserRequest;
+use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Resources\BadgeResource;
 use App\Http\Resources\UserResource;
 
@@ -60,6 +61,16 @@ class AuthController extends Controller
     {
         return response()->json([
             'user' => new UserResource($request->user()->load('tasks', 'badges')),
+        ], 200);
+    }
+
+    public function updateMe(UpdateProfileRequest $request)
+    {
+        $user = $request->user();
+        $user->update($request->validated());
+
+        return response()->json([
+            'user' => new UserResource($user->fresh()),
         ], 200);
     }
 

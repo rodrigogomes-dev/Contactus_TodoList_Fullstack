@@ -18,6 +18,7 @@ Route::get('/rankings', [UserController::class, 'rankings']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
     Route::get('/me', [\App\Http\Controllers\Api\AuthController::class, 'me']);
+    Route::patch('/me', [\App\Http\Controllers\Api\AuthController::class, 'updateMe']);
     Route::get('/me/badges', [\App\Http\Controllers\Api\AuthController::class, 'meBadges']);
 
     Route::apiResource('tasks', TaskController::class);
@@ -29,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin routes
     Route::middleware('admin')->group(function () {
         Route::get('/admin/stats', [AdminController::class, 'stats']);
+        Route::get('/stats/available-years-months', [StatsController::class, 'availableYearsAndMonths']);
         Route::get('/stats/users-growth', [StatsController::class, 'userGrowth']);
     });
 

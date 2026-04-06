@@ -3,53 +3,71 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Stats\GetUsersGrowthRequest;
 use App\Http\Resources\StatsResource;
 use App\Models\User;
-use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class StatsController extends Controller
 {
-    public function userGrowth(GetUsersGrowthRequest $request)
+    /**
+     * Get available years and months with user data
+     */
+    public function availableYearsAndMonths()
     {
-        $period = $request->validated()['period']; // 'year' ou 'month'
-        $year = $request->validated()['year'];
-        $month = $request->validated()['month'] ?? null;
-        
-        \Log::info('Stats request', [
-            'period' => $period,
-            'year' => $year,
-            'month' => $month
-        ]);
-        
         $now = now();
-        
-        if ($period === 'year') {
-            $result = $this->getYearData($year, $now);
-            \Log::info('Year response sent', ['data' => $result->getData(true)]);
-            return $result;
+
+        // Get all years that have users
+        $yearsWithData = User::distinct()
+            ->select(DB::raw('YEAR(created_at) as year'))
+            ->orderBy('year', 'desc')
+            ->get()
+            ->pluck('year')
+            ->toArray();
+
+        // For each year, get available months (up to current month if current year)
+        $result = [];
+        foreach ($yearsWithData as $year) {
+            $monthsQuery = User::whereYear('created_at', $year)
+                ->distinct()
+                ->select(DB::raw('MONTH(created_at) as month'))
+                ->orderBy('month', 'asc')
+                ->get()
+                ->pluck('month')
+                ->toArray();
+
+            // If it's the current year, only include months up to current month
+            if ($year === $now->year) {
+                $monthsQuery = array_filter($monthsQuery, function ($month) use ($now) {
+                    return $month <= $now->month;
+                });
+                $monthsQuery = array_values($monthsQuery); // Re-index array
+            }
+
+            $result[$year] = $monthsQuery;
         }
-        
-        if ($period === 'month') {
-            $result = $this->getMonthData($year, $month, $now);
-            \Log::info('Month response sent', ['data' => $result->getData(true)]);
-            return $result;
-        }
+
+        return response()->json($result, 200);
     }
-    
-    private function getYearData($year, $now)
+
+    /**
+     * Get user growth statistics for a given year
+     * Shows monthly breakdown of new user registrations
+     * 
+     * @param Request $request - Query param: year
+     */
+    public function userGrowth(Request $request)
     {
-        // Obtém o mês atual
+        $year = $request->query('year');
+        
+        if (!$year || !is_numeric($year)) {
+            return response()->json(['message' => 'Year parameter is required'], 400);
+        }
+
+        $now = now();
         $currentMonth = $now->month;
-        
-        \Log::info('Getting year data', [
-            'year' => $year,
-            'currentMonth' => $currentMonth,
-            'nowYear' => $now->year
-        ]);
-        
-        // Query: agrupa por mês (1-12) apenas até mês atual
+
+        // Query: group by month with user count
         $users = User::whereYear('created_at', $year)
                      ->whereMonth('created_at', '<=', $currentMonth)
                      ->groupBy(DB::raw('MONTH(created_at)'))
@@ -59,13 +77,8 @@ class StatsController extends Controller
                      )
                      ->orderBy('month')
                      ->get();
-        
-        \Log::info('Year data query result', [
-            'total_records' => $users->count(),
-            'users' => $users->toArray()
-        ]);
-        
-        // Mapear para labels (Jan, Feb, Mar, etc)
+
+        // Map to month names (Jan, Feb, Mar, etc)
         $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         
@@ -79,83 +92,10 @@ class StatsController extends Controller
         
         $response = [
             'period' => 'year',
-            'year' => $year,
-            'current_month' => $currentMonth,
+            'year' => (int)$year,
             'labels' => $labels,
             'data' => $data,
         ];
-        
-        \Log::info('Year response data constructed', [
-            'response' => $response,
-            'labels_count' => count($labels),
-            'data_count' => count($data)
-        ]);
-        
-        return response()->json(new StatsResource($response));
-    }
-    
-    private function getMonthData($year, $month, $now)
-    {
-        // Cria data para obter dias do mês
-        $date = Carbon::createFromDate($year, $month, 1);
-        $daysInMonth = $date->daysInMonth; // 28, 29, 30 ou 31
-        $currentDay = $now->day;
-        
-        // Se estamos em mês futuro, retornar vazio
-        if ($year === $now->year && $month > $now->month) {
-            $response = [
-                'period' => 'month',
-                'year' => $year,
-                'month' => $month,
-                'days_in_month' => $daysInMonth,
-                'current_day' => $currentDay,
-                'total_weeks' => ceil($daysInMonth / 7),
-                'labels' => [],
-                'data' => [],
-            ];
-            
-            \Log::info('Month is in future, returning empty', ['response' => $response]);
-            
-            return response()->json(new StatsResource($response));
-        }
-        
-        // Query: agrupa por semana dentro do mês
-        $users = User::whereYear('created_at', $year)
-                     ->whereMonth('created_at', $month)
-                     ->groupBy(DB::raw('FLOOR((DAY(created_at) - 1) / 7) + 1'))
-                     ->select(
-                         DB::raw('FLOOR((DAY(created_at) - 1) / 7) + 1 as week'),
-                         DB::raw('COUNT(*) as count')
-                     )
-                     ->orderBy('week')
-                     ->get();
-        
-        \Log::info('Month data query result', ['users' => $users->toArray()]);
-        
-        // Calcular semanas totais
-        $totalWeeks = ceil($daysInMonth / 7);
-        
-        // Mapear para labels
-        $labels = [];
-        $data = [];
-        
-        foreach ($users as $user) {
-            $labels[] = "Week {$user->week}";
-            $data[] = $user->count;
-        }
-        
-        $response = [
-            'period' => 'month',
-            'year' => $year,
-            'month' => $month,
-            'days_in_month' => $daysInMonth,
-            'current_day' => $currentDay,
-            'total_weeks' => $totalWeeks,
-            'labels' => $labels,
-            'data' => $data,
-        ];
-        
-        \Log::info('Month response data', ['response' => $response]);
         
         return response()->json(new StatsResource($response));
     }
