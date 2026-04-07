@@ -281,17 +281,6 @@ ng serve
 - [QUICK_START_FRONTEND.md](./frontend/QUICK_START_FRONTEND.md) - Setup detalhado do Angular
 - [Relevant_Querys.txt](./frontend/Docs/Relevant_Querys.txt) - Queries SQL importantes
 
----
-
-## 📝 Commits Importantes
-
-```
-405b4b8 chore: Remove documentation files from tracking
-b0631cb fix: Ligação à DB e avatar de user
-a3b74c9 chore: migração completa do backend
-75d982e chore: organização de ficheiros de backend
-46982cd merge: laravel backend history
-```
 
 ---
 
@@ -314,8 +303,6 @@ a3b74c9 chore: migração completa do backend
 
 ## 🔄 Próximos Steps (Opcional)
 
-- [ ] Email notifications para badges
-- [ ] Notifications em tempo real (WebSockets)
 - [ ] Export de estatísticas (PDF/CSV)
 - [ ] Dark mode no frontend
 - [ ] Testes unitários completos
