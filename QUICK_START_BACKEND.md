@@ -340,7 +340,7 @@ backend/
 
 1. **Testar Frontend:** [QUICK_START_FRONTEND.md](../frontend/QUICK_START_FRONTEND.md)
 2. **Ver Queries:** [Relevant_Querys.txt](../frontend/Docs/Relevant_Querys.txt)
-3. **Explorar API:** Use Postman/Insomnia com as rotas em `routes/api.php`
+3. **Explorar API:** Use Postman/Swagger com as rotas em `routes/api.php`
 4. **Modificar Seeders:** Editar `database/seeders/` para mudar dados iniciais
 
 ---

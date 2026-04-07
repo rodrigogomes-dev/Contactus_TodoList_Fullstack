@@ -363,4 +363,3 @@ firebase deploy
 
 ---
 
-**Desenvolvido com ❤️ para a TODO App**
