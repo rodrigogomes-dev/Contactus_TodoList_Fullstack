@@ -4,6 +4,8 @@ FRONTEND_INTEGRATION.md
 STATS_INTEGRATION.md
 API_CONTRACTS.md
 SQL_QUERIES_ANALYSIS.md
+backend/README.md
+frontend/README.md
 
 # Backend - Laravel
 backend/.env
