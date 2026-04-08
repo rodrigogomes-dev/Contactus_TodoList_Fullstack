@@ -283,17 +283,6 @@ ng serve
 
 ---
 
-## Commits Importantes
-
-```
-405b4b8 chore: Remove documentation files from tracking
-b0631cb fix: Ligação à DB e avatar de user
-a3b74c9 chore: migração completa do backend
-75d982e chore: organização de ficheiros de backend
-46982cd merge: laravel backend history
-```
-
----
 
 ## Features Implementados
 
