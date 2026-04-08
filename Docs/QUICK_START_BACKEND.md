@@ -356,5 +356,4 @@ backend/
 
 **Autor:** Rodrigo Gomes
 
-**Data:** 7 Abril 2026
 
