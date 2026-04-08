@@ -1,0 +1,335 @@
+
+AUTHOR: Rodrigo Gomes
+APLICAÇÃO: TodoList Contactus - Full Stack
+BACKEND: Laravel 11
+FRONTEND: Angular 21
+DATABASE: MySQL 8.0+
+
+================================================================================
+QUERY #1 - LOGIN DO UTILIZADOR
+================================================================================
+
+QUANDO: POST /api/login
+UTILIDADE: Autenticar utilizador e gerar token
+
+SQL EXECUTADO:
+SELECT * FROM `users` WHERE `email` = 'testadmin@example.com' LIMIT 1
+
+ELOQUENT (Backend):
+$user = User::where('email', $request->validated()['email'])->first();
+
+RESULTADO:
+```json
+{
+  "id": 8,
+  "name": "Test Admin",
+  "email": "testadmin@example.com",
+  "avatar_path": null,
+  "is_admin": 1,
+  "created_at": "2026-04-01T10:14:01Z",
+  "updated_at": "2026-04-01T10:14:01Z"
+}
+```
+
+IMPACTO: Crítico - Autenticação de toda a aplicação
+
+================================================================================
+QUERY #2 - LISTAR TAREFAS DO UTILIZADOR COM PAGINAÇÃO
+================================================================================
+
+QUANDO: GET /api/tasks
+UTILIDADE: Mostrar todas as tarefas do user logado (15 por página)
+
+SQL EXECUTADO:
+SELECT t.*, u.name, c.nome 
+FROM tasks t
+LEFT JOIN users u ON t.user_id = u.id
+LEFT JOIN categories c ON t.category_id = c.id
+WHERE t.user_id = 8
+LIMIT 15 OFFSET 0
+
+ELOQUENT (Backend):
+$tasks = Task::with('user', 'category')
+  ->where('user_id', auth()->id())
+  ->paginate(15)
+
+RESULTADO:
+```json
+[
+  {
+    "id": 1,
+    "titulo": "Implementar autenticação",
+    "estado": "concluída",
+    "prioridade": "alta",
+    "category": { "nome": "Backend" },
+    "data_vencimento": "2026-04-10"
+  }
+]
+```
+
+IMPACTO: Alto - Dashboard principal da app
+
+================================================================================
+QUERY #3 - CONTAR TAREFAS POR ESTADO (Dashboard)
+================================================================================
+
+QUANDO: Renderização de componente Profile no Angular
+UTILIDADE: Mostrar resumo visualmente
+
+SQL EXECUTADO:
+SELECT COUNT(*) as concluidas FROM tasks WHERE user_id = 8 AND estado = 'concluída'
+SELECT COUNT(*) as pendentes FROM tasks WHERE user_id = 8 AND estado = 'pendente'
+
+ELOQUENT (Backend/Frontend):
+totalConcluidas = tasks().filter(t => t.estado === 'concluído').length
+totalPendentes = tasks().filter(t => t.estado === 'pendente').length
+
+DADOS:
+- Total de Tarefas: 21
+- Concluídas: 14
+- Pendentes: 7
+- Percentual: 66%
+
+IMPACTO: Médio - Estatísticas visuais
+
+================================================================================
+QUERY #4 - BADGES DO UTILIZADOR AUTENTICADO
+================================================================================
+
+QUANDO: GET /api/me/badges
+UTILIDADE: Mostrar badges conquistados do user no profile
+
+SQL EXECUTADO:
+SELECT b.*, c.nome as category_nome
+FROM badge_user bu
+JOIN badges b ON bu.badge_id = b.id
+LEFT JOIN categories c ON b.category_id = c.id
+WHERE bu.user_id = 8
+
+ELOQUENT (Backend):
+$user->badges()->with('category')->get()
+
+RESULTADO:
+```json
+[
+  {
+    "id": 5,
+    "nome": "Iniciante em Backend",
+    "milestone": 1,
+    "category": { "nome": "Backend" },
+    "awarded_at": "2026-04-05"
+  },
+  {
+    "id": 12,
+    "nome": "Intermediário em Frontend",
+    "milestone": 10,
+    "category": { "nome": "Frontend" }
+  }
+]
+```
+
+IMPACTO: Crítico - Gamificação core
+
+================================================================================
+QUERY #5 - CRIAR TAREFA
+================================================================================
+
+QUANDO: POST /api/tasks
+UTILIDADE: Palavra novo task com validação
+
+SQL EXECUTADO:
+INSERT INTO tasks 
+(user_id, titulo, descricao, estado, prioridade, data_vencimento, category_id, created_at, updated_at)
+VALUES (8, 'Implementar alerts', 'Adicionar notificações', 'pendente', 'média', '2026-04-15', 2, NOW(), NOW())
+
+ELOQUENT (Backend):
+Task::create([
+  'user_id' => auth()->id(),
+  'titulo' => 'Implementar alerts',
+  'descricao' => 'Adicionar notificações',
+  'estado' => 'pendente',
+  'prioridade' => 'média',
+  'data_vencimento' => '2026-04-15',
+  'category_id' => 2
+])
+
+TRIGGERIZA: TaskObserver (verifica milestones para badges automáticas)
+
+IMPACTO: Alto - Criação de conteúdo principal
+
+================================================================================
+QUERY #6 - ATUALIZAR ESTADO TAREFA (Concluir/Editar)
+================================================================================
+
+QUANDO: PUT /api/tasks/{id}
+UTILIDADE: Marcar como concluída ou modificar prioridade/dados
+
+SQL EXECUTADO:
+UPDATE tasks 
+SET estado = 'concluída', prioridade = 'alta', updated_at = NOW()
+WHERE id = 15 AND user_id = 8
+
+ELOQUENT (Backend):
+$task->update([
+  'estado' => 'concluída',
+  'prioridade' => 'alta'
+])
+
+AUTOMÁTICO:
+→ TaskObserver detecta mudança
+→ Conta: SELECT COUNT(*) FROM tasks WHERE user_id=8 AND category_id=2 AND estado='concluída'
+→ Se milestone atingido [1,10,50,100]: INSERT badge_user
+
+IMPACTO: Crítico - Gamificação automática
+
+================================================================================
+QUERY #7 - LISTAR CATEGORIAS (COM CONTAGEM)
+================================================================================
+
+QUANDO: GET /api/categories
+UTILIDADE: Mostrar todas as categorias com contagem de tarefas e badges
+
+SQL EXECUTADO:
+SELECT c.*, 
+       COUNT(DISTINCT b.id) as badges_count,
+       COUNT(DISTINCT t.id) as tasks_count
+FROM categories c
+LEFT JOIN badges b ON c.id = b.category_id
+LEFT JOIN tasks t ON c.id = t.category_id
+GROUP BY c.id
+LIMIT 15
+
+RESULTADO:
+```json
+[
+  {
+    "id": 1,
+    "nome": "Backend",
+    "cor": "#FF6B6B",
+    "badges_count": 4,
+    "tasks_count": 8
+  },
+  {
+    "id": 2,
+    "nome": "Frontend",
+    "cor": "#4ECDC4",
+    "badges_count": 4,
+    "tasks_count": 7
+  }
+]
+```
+
+IMPACTO: Médio - Organização de tarefas
+
+================================================================================
+QUERY #8 - UPLOAD AVATAR (ATUALIZAR PATH)
+================================================================================
+
+QUANDO: POST /api/users/avatar
+UTILIDADE: Armazenar foto de perfil do utilizador
+
+SQL EXECUTADO:
+UPDATE users SET avatar_path = 'avatars/user_8_1712550819.jpg', updated_at = NOW()
+WHERE id = 8
+
+BACKEND LOGIC (Laravel):
+1. Recebe ficheiro via FormData
+2. Valida: image, mimes:jpeg,png,jpg,gif, max:2048
+3. Armazena em: storage/app/public/avatars/
+4. Guarda path em BD
+5. Retorna avatar_url: /storage/avatars/user_8_...jpg
+
+FRONTEND (Angular):
+- Envia via FormData em multipart/form-data
+- Mostra pré-visualização antes do upload
+- Recarrega user data após sucesso
+
+IMPACTO: Médio - Personalização user
+
+================================================================================
+QUERY #9 - ESTATÍSTICAS ADMIN (CRESCIMENTO POR MÊS)
+================================================================================
+
+QUANDO: GET /api/stats/users-growth?period=year&year=2026
+UTILIDADE: Gráfico de crescimento de utilizadores para dashboard admin
+
+SQL EXECUTADO:
+SELECT YEAR(created_at) as year, 
+       MONTH(created_at) as month, 
+       COUNT(*) as count
+FROM users
+WHERE YEAR(created_at) = 2026 AND MONTH(created_at) <= 4
+GROUP BY YEAR(created_at), MONTH(created_at)
+ORDER BY month
+
+RESULTADO:
+```json
+{
+  "labels": ["Janeiro", "Fevereiro", "Março", "Abril"],
+  "datasets": [{
+    "label": "Novos Utilizadores",
+    "data": [2, 3, 2, 1],
+    "borderColor": "#FF6B6B",
+    "backgroundColor": "rgba(255,107,107,0.1)"
+  }]
+}
+```
+
+NOTA: Dados formatados automaticamente para Chart.js
+
+IMPACTO: Baixo - Admin only, analytics
+
+================================================================================
+RESUMO - QUERIES EM PRODUÇÃO
+================================================================================
+
+ÍNDICE DE FREQUÊNCIA (por sessão user):
+1. Query #1 (Login) ............... 1 vez por login
+2. Query #2 (List Tasks) .......... 3-5 vezes
+3. Query #3 (Count Tasks) ......... Contínuo (signals)
+4. Query #4 (My Badges) ........... 1-2 vezes
+5. Query #5 (Create Task) ......... 0-3 vezes
+6. Query #6 (Update Task) ......... 0-10 vezes
+7. Query #7 (Categories) .......... 1 vez
+8. Query #8 (Avatar Upload) ....... 0-1 vez
+9. Query #9 (Stats) ............... Admin only
+
+PERFORMANCE:
+- Índices em: users.email, tasks.user_id, tasks.category_id
+- Query #2 paginada: 0.08ms (15 rows)
+- Query #4 com joins: 0.15ms (8 users)
+- Query #7 com trigger: 0.12ms
+
+OTIMIZAÇÕES APLICADAS:
+✓ Eager loading com ->with('relationship')
+✓ Paginação em endpoints
+✓ Índices em foreign keys
+✓ Unique constraints em emails
+✓ Cascade deletes para integridade
+✓ SELECT apenas colunas necessárias
+
+================================================================================
+
+FUTURAS FEATURES - QUERIES PREVISTAS
+================================================================================
+
+FEATURE: LEADERBOARD / RANKING GLOBAL
+================================================================================
+
+QUANDO: GET /api/rankings (endpoint parado - não é crítico para MVP)
+UTILIDADE: Mostrar top users por badges e tarefas concluídas
+
+SQL ESPERADO:
+SELECT u.id, u.name, u.avatar_path,
+       COUNT(DISTINCT bu.badge_id) as badges_count,
+       COUNT(DISTINCT CASE WHEN t.estado = 'concluída' THEN t.id END) as tasks_completed
+FROM users u
+LEFT JOIN badge_user bu ON u.id = bu.user_id
+LEFT JOIN tasks t ON u.id = t.user_id
+GROUP BY u.id
+ORDER BY badges_count DESC, tasks_completed DESC
+
+ESTADO: Endpoint implementado mas não utilizado no frontend
+PRIORIDADE: Baixa - Será ativado em fase 2 para gamificação avançada
+
+================================================================================

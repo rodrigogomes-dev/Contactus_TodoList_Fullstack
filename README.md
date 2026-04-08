@@ -6,23 +6,23 @@ Autor: **Rodrigo Gomes**
 
 ---
 
-## 📋 Visão Geral
+## Visão Geral
 
 Aplicação completa de gestão de tarefas com sistema de gamificação baseado em badges. Desenvolvida com **Laravel 11** (Backend) e **Angular 21** (Frontend) com autenticação via tokens Sanctum e MySQL 8.0+.
 
 ### Funcionalidades Principais
 
-✅ **Autenticação** - Login/Registo com tokens Bearer (Sanctum)
-✅ **Gestão de Tarefas** - CRUD completo com estados e prioridades
-✅ **Categorias** - Organização de tarefas por categoria
-✅ **Gamificação** - Sistema automático de badges baseado em milestones
-✅ **Avatar de Utilizador** - Upload e visualização de fotografias
-✅ **Rankings** - Leaderboard de utilizadores por badges e tarefas concluídas
-✅ **Estatísticas** - Dashboard admin com gráficos de crescimento
+- **Autenticação** - Login/Registo com tokens Bearer (Sanctum)
+- **Gestão de Tarefas** - CRUD completo com estados e prioridades
+- **Categorias** - Organização de tarefas por categoria
+- **Gamificação** - Sistema automático de badges baseado em milestones
+- **Avatar de Utilizador** - Upload e visualização de fotografias
+- **Rankings** - Leaderboard de utilizadores por badges e tarefas concluídas
+- **Estatísticas** - Dashboard admin com gráficos de crescimento
 
 ---
 
-## 🏗️ Arquitetura
+## Arquitetura
 
 ### Stack Tecnológico
 
@@ -58,7 +58,7 @@ Projeto_TodoList_Contactus_Fullstack/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Pré-Requisitos
 
@@ -93,7 +93,7 @@ php artisan storage:link
 php artisan serve
 ```
 
-➡️ **Documentação Completa:** [QUICK_START_BACKEND.md](./QUICK_START_BACKEND.md)
+**Documentação Completa:** [QUICK_START_BACKEND.md](./QUICK_START_BACKEND.md)
 
 ### Setup Frontend (2 minutos)
 
@@ -110,11 +110,11 @@ ng serve
 # http://localhost:4200
 ```
 
-➡️ **Documentação Completa:** [QUICK_START_FRONTEND.md](./frontend/QUICK_START_FRONTEND.md)
+**Documentação Completa:** [QUICK_START_FRONTEND.md](./frontend/QUICK_START_FRONTEND.md)
 
 ---
 
-## 📦 Database Schema
+## Database Schema
 
 ### 7 Tabelas Principais
 
@@ -150,7 +150,7 @@ badges
 
 ---
 
-## 🔐 Autenticação
+## Autenticação
 
 ### Credenciais de Teste
 
@@ -167,7 +167,7 @@ badges
 
 ---
 
-## 🎮 Sistema de Gamificação
+## Sistema de Gamificação
 
 ### Milestones & Badges
 
@@ -188,7 +188,7 @@ Quando um utilizador conclui tarefas numa categoria, automaticamente recebe badg
 
 ---
 
-## 📊 API Endpoints
+## API Endpoints
 
 ### Públicos (sem autenticação)
 
@@ -231,7 +231,7 @@ GET    /api/stats/users-growth?period=year&year=2026
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Backend não responde
 
@@ -263,7 +263,7 @@ ng serve
 
 ### CORS errors
 
-✅ **Já configurado!** 
+**Já configurado!** 
 - Middleware `HandleCors.php` permite `http://localhost:4200`
 - Rota OPTIONS para preflight requests
 
@@ -275,7 +275,7 @@ ng serve
 
 ---
 
-## 📚 Documentação Adicional
+## Documentação Adicional
 
 - [QUICK_START_BACKEND.md](./QUICK_START_BACKEND.md) - Setup detalhado do Laravel
 - [QUICK_START_FRONTEND.md](./frontend/QUICK_START_FRONTEND.md) - Setup detalhado do Angular
@@ -283,7 +283,7 @@ ng serve
 
 ---
 
-## 📝 Commits Importantes
+## Commits Importantes
 
 ```
 405b4b8 chore: Remove documentation files from tracking
@@ -295,9 +295,9 @@ a3b74c9 chore: migração completa do backend
 
 ---
 
-## ✨ Features Implementados
+## Features Implementados
 
-- ✅ Autenticação com Sanctum
+- Autenticação com Sanctum
 - ✅ CRUD de tarefas com filtros
 - ✅ Sistema de categorias dinâmico
 - ✅ Gamificação com milestones automáticos
@@ -334,6 +334,4 @@ a3b74c9 chore: migração completa do backend
 Propriedade privada - Contactus
 
 ---
-
-**Última atualização:** 7 Abril 2026
 
