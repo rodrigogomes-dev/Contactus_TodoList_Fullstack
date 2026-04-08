@@ -314,8 +314,6 @@ a3b74c9 chore: migração completa do backend
 
 ## 🔄 Próximos Steps (Opcional)
 
-- [ ] Email notifications para badges
-- [ ] Notifications em tempo real (WebSockets)
 - [ ] Export de estatísticas (PDF/CSV)
 - [ ] Dark mode no frontend
 - [ ] Testes unitários completos
