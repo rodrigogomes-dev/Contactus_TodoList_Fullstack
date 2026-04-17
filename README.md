@@ -17,7 +17,6 @@ Aplicação completa de gestão de tarefas com sistema de gamificação baseado 
 - **Categorias** - Organização de tarefas por categoria
 - **Gamificação** - Sistema automático de badges baseado em milestones
 - **Avatar de Utilizador** - Upload e visualização de fotografias
-- **Rankings** - Leaderboard de utilizadores por badges e tarefas concluídas
 - **Estatísticas** - Dashboard admin com gráficos de crescimento
 
 ---
