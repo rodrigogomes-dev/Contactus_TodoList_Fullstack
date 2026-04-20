@@ -1,12 +1,21 @@
 import { Component, input, output, signal, OnInit } from '@angular/core';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Categoria } from '../../../../services/category';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+
+// Validator para cor HEX
+function hexColorValidator(control: FormControl): { [key: string]: boolean } | null {
+  const value = control.value;
+  if (!value) return null;
+  
+  const hexColorRegex = /^#[0-9A-Fa-f]{6}$/;
+  return hexColorRegex.test(value) ? null : { invalidHexColor: true };
+}
 
 @Component({
   selector: 'app-category-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './category-form.html',
   styleUrl: './category-form.css'
 })
@@ -16,37 +25,60 @@ export class CategoryFormComponent implements OnInit {
   close = output<void>();
   save = output<Categoria | Omit<Categoria, 'id'>>();
 
-  nome = signal<string>('');
-  cor = signal<string>('#007bff');
+  isSubmitting = signal(false);
+  errorMessage = signal('');
+
+  form = new FormGroup({
+    nome: new FormControl('', [Validators.required, Validators.maxLength(255)]),
+    cor: new FormControl('#007bff', [Validators.required, hexColorValidator]),
+  });
 
   ngOnInit() {
     const cat = this.category();
     if (cat) {
-        // Se recebermos uma categoria pelo input, estamos em modo Edição.
-      this.nome.set(cat.nome);
-      this.cor.set(cat.cor);
+      this.form.patchValue({
+        nome: cat.nome,
+        cor: cat.cor,
+      });
     }
   }
 
   onSave() {
-    if (!this.nome().trim()) return;
+    this.errorMessage.set('');
 
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    const values = this.form.value;
+    
     const cat = this.category();
     if (cat) {
       this.save.emit({
         id: cat.id,
-        nome: this.nome().trim(),
-        cor: this.cor()
+        nome: values.nome!.trim(),
+        cor: values.cor!,
       });
     } else {
       this.save.emit({
-        nome: this.nome().trim(),
-        cor: this.cor()
+        nome: values.nome!.trim(),
+        cor: values.cor!,
       });
     }
   }
 
   onCancel() {
     this.close.emit();
+  }
+
+  // Helpers para template
+  get nomeControl() {
+    return this.form.get('nome');
+  }
+
+  get corControl() {
+    return this.form.get('cor');
   }
 }

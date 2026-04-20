@@ -8,9 +8,12 @@ use App\Models\Task;
 use App\Http\Requests\Task\StoreTaskRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
 use App\Http\Resources\TaskResource;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class TaskController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
@@ -72,11 +75,8 @@ class TaskController extends Controller
     public function update(UpdateTaskRequest $request, string $id)
     {
         $task = Task::with('user', 'category')->findOrFail($id);
-        
-        // Segurança: Só permita atualizar se a tarefa pertence ao user autenticado
-        if ($task->user_id !== (int) $request->user()->id) {
-            abort(403, 'Unauthorized');
-        }
+
+        $this->authorize('update', $task);
         
         $task->update($request->validated());
         return response()->json(new TaskResource($task->load('user', 'category')), 200);
@@ -89,10 +89,7 @@ class TaskController extends Controller
     {
         $task = Task::findOrFail($id);
         
-        // Segurança: Só permite apagar se a tarefa pertence ao user autenticado
-        if ($task->user_id !== (int) $request->user()->id) {
-            abort(403, 'Unauthorized');
-        }
+        $this->authorize('delete', $task);
         
         $task->delete();
         return response()->noContent();

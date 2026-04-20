@@ -6,11 +6,12 @@ import { Tarefa } from '../../types/task';
 import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CategoryService } from '../../services/category';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-taskform',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './taskform.html',
   styleUrls: ['./taskform.css'],
 })
@@ -26,8 +27,12 @@ export class TaskformComponent implements OnInit {
   categories = this.categoryService.getCategoriesSignal();
 
   form = new FormGroup({
-    titulo:       new FormControl('', [Validators.required]),
-    descricao:    new FormControl(''),
+    titulo:       new FormControl('', [
+      Validators.required, 
+      Validators.minLength(3),
+      Validators.maxLength(255)
+    ]),
+    descricao:    new FormControl('', [Validators.maxLength(1000)]),
     categoria:    new FormControl('', [Validators.required]),
     prioridade:   new FormControl('media', [Validators.required]),
     dataValidade: new FormControl('', [dateNotInPastValidator])
@@ -67,8 +72,8 @@ export class TaskformComponent implements OnInit {
       // Update existing task
       this.taskService.updateTask({
         ...this.task,
-        titulo:          this.form.value.titulo!,
-        descricao:       this.form.value.descricao || '',
+        titulo:          this.form.value.titulo!.trim(),
+        descricao:       (this.form.value.descricao || '').trim(),
         prioridade:      (this.form.value.prioridade as 'alta' | 'media' | 'baixa') ?? 'media',
         dataVencimento:  this.form.value.dataValidade ?? '',
         categoryId:      this.form.value.categoria ? Number(this.form.value.categoria) : null,
@@ -86,8 +91,8 @@ export class TaskformComponent implements OnInit {
     } else {
       // Create new task
       this.taskService.addTask({
-        titulo:         this.form.value.titulo!,
-        descricao:      this.form.value.descricao || '',
+        titulo:         this.form.value.titulo!.trim(),
+        descricao:      (this.form.value.descricao || '').trim(),
         estado:         'pendente',
         prioridade:     (this.form.value.prioridade as 'alta' | 'media' | 'baixa') ?? 'media',
         dataVencimento: this.form.value.dataValidade ?? '',
@@ -131,5 +136,38 @@ export class TaskformComponent implements OnInit {
 
   cancel() {
     this.close.emit();
+  }
+
+  // Getters para validação no template
+  get tituloControl() {
+    return this.form.get('titulo');
+  }
+
+  get tituloErrors() {
+    const control = this.tituloControl;
+    if (!control?.touched) return null;
+    return control.errors;
+  }
+
+  get descricaoControl() {
+    return this.form.get('descricao');
+  }
+
+  get descricaoErrors() {
+    const control = this.descricaoControl;
+    if (!control?.touched) return null;
+    return control.errors;
+  }
+
+  get categoriaControl() {
+    return this.form.get('categoria');
+  }
+
+  get prioridadeControl() {
+    return this.form.get('prioridade');
+  }
+
+  get dataValidadeControl() {
+    return this.form.get('dataValidade');
   }
 }

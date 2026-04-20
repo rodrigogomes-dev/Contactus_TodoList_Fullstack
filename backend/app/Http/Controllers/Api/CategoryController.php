@@ -8,9 +8,12 @@ use App\Models\Category;
 use App\Http\Requests\Category\StoreCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CategoryController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
@@ -24,6 +27,8 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
+        $this->authorize('create', Category::class);
+        
         $category = Category::create($request->validated());
         return response()->json(new CategoryResource($category), 201);
     }
@@ -33,7 +38,9 @@ class CategoryController extends Controller
      */
     public function show(string $id)
     {
+
         return new CategoryResource(Category::with('badges')->withCount('tasks')->findOrFail($id));
+
     }
 
     /**
@@ -42,6 +49,9 @@ class CategoryController extends Controller
     public function update(UpdateCategoryRequest $request, string $id)
     {
         $category = Category::findOrFail($id);
+
+        $this->authorize('update', $category);
+        
         $category->update($request->validated());
         return response()->json(new CategoryResource($category), 200);
     }
@@ -51,7 +61,11 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        Category::findOrFail($id)->delete();
+        $category = Category::findOrFail($id);
+
+        $this->authorize('delete', $category);
+
+        $category->delete();
         return response()->noContent();
     }
 }

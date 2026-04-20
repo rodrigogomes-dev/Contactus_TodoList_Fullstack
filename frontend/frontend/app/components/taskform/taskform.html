@@ -13,13 +13,28 @@
           <div class="form-group">
             <label>Título</label>
             <input type="text" formControlName="titulo" />
-            @if (form.get('titulo')?.invalid && form.get('titulo')?.touched) {
-              <span class="error">Título obrigatório</span>
+            @if (tituloControl?.invalid && tituloControl?.touched) {
+              <span class="error">
+                @if (tituloControl?.errors?.['required']) {
+                  Título obrigatório
+                } @else if (tituloControl?.errors?.['minlength']) {
+                  Mínimo 3 caracteres
+                } @else if (tituloControl?.errors?.['maxlength']) {
+                  Máximo 255 caracteres
+                }
+              </span>
             }
           </div>
           <div class="form-group">
             <label>Descrição</label>
             <textarea formControlName="descricao" rows="4"></textarea>
+            @if (descricaoControl?.invalid && descricaoControl?.touched) {
+              <span class="error">
+                @if (descricaoControl?.errors?.['maxlength']) {
+                  Máximo 1000 caracteres
+                }
+              </span>
+            }
           </div>
         </div>
 
@@ -32,7 +47,7 @@
                 <option [value]="category.id">{{ category.nome }}</option>
               }
             </select>
-            @if (form.get('categoria')?.invalid && form.get('categoria')?.touched) {
+            @if (categoriaControl?.invalid && categoriaControl?.touched) {
               <span class="error">Categoria obrigatória</span>
             }
           </div>
@@ -47,7 +62,7 @@
           <div class="form-group">
             <label>Data de Validade</label>
             <input type="date" formControlName="dataValidade" />
-            @if (form.get('dataValidade')?.errors?.['dateInPast']) {
+            @if (dataValidadeControl?.errors?.['dateInPast']) {
               <span class="error">A data não pode ser no passado</span>
             }
           </div>

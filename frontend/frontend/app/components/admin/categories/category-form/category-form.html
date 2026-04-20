@@ -9,23 +9,72 @@
     </div>
 
     <div class="modal-body">
-      <div class="form-group">
-        <label for="cat-nome">Nome da Categoria</label>
-        <input id="cat-nome" type="text" [ngModel]="nome()" (ngModelChange)="nome.set($event)" placeholder="Ex: Finanças..." autofocus>
-      </div>
+      @if (errorMessage()) {
+        <p class="form-error-message">{{ errorMessage() }}</p>
+      }
 
-      <div class="form-group color-picker-group">
-        <label for="cat-cor">Cor da Categoria</label>
-        <div class="color-input-wrapper">
-          <input id="cat-cor" type="color" [ngModel]="cor()" (ngModelChange)="cor.set($event)">
-          <span class="color-hex">{{ cor() | uppercase }}</span>
+      <form [formGroup]="form" (ngSubmit)="onSave()">
+        <div class="form-group">
+          <label for="cat-nome">Nome da Categoria</label>
+          <input 
+            id="cat-nome" 
+            type="text" 
+            formControlName="nome"
+            placeholder="Ex: Finanças..." 
+            autofocus
+          >
+          @if (nomeControl?.invalid && nomeControl?.touched) {
+            <span class="error">
+              @if (nomeControl?.errors?.['required']) {
+                Nome é obrigatório
+              } @else if (nomeControl?.errors?.['maxlength']) {
+                Máximo 255 caracteres
+              }
+            </span>
+          }
         </div>
-      </div>
-    </div>
 
-    <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
-      <button class="btn btn-primary" (click)="onSave()" [disabled]="!nome().trim()">Guardar</button>
+        <div class="form-group color-picker-group">
+          <label for="cat-cor">Cor da Categoria</label>
+          <div class="color-input-wrapper">
+            <input 
+              id="cat-cor" 
+              type="color" 
+              formControlName="cor"
+            >
+            <span class="color-hex">{{ form.get('cor')?.value | uppercase }}</span>
+          </div>
+          @if (corControl?.invalid && corControl?.touched) {
+            <span class="error">
+              @if (corControl?.errors?.['invalidHexColor']) {
+                Cor HEX inválida
+              }
+            </span>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button 
+            type="button"
+            class="btn btn-secondary" 
+            (click)="onCancel()"
+            [disabled]="isSubmitting()"
+          >
+            Cancelar
+          </button>
+          <button 
+            type="submit"
+            class="btn btn-primary" 
+            [disabled]="form.invalid || isSubmitting()"
+          >
+            @if (isSubmitting()) {
+              A guardar...
+            } @else {
+              Guardar
+            }
+          </button>
+        </div>
+      </form>
     </div>
     
   </div>

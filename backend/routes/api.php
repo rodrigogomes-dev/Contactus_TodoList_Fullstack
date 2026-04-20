@@ -15,12 +15,11 @@ Route::options('/{any}', function () {
 })->where('any', '.*');
 
 //Rotas públicas
-Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
-Route::post('/register', [\App\Http\Controllers\Api\AuthController::class, 'register']);
-Route::get('/rankings', [UserController::class, 'rankings']);
+Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login'])->middleware('throttle:5,1'); // Limitar a 5 tentativas por minuto 
+Route::post('/register', [\App\Http\Controllers\Api\AuthController::class, 'register'])->middleware('throttle:5,1'); // Limitar a 5 tentativas por minuto
 
 //Rotas Protegidas(autenticação vida token Sanctum)
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum', 'throttle:60,1')->group(function () {
     Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
     Route::get('/me', [\App\Http\Controllers\Api\AuthController::class, 'me']);
     Route::patch('/me', [\App\Http\Controllers\Api\AuthController::class, 'updateMe']);

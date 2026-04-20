@@ -149,6 +149,39 @@ badges
 
 ---
 
+## 🔐 Segurança & DevOps
+
+### Princípio de Menor Privilégio (Database)
+
+**Implementação:** A aplicação Laravel comunica com a base de dados através de um utilizador restrito, nunca com `root`.
+
+```
+Utilizador MySQL: rodrigo_admin
+Permissões: DML + DDL apenas
+Base de Dados: contactus_db
+
+Utilizador root: Isolado para operações administrativas apenas
+```
+
+**Benefícios:**
+- ✅ Reduz superfície de ataque (se a aplicação for comprometida, attacker tem acesso limitado à BD)
+- ✅ Conformidade com OWASP Top 10 (A01:2021 - Broken Access Control)
+- ✅ Pronto para containerização Docker com segurança aplicada
+
+**Configuração:** Variáveis `DB_USER` e `DB_PASSWORD` em `.env` (nunca commitar em git)
+
+### Outros Controles de Segurança
+
+Ver [SECURITY_CHECKLIST.md](./Docs/SECURITY_CHECKLIST.md) para auditoria completa:
+- ✅ CORS configurado (localhost:4200, localhost:3000)
+- ✅ Rate Limiting (5 req/min em /login, 60 req/min em rotas protegidas)
+- ✅ Autorização (RBAC com Policies: TaskPolicy, CategoryPolicy)
+- ✅ Hashing de passwords (Bcrypt - BCRYPT_ROUNDS=12)
+- ✅ Tokens JWT via Laravel Sanctum
+- ✅ Prepared Statements via Eloquent ORM
+
+---
+
 ## Autenticação
 
 ### Credenciais de Teste
@@ -194,7 +227,6 @@ Quando um utilizador conclui tarefas numa categoria, automaticamente recebe badg
 ```
 POST   /api/login              Login
 POST   /api/register           Registar
-GET    /api/rankings           Leaderboard global
 ```
 
 ### Autenticados (requerem token)
@@ -290,7 +322,6 @@ ng serve
 - ✅ Sistema de categorias dinâmico
 - ✅ Gamificação com milestones automáticos
 - ✅ Upload de avatar com storage
-- ✅ Rankings globais
 - ✅ Dashboard admin com estatísticas
 - ✅ Gestão de badges
 - ✅ Soft/Hard deletes configurados
