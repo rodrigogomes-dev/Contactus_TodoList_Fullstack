@@ -331,12 +331,10 @@ ng serve
 
 ---
 
-## 🔄 Próximos Steps (Opcional)
+## 🔄 Próximos Steps
 
 - [ ] Export de estatísticas (PDF/CSV)
 - [ ] Dark mode no frontend
-- [ ] Testes unitários completos
-- [ ] CI/CD pipeline
 
 ---
 
