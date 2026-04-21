@@ -6,11 +6,10 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Task;
 use App\Models\Category;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class TaskTest extends TestCase
 {
-    use RefreshDatabase;
 
     private User $user;
     private User $otherUser;

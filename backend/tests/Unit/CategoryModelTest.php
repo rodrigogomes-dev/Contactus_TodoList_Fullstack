@@ -6,11 +6,10 @@ use Tests\TestCase;
 use App\Models\Task;
 use App\Models\Category;
 use App\Models\Badge;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class CategoryModelTest extends TestCase
 {
-    use RefreshDatabase;
 
     /**
      * Test category has many tasks

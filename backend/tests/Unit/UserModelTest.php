@@ -7,11 +7,10 @@ use App\Models\User;
 use App\Models\Task;
 use App\Models\Category;
 use App\Models\Badge;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class UserModelTest extends TestCase
 {
-    use RefreshDatabase;
 
     /**
      * Test user has many tasks
