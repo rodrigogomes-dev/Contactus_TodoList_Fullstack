@@ -41,5 +41,4 @@ export const roleGuard: CanActivateFn = async () => {
   // Utilizador comum tentando aceder á área admin → redirecionar
   return router.createUrlTree(['/tarefas-abertas']);
 };
-};
 

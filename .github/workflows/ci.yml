@@ -125,7 +125,7 @@ jobs:
           DB_DATABASE: test_db
           DB_USERNAME: root
           DB_PASSWORD: ""
-        run: php artisan test -v
+        run: php artisan test
 
       - name: Check for PHP syntax errors
         working-directory: backend
