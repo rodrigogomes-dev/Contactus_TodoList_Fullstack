@@ -1,0 +1,38 @@
+# Controlo de versão
+.git
+.gitignore
+.github
+
+# Node (se existir)
+node_modules
+npm-debug.log
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Laravel específico
+.env.example
+.env.testing
+storage/logs/*
+storage/framework/cache/*
+bootstrap/cache/*
+
+# Testes
+tests/
+phpunit.xml
+
+# Documentação
+README.md
+*.md
+Docs/
+
+# Build
+vendor/  (será instalado pelo composer install no container)

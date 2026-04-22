@@ -1,0 +1,37 @@
+# Controlo de versão
+.git
+.gitignore
+.github
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Node/npm
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# Angular/Build
+dist/
+.angular/
+
+# Testes
+*.spec.ts
+
+# Documentação
+README.md
+*.md
+Docs/
+
+# Ambiente
+.env
+.env.local
+.env.prod
