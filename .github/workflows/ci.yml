@@ -88,7 +88,23 @@ jobs:
             mysqladmin ping -h 127.0.0.1 -P 3306 && break || sleep 1
           done
 
-      - name: Create test database and run migrations
+      - name: Create test database
+        run: |
+          mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS test_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+      - name: Run migrations
+        working-directory: backend
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: test_db
+          DB_USERNAME: root
+          DB_PASSWORD: ""
+        run: php artisan migrate --env=testing --force --verbose
+
+      - name: Verify migrations
         working-directory: backend
         env:
           DB_CONNECTION: mysql
@@ -97,8 +113,7 @@ jobs:
           DB_DATABASE: test_db
           DB_USERNAME: root
           DB_PASSWORD: ""
-        run: |
-          php artisan migrate --env=testing --force
+        run: mysql -h 127.0.0.1 -u root test_db -e "SHOW TABLES;"
 
       - name: Run PHPUnit tests
         working-directory: backend
@@ -110,7 +125,7 @@ jobs:
           DB_DATABASE: test_db
           DB_USERNAME: root
           DB_PASSWORD: ""
-        run: php artisan test
+        run: php artisan test --verbose
 
       - name: Check for PHP syntax errors
         working-directory: backend

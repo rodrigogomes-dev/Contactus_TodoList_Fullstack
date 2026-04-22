@@ -10,11 +10,15 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class TaskTest extends TestCase
 {
-
-    private User $user;
-    private User $otherUser;
-    private Category $category;
-    private string $token;
+    /**
+     * Dados reutilizáveis entre testes.
+     * Criados no setUp() antes de cada teste.
+     *
+     * @var User Utilizador principal (proprietário de tarefas)
+     * @var User Utilizador alternativo (para testes de autorização)
+     * @var Category Categoria para as tarefas
+     * @var string Token de autenticação do utilizador principal
+     */
 
     protected function setUp(): void
     {
@@ -27,7 +31,12 @@ class TaskTest extends TestCase
     }
 
     /**
-     * Test authenticated user can create a task
+     * Teste: utilizador autenticado pode criar uma tarefa.
+     * 
+     * Verifica:
+     *  - HTTP 201 (Criado)
+     *  - Estrutura correta de resposta
+     *  - Dados da tarefa foram gravados na BD
      */
     public function test_authenticated_user_can_create_task(): void
     {
@@ -76,7 +85,12 @@ class TaskTest extends TestCase
     }
 
     /**
-     * Test user sees only their own tasks
+     * Teste: utilizador ver apenas as suas tarefas.
+     * 
+     * Verifica:
+     *  - HTTP 200
+     *  - Resposta contém apenas tarefas do utilizador autenticado
+     *  - Tarefas de outro utilizador NÃO são incluídas
      */
     public function test_user_sees_only_own_tasks(): void
     {
@@ -99,7 +113,10 @@ class TaskTest extends TestCase
     }
 
     /**
-     * Test user cannot see other user's tasks directly
+     * Teste: utilizador NÃO pode ver tarefas de outro utilizador.
+     * 
+     * Verifica:
+     *  - HTTP 403 (Forbidden) quando tenta aceder a tarefa alheia
      */
     public function test_user_cannot_see_other_users_tasks(): void
     {

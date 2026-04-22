@@ -76,24 +76,65 @@ type UserBadgeListResponse =
   providedIn: 'root',
 })
 export class BadgeService {
+  /**
+   * Injeção de dependência
+   */
   private http = inject(HttpClient);
+  
+  /**
+   * Signal: Lista de crachés disponíveis com status de desbloqueio.
+   * Cada badge tem: id, nome, descrição, categoria, milestone, percentage, icon_url, unlocked
+   */
   private badges = signal<BadgeItem[]>([]);
+  
+  /**
+   * Signal: Mensagem de erro ao carregar crachés.
+   * null = sem erro, string = mensagem de erro
+   */
   private loadError = signal<string | null>(null);
 
+  /**
+   * Obter signal de crachés para reatividade.
+   */
   getBadgesSignal() {
     return this.badges;
   }
 
+  /**
+   * Obter signal de erro de carregamento.
+   */
   getLoadErrorSignal() {
     return this.loadError;
   }
 
+  /**
+   * Obter SET de IDs de crachés desbloqueados pelo utilizador atual.
+   * Endpoint: GET /me/badges (com paginação)
+   * 
+   * Retorna:
+   *  Set<number> de IDs para rápida verificação: if (unlockedIds.has(badgeId))
+   */
   getUserBadgeIds(): Observable<Set<number>> {
     return this.loadAllUserBadgesPages(`${environment.apiUrl}/me/badges`).pipe(
       map((badges) => new Set(badges.map((badge) => badge.id)))
     );
   }
 
+  /**
+   * Carregar TODOS os crachés com metadata completa.
+   * 
+   * Fluxo (forkJoin = aguardar todos em paralelo):
+   *  1. GET /api/badges (todos os crachés com paginação)
+   *  2. GET /api/categories (categorias para nomes legais)
+   *  3. GET /api/me/badges (IDs dos crachés desbloqueados do utilizador)
+   *  4. Map: combinar dados e enriquecer com categoria + status de desbloqueio
+   *  5. Tap: atualizar signal e limpar erro
+   *  6. CatchError: se erro, atualizar signal de erro
+   * 
+   * Robustez:
+   *  - Categories pode falhar → badges ainda são visíveis
+   *  - User badges pode falhar → nenhum craché marcado como desbloqueado
+   */
   loadBadges(): Observable<BadgeItem[]> {
     return forkJoin({
       badges: this.loadAllBadgesPages(`${environment.apiUrl}/badges`),

@@ -7,9 +7,13 @@ use App\Models\User;
 
 class AuthTest extends TestCase
 {
-
     /**
-     * Test user registration with valid data
+     * Teste: registar um novo utilizador com dados válidos.
+     * 
+     * Verifica:
+     *  - HTTP 201 (Criado) retornado
+     *  - Resposta contém estrutura correta (user + token)
+     *  - Utilizador foi realmente criado na BD
      */
     public function test_can_register_new_user(): void
     {
@@ -31,7 +35,12 @@ class AuthTest extends TestCase
     }
 
     /**
-     * Test user login with valid credentials
+     * Teste: fazer login com credenciais válidas.
+     * 
+     * Verifica:
+     *  - HTTP 200 se credenciais estão corretas
+     *  - Token de autenticação é devolvido
+     *  - Dados do utilizador coincidem com o request
      */
     public function test_can_login_with_valid_credentials(): void
     {
@@ -59,7 +68,11 @@ class AuthTest extends TestCase
     }
 
     /**
-     * Test login fails with invalid password
+     * Teste: falha de login com password incorreta.
+     * 
+     * Verifica:
+     *  - HTTP 401 (Não Autorizado)
+     *  - Mensagem genérica de erro
      */
     public function test_cannot_login_with_invalid_password(): void
     {
@@ -80,7 +93,11 @@ class AuthTest extends TestCase
     }
 
     /**
-     * Test login fails with nonexistent email
+     * Teste: falha de login com email inexistente.
+     * 
+     * Verifica:
+     *  - HTTP 401
+     *  - Mensagem genérica (não revela se email existe)
      */
     public function test_cannot_login_with_nonexistent_email(): void
     {

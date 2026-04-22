@@ -23,28 +23,46 @@ type TaskApiEnvelope =
   providedIn: 'root',
 })
 export class TaskService {
+  /**
+   * Injeção de dependência
+   */
   private http = inject(HttpClient);
 
-  // Signal to store all user's tasks
+  /**
+   * Signal: Lista de tarefas do utilizador atual.
+   * Atualiza automaticamente quando tarefas são criadas/atualizadas/deletadas.
+   * Componentes usam getTasksSignal() para acesso reativo.
+   */
   private tarefas = signal<Tarefa[]>([]);
 
-  // Loading state for UI indicators
+  /**
+   * Signal: Estado de carregamento.
+   * true = HTTP request em progresso
+   * false = request completo
+   * Usado para UI spinners/loaders
+   */
   private isLoading = signal(false);
 
   /**
-   * Fetch all tasks for current user from API
-   * GET /api/tasks - returns paginated response
-   * Updates the tarefas signal with fetched data
+   * Endpoint: GET /api/tasks
+   * Obter todas as tarefas do utilizador atual (paginado).
+   * 
+   * Fluxo:
+   *  1. Marcar isLoading = true
+   *  2. Fazer request GET
+   *  3. Map: converter resposta API para frontend format
+   *  4. Update signal tarefas
+   *  5. Finalize: marcar isLoading = false
    */
   getTasks(): Observable<Tarefa[]> {
     this.isLoading.set(true);
     return this.http.get<TasksPaginatedResponse>(`${environment.apiUrl}/tasks`).pipe(
       map((response) => {
-        // Map API responses to frontend format
+        // Converter resposta API para modelo frontend
         const mappedTasks = mapApiTasksToFrontend(response.data);
-        // Update signal
+        // Atualizar signal com novas tarefas
         this.tarefas.set(mappedTasks);
-        // Return mapped tasks
+        // Retornar para componente
         return mappedTasks;
       }),
       finalize(() => this.isLoading.set(false))
@@ -52,20 +70,26 @@ export class TaskService {
   }
 
   /**
-   * Get the reactive signal accessor for tasks
-   * Use this for template binding and reactive updates
+   * Obter acesso ao signal reativo de tarefas.
+   * Usado em componentes: tasks$ = taskService.getTasksSignal()
+   * Permite reatividade sem subscrever manualmente
    */
   getTasksSignal() {
     return this.tarefas;
   }
 
   /**
-   * Create a new task via POST /api/tasks
-   * Removes id since server will assign it
-   * Normalizes frontend values to API format
+   * Endpoint: POST /api/tasks
+   * Criar nova tarefa.
+   * 
+   * Fluxo:
+   *  1. Converter modelo frontend para formato API
+   *  2. POST ao backend
+   *  3. Map: extrair payload da resposta
+   *  4. Tap: converter para frontend e adicionar ao signal
    */
   addTask(task: Omit<Tarefa, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Observable<TaskApiResponse> {
-    // Convert frontend task to API format expected by backend
+    // Converter tarefa frontend para formato esperado pelo backend
     const apiRequest: CreateTaskRequest = {
       titulo: task.titulo,
       descricao: task.descricao,
@@ -78,21 +102,28 @@ export class TaskService {
     return this.http.post<TaskApiEnvelope>(`${environment.apiUrl}/tasks`, apiRequest).pipe(
       map((response) => this.extractTaskPayload(response)),
       tap((apiResponse) => {
-        // Map response to frontend format and add to signal
+        // Converter resposta para frontend format
         const newTask = mapApiTaskToFrontend(apiResponse);
+        // Adicionar nova tarefa ao signal (reatividade)
         this.tarefas.update((list) => [...list, newTask]);
       })
     );
   }
 
   /**
-   * Update existing task via PUT /api/tasks/{id}
-   * Normalizes frontend values to API format
+   * Endpoint: PUT /api/tasks/{id}
+   * Atualizar tarefa existente.
+   * 
+   * Fluxo:
+   *  1. Converter para formato API
+   *  2. PUT ao backend com ID na rota
+   *  3. Map: extrair payload
+   *  4. Tap: atualizar signal (encontrar por ID e substituir)
    */
   updateTask(task: Tarefa): Observable<TaskApiResponse> {
     const { id, ...updateData } = task;
 
-    // Convert to API format (excluding id, createdAt, updatedAt, userId)
+    // Converter para formato API
     const apiRequest: UpdateTaskRequest = {
       titulo: updateData.titulo,
       descricao: updateData.descricao,
@@ -105,7 +136,7 @@ export class TaskService {
     return this.http.put<TaskApiEnvelope>(`${environment.apiUrl}/tasks/${id}`, apiRequest).pipe(
       map((response) => this.extractTaskPayload(response)),
       tap((apiResponse) => {
-        // Map response to frontend format and update signal
+        // Converter resposta e atualizar signal
         const updatedTask = mapApiTaskToFrontend(apiResponse);
         this.tarefas.update((list) =>
           list.map((t) => (t.id === updatedTask.id ? updatedTask : t))
@@ -115,21 +146,30 @@ export class TaskService {
   }
 
   /**
-   * Delete task via DELETE /api/tasks/{id}
-   * Updates signal to remove deleted task
+   * Endpoint: DELETE /api/tasks/{id}
+   * Deletar tarefa.
+   * 
+   * Fluxo:
+   *  1. DELETE ao backend
+   *  2. Tap: remover de signal (filter por ID)
+   *  3. Retorna mensagem de sucesso
    */
   deleteTask(id: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${environment.apiUrl}/tasks/${id}`).pipe(
       tap(() => {
-        // Remove from signal
+        // Remover tarefa deletada do signal
         this.tarefas.update((list) => list.filter((task) => task.id !== id));
       })
     );
   }
 
   /**
-   * Get single task by ID
-   * Used by route resolver when user navigates to task details
+   * Endpoint: GET /api/tasks/{id}
+   * Obter tarefa específica por ID.
+   * 
+   * Usado por:
+   *  - Route resolver: pré-carregar dados antes de navegar
+   *  - Componente de detalhe de tarefa
    */
   getById(id: number): Observable<TaskApiResponse> {
     return this.http
@@ -138,21 +178,27 @@ export class TaskService {
   }
 
   /**
-   * Get loading state signal
+   * Obter signal de estado de carregamento.
+   * Componentes usam para mostrar spinners/loaders durante requests.
    */
   getLoadingState() {
     return this.isLoading;
   }
 
+  /**
+   * Helper: Extrair payload da resposta da API.
+   * Backend pode retornar { data: {...} } ou { task: {...} } ou diretamente {...}
+   * Este método normaliza todos os formatos.
+   */
   private extractTaskPayload(response: TaskApiEnvelope): TaskApiResponse {
     if ('data' in response) {
-      return response.data;
+      return response.data;           // Formato paginado: { data: {...} }
     }
 
     if ('task' in response) {
-      return response.task;
+      return response.task;           // Formato resource: { task: {...} }
     }
 
-    return response;
+    return response;                  // Formato direto: {...}
   }
 }

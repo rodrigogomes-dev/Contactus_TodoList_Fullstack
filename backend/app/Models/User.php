@@ -21,28 +21,48 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HasApiTokens;
 
     /**
-     * Get the attributes that should be cast.
+     * Define as conversões de tipos para os atributos do modelo.
+     * Garante que determinados campos sejam automaticamente convertidos para tipos específicos.
      *
-     * @return array<string, string>
+     * @return array<string, string> Mapa de atributos e seus tipos de conversão
      */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'email_verified_at' => 'datetime',  // Converte para data/hora
+            'password' => 'hashed',             // Password é automaticamente hasheada
         ];
     }
 
+    /**
+     * Define relação: um utilizador tem muitas tarefas.
+     * Uma tarefa pertence apenas a um utilizador.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function tasks()
     {
         return $this->hasMany(Task::class);
     }
 
+    /**
+     * Define relação: um utilizador tem muitos crachás (badges).
+     * Uma badge pode pertencer a vários utilizadores.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function badges()
     {
         return $this->belongsToMany(Badge::class);
     }
 
+    /**
+     * Acesso computado: gera URL completa do avatar.
+     * Se avatar_path estiver preenchido, devolve URL pública do armazenamento.
+     * Caso contrário, devolve null para indicar que não há avatar.
+     *
+     * @return string|null URL completa do avatar ou null se não existir
+     */
     public function getAvatarUrlAttribute(): ?string
     {
         if ($this->avatar_path) {
@@ -51,23 +71,36 @@ class User extends Authenticatable
         return null;
     }
 
+    /**
+     * Hook de ciclo de vida: executa automaticamente em eventos do modelo.
+     * Responsável por encriptar o email quando um utilizador é criado ou atualizado.
+     * Mantém sincronização entre email (visível) e email_encrypted (seguro).
+     */
     protected static function booted(): void
-{
-    static::creating(function ($user) {
-        if ($user->email && !$user->email_encrypted) {
-            $user->email_encrypted = Crypt::encryptString($user->email);
-        }
-    });
+    {
+        // Quando um utilizador é CRIADO
+        static::creating(function ($user) {
+            // Se email existe e email_encrypted ainda não foi preenchido, encripta o email
+            if ($user->email && !$user->email_encrypted) {
+                $user->email_encrypted = Crypt::encryptString($user->email);
+            }
+        });
 
-    static::updating(function ($user) {
-        if ($user->isDirty('email')) {
-            $user->email_encrypted = Crypt::encryptString($user->email);
-        }
-    });
-}
+        // Quando um utilizador é ATUALIZADO
+        static::updating(function ($user) {
+            // Se o email foi modificado, atualiza também a versão encriptada
+            if ($user->isDirty('email')) {
+                $user->email_encrypted = Crypt::encryptString($user->email);
+            }
+        });
+    }
 
     /**
-     * Obter email desencriptado (para auditoria)
+     * Acesso computado: desencripta o email para fins de auditoria.
+     * Tenta desencriptar o email_encrypted; se falhar, devolve 'N/A'.
+     * Nunca exposição direta - apenas para lógica interna.
+     *
+     * @return string Email desencriptado ou 'N/A' se erro de desencriptação
      */
     public function getEmailDecryptedAttribute(): string
     {

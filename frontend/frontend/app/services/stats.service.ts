@@ -23,12 +23,23 @@ export type AvailableYearsAndMonths = Record<string | number, number[]>;
   providedIn: 'root'
 })
 export class StatsService {
+  /**
+   * Injeção de dependência
+   */
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/stats`;
+  private apiUrl = `${environment.apiUrl}/stats`;  // URL base para endpoints de stats (admin only)
 
   /**
-   * Get available years and months with user data
-   * Returns an object where keys are years and values are arrays of available months
+   * Endpoint: GET /stats/available-years-months
+   * Obter anos e meses para os quais existem dados de utilizadores.
+   * 
+   * Retorna:
+   *  Record<year, months[]>
+   *  Ex: { "2024": [1, 2, 3, ...], "2025": [1, 2, ...] }
+   * 
+   * Usado para:
+   *  - Preenchimento de dropdowns de filtro
+   *  - Validar que dados existem antes de carregar gráficos
    */
   getAvailableYearsAndMonths(): Observable<AvailableYearsAndMonths> {
     return this.http.get<AvailableYearsAndMonths>(
@@ -37,10 +48,19 @@ export class StatsService {
   }
 
   /**
-   * Get user growth statistics for a given year
-   * Shows all 12 months with user registration growth
+   * Endpoint: GET /stats/users-growth
+   * Obter dados de crescimento de utilizadores para um ano.
    * 
-   * @param year - The year to fetch stats for
+   * Parâmetros:
+   *  - period: "year" (obriga todos os 12 meses)
+   *  - year: ex 2024, 2025
+   * 
+   * Retorna:
+   *  - labels: ["Jan", "Feb", "Mar", ...] ou datas no formato escolhido
+   *  - datasets: gráfico com cores, tensão de curva, etc
+   * 
+   * Formato Chart.js:
+   *  - Pronto para passar a ng-charts ou chart.js
    */
   getUsersGrowthByYear(year: number): Observable<StatsResponse> {
     return this.http.get<StatsResponse>(

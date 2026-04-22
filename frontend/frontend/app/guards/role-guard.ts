@@ -5,28 +5,41 @@ import { firstValueFrom } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 
+/**
+ * Guard: roleGuard
+ * Proteção de rotas que requerem permissão de administrador.
+ * 
+ * Fluxo:
+ *  1. Esperar inicialização de auth
+ *  2. Verificar se sessionValid = true
+ *  3. Verificar se role = 'admin'
+ *  4. Se admin, permitir; senão, redirecionar para tarefas
+ * 
+ * Usado em: Rotas de admin (stats, categorias, etc)
+ */
 export const roleGuard: CanActivateFn = async () => {
   const auth = inject(AuthService);
   const router = inject(Router);
   
-  // Wait for isInitialized signal to become true
+  // Aguardar que auth seja inicializada
   await firstValueFrom(
     toObservable(auth.isInitialized).pipe(
       filter(initialized => initialized === true)
     )
   );
   
-  // Check if session is valid first
+  // Verificar se sessão é válida
   if (!auth.sessionValid()) {
-    return router.createUrlTree(['/login']);
+    return router.createUrlTree(['/login']);           // Não autenticado → login
   }
   
-  // Now check if user is admin
+  // Verificar se utilizador é admin
   if (auth.role() === 'admin') {
-    return true;
+    return true;                                        // ✅ Admin → permitir
   }
   
-  // Not admin, deny access
+  // Utilizador comum tentando aceder á área admin → redirecionar
   return router.createUrlTree(['/tarefas-abertas']);
+};
 };
 

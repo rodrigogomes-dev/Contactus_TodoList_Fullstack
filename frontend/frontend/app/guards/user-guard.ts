@@ -5,27 +5,40 @@ import { firstValueFrom } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 
+/**
+ * Guard: userGuard
+ * Proteção de rotas que requerem não ser administrador.
+ * Bloqueia admins de acederem ás páginas de utilizador comum.
+ * 
+ * Fluxo:
+ *  1. Esperar inicialização de auth
+ *  2. Verificar se sessionValid = true
+ *  3. Verificar se role = 'user' (não admin)
+ *  4. Se user, permitir; se admin, redirecionar para admin stats
+ * 
+ * Usado em: Rotas de utilizadores normais (tarefas, perfil, etc)
+ */
 export const userGuard: CanActivateFn = async () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  // Wait for isInitialized signal to become true
+  // Aguardar que auth seja inicializada
   await firstValueFrom(
     toObservable(auth.isInitialized).pipe(
       filter(initialized => initialized === true)
     )
   );
 
-  // Check if session is valid
+  // Verificar se sessão é válida
   if (!auth.sessionValid()) {
-    return router.createUrlTree(['/login']);
+    return router.createUrlTree(['/login']);           // Não autenticado → login
   }
 
-  // Se for user, permite a entrada nas rotas de utilizador
+  // Verificar se é utilizador comum (não admin)
   if (auth.role() === 'user') {
-    return true;
+    return true;                                        // ✅ User → permitir
   }
 
-  // Se for Admin, bloqueia e redireciona para a sua área de administração
-  return router.createUrlTree(['/admin/estatisticas']);
+  // Utilizador é admin, redirecionar para área de admin
+  return router.createUrlTree(['/admin/estatisticas']);  // ❌ Admin → redirecionar
 };

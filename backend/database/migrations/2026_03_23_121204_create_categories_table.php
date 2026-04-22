@@ -6,20 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
-     * Run the migrations.
+     * Executar migração.
+     * Cria tabela de categorias para organizar tarefas por tipo.
      */
     public function up(): void
     {
         Schema::create('categories', function (Blueprint $table) {
-            $table->id();
-            $table->string('nome');
-            $table->string('cor');
-            $table->timestamps();
+            $table->id();                   // ID primária
+            $table->string('nome');         // Nome da categoria (ex: "Casa", "Trabalho")
+            $table->string('cor');          // Cor hex para UI (ex: "#FF5733")
+            $table->timestamps();           // created_at, updated_at
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Reverter migração.
      */
     public function down(): void
     {

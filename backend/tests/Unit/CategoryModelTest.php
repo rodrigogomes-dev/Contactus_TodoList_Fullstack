@@ -10,9 +10,11 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class CategoryModelTest extends TestCase
 {
-
     /**
-     * Test category has many tasks
+     * Teste: categoria tem muitas tarefas.
+     * 
+     * Verifica:
+     *  - Relação hasMany funciona
      */
     public function test_category_has_many_tasks(): void
     {

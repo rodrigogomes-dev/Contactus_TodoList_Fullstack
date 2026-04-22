@@ -9,26 +9,41 @@ use App\Http\Requests\User\UploadAvatarRequest;
 class UserController extends Controller
 {
     /**
-     * Upload user avatar
+     * Faz upload de avatar para o utilizador autenticado.
+     * Armazena imagem em storage/public/avatars/
+     * Remove avatar anterior se existir.
+     *
+     * Fluxo:
+     *  1. Valida ficheiro de imagem
+     *  2. Se avatar anterior existe, deleta-o
+     *  3. Armazena nova imagem
+     *  4. Atualiza avatar_path do utilizador
+     *  5. Retorna utilizador com dados atualizados
+     *
+     * Nota: avatar_url é computada automaticamente no modelo User
+     *
+     * @param UploadAvatarRequest $request Ficheiro de imagem validado
+     * @return \Illuminate\Http\JsonResponse Utilizador atualizado, HTTP 200
      */
     public function uploadAvatar(UploadAvatarRequest $request)
     {
         $validated = $request->validated();
-
         $user = $request->user();
 
-        // Delete old avatar if exists
+        // Remove avatar anterior se existir (limpeza de storage)
         if ($user->avatar_path) {
             Storage::disk('public')->delete($user->avatar_path);
         }
 
-        // Store new avatar
+        // Armazena novo avatar na pasta 'avatars' do storage púbico
         $path = $request->file('avatar')->store('avatars', 'public');
+        
+        // Atualiza registo do utilizador com novo caminho
         $user->update(['avatar_path' => $path]);
 
         return response()->json([
-            'message' => 'Avatar uploaded successfully',
-            'user' => $user->load('badges', 'tasks'),
+            'message' => 'Avatar carregado com sucesso',
+            'user'    => $user->load('badges', 'tasks'),
         ], 200);
     }
 }

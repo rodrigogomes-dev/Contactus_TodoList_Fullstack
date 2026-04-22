@@ -8,28 +8,39 @@ use Illuminate\Foundation\Http\FormRequest;
 class StoreTaskRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Determina se o utilizador pode fazer este pedido.
+     * Só utilizadores autenticados podem criar tarefas.
+     *
+     * @return bool true = autorizado
      */
     public function authorize(): bool
     {
         // Qualquer utilizador autenticado pode criar as suas próprias tarefas
-        return true;
+        return auth()->check();
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Define as regras de validação para criação de tarefa.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * Campos esperados:
+     *  - titulo: obrigatório, string, máximo 255 caracteres
+     *  - descricao: opcional, string (sem limite)
+     *  - prioridade: obrigatório, uma de: baixa, média, alta
+     *  - data_vencimento: opcional, data válida
+     *  - category_id: obrigatório, ID de categoria existente
+     *  - estado: obrigatório, uma de: pendente, concluída
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> Regras
      */
     public function rules(): array
     {
         return [
-            'titulo' => 'required|string|max:255',
-            'descricao' => 'nullable|string',
-            'prioridade' => 'required|in:baixa,média,alta',
-            'data_vencimento' => 'nullable|date',
-            'category_id' => 'required|exists:categories,id',
-            'estado' => 'required|in:pendente,concluída',
+            'titulo'            => 'required|string|max:255',                  // Título, obrigatório
+            'descricao'         => 'nullable|string',                         // Descrição, opcional
+            'prioridade'        => 'required|in:baixa,média,alta',          // Prioridade, um destes valores
+            'data_vencimento'   => 'nullable|date',                          // Data limite, opcional, formato data
+            'category_id'       => 'required|exists:categories,id',          // Categoria, obrigatória, deve existir
+            'estado'            => 'required|in:pendente,concluída',         // Estado, obrigatório
         ];
     }
 }

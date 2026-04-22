@@ -7,20 +7,21 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Executar migração.
+     * Cria tabela de crachés (badges) para gamificação.
      */
     public function up(): void
     {
         Schema::create('badges', function (Blueprint $table) {
-            $table->id();
-            $table->string('nome');
-            $table->string('descricao')->nullable();
-            $table->timestamps();
+            $table->id();                           // ID primária
+            $table->string('nome');                 // Nome do craché (ex: "Primeira Tarefa")
+            $table->string('descricao')->nullable(); // Descrição (ex: "Complete a sua primeira tarefa")
+            $table->timestamps();                   // created_at, updated_at
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Reverter migração.
      */
     public function down(): void
     {

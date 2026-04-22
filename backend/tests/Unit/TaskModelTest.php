@@ -10,9 +10,12 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class TaskModelTest extends TestCase
 {
-
     /**
-     * Test task belongs to user
+     * Teste: tarefa pertence a um utilizador.
+     * 
+     * Verifica:
+     *  - Relação belongsTo funciona
+     *  - $task->user retorna utilizador correto
      */
     public function test_task_belongs_to_user(): void
     {
@@ -34,7 +37,11 @@ class TaskModelTest extends TestCase
     }
 
     /**
-     * Test task timestamps are cast to datetime
+     * Teste: timestamps são convertidos para Carbon dates.
+     * 
+     * Verifica:
+     *  - created_at e updated_at são instâncias de Carbon
+     *  - Podem ser manipulados como objetos de data
      */
     public function test_timestamps_are_cast(): void
     {

@@ -11,9 +11,12 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class UserModelTest extends TestCase
 {
-
     /**
-     * Test user has many tasks
+     * Teste: utilizador tem muitas tarefas.
+     * 
+     * Verifica:
+     *  - Relação hasMany funciona
+     *  - Tarefas podem ser acedidas via $user->tasks
      */
     public function test_user_has_many_tasks(): void
     {
@@ -37,7 +40,11 @@ class UserModelTest extends TestCase
     }
 
     /**
-     * Test password is hashed
+     * Teste: password do utilizador é hasheada.
+     * 
+     * Verifica:
+     *  - Password armazenado NÃO é texto puro
+     *  - Hash pode ser verificado com Hash::check()
      */
     public function test_password_is_hashed(): void
     {
@@ -64,7 +71,11 @@ class UserModelTest extends TestCase
     }
 
     /**
-     * Test avatar url accessor works
+     * Teste: avatar_url acessor funciona.
+     * 
+     * Verifica:
+     *  - Se avatar_path preenchido, gera URL cométa
+     *  - URL é acedida como atributo computado
      */
     public function test_avatar_url_accessor_works(): void
     {

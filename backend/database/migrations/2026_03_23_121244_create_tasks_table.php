@@ -6,25 +6,32 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
-     * Run the migrations.
+     * Executar migração.
+     * Cria tabela de tarefas com relações para utilizadores e categorias.
      */
     public function up(): void
     {
         Schema::create('tasks', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('titulo');
-            $table->text('descricao')->nullable();
-            $table->enum('estado', ['pendente', 'concluída'])->default('pendente');
-            $table->enum('prioridade', ['baixa', 'média', 'alta'])->default('média');
-            $table->date('data_vencimento')->nullable();
-            $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
-            $table->timestamps();
+            $table->id();                                               // ID primária
+            $table->foreignId('user_id')                               // FK para users (proprietário)
+                  ->constrained()->onDelete('cascade');                 // Se utilizador deletado, tarefa apaga
+            $table->string('titulo');                                   // Título da tarefa
+            $table->text('descricao')->nullable();                      // Descrição opcional
+            $table->enum('estado', ['pendente', 'concluída'])          // Estado: pendente ou concluída
+                  ->default('pendente');
+            $table->enum('prioridade', ['baixa', 'média', 'alta'])     // Nível de prioridade
+                  ->default('média');
+            $table->date('data_vencimento')->nullable();                // Data limite (pode ser NULL)
+            $table->foreignId('category_id')                            // FK para categories (opcional)
+                  ->nullable()
+                  ->constrained('categories')
+                  ->onDelete('set null');                               // Se categoria deletada, deixar NULL
+            $table->timestamps();                                       // created_at, updated_at
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Reverter migração.
      */
     public function down(): void
     {

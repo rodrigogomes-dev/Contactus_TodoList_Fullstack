@@ -13,28 +13,33 @@ use Illuminate\Support\Str;
 class UserFactory extends Factory
 {
     /**
-     * The current password being used by the factory.
+     * Password armazenada em cache durante testes.
+     * Evita rehashing de password múltiplas vezes (performance).
+     *
+     * @var ?string
      */
     protected static ?string $password;
 
     /**
-     * Define the model's default state.
+     * Define o estado padrão do modelo.
+     * Gera dados fictícios com Faker para testes.
      *
-     * @return array<string, mixed>
+     * @return array<string, mixed> Atributos do utilizador
      */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
-            'is_admin' => false,
+            'name' => fake()->name(),                           // Nome aleatório fictício
+            'email' => fake()->unique()->safeEmail(),           // Email único e seguro
+            'password' => static::$password ??= Hash::make('password'),  // Password hasheada (reutilizada)
+            'remember_token' => Str::random(10),                // Token aleatório para "remember me"
+            'is_admin' => false,                                // Não é admin por padrão
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Criar utilizador com email não verificado.
+     * Útil para testes de verificação de email.
      */
     public function unverified(): static
     {
