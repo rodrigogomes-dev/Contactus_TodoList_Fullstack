@@ -102,7 +102,7 @@ jobs:
           DB_DATABASE: test_db
           DB_USERNAME: root
           DB_PASSWORD: ""
-        run: php artisan migrate --env=testing --force --verbose
+        run: php artisan migrate --env=testing --force
 
       - name: Verify migrations
         working-directory: backend
@@ -125,7 +125,7 @@ jobs:
           DB_DATABASE: test_db
           DB_USERNAME: root
           DB_PASSWORD: ""
-        run: php artisan test --verbose
+        run: php artisan test -v
 
       - name: Check for PHP syntax errors
         working-directory: backend
