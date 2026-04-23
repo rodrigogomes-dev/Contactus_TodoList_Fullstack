@@ -1,12 +1,14 @@
 # 🐳 Docker Setup - TodoList Contactus Fullstack
 
-## Pré-requisitos
+**Executar toda a aplicação (Backend + Frontend + BD) com um único comando.**
 
-- Docker Desktop instalado ([Download](https://www.docker.com/products/docker-desktop))
-- Docker Compose (incluído no Docker Desktop)
-- GNU Make (para usar os comandos Makefile) - opcional
+---
 
-Verificar instalação:
+## ⚙️ Pré-requisitos
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) instalado
+
+Verificar:
 ```bash
 docker --version
 docker-compose --version
@@ -14,88 +16,113 @@ docker-compose --version
 
 ---
 
-## 📦 Arquitetura
+## 🚀 Iniciar (3 segundos)
 
+```bash
+docker-compose up -d
 ```
-┌─────────────────────────────────────────────────────────┐
-│              http://localhost:8000                       │
-│                 (Nginx Reverse Proxy)                   │
-└─────────────────────────────────────────────────────────┘
-           ▲                                    ▲
-           │                                    │
-    /api/* │                                    │ /*
-           │                                    │
-┌──────────┴──────┐                   ┌────────┴────────┐
-│ PHP-FPM (9000)  │                   │  Nginx (80)     │
-│ Backend Laravel │                   │ Frontend SPA    │
-└────────┬────────┘                   └─────────────────┘
-         │
-    ┌────▼─────┐
-    │  MySQL   │
-    │ (3306)   │
-    └──────────┘
-```
+
+Pronto! A aplicação está em:
+- **Frontend:** http://localhost:8000
+- **API:** http://localhost:8000/api
 
 ---
 
-## 🚀 Quick Start
+## 📊 Arquitetura
 
-### Opção 1: Usar Makefile (Recomendado)
-
-```bash
-# Setup completo (build + start + migrate)
-make docker-init
-
-# Ver todos os comandos disponíveis
-make help
+```
+Cliente (Browser) → http://localhost:8000
+                        ↓
+                  Nginx Reverse Proxy
+                    /          \
+              /api/*             /*
+                /                  \
+         Laravel Backend        Angular Frontend
+           (PHP-FPM)             (Nginx)
+             9000                  80
+                |
+            MySQL BD
+             3306
 ```
 
-### Opção 2: Comandos Docker Compose diretos
+**4 containers automáticos:**
+1. **MySQL** - Base de dados (`db_todolist_contactus`)
+2. **Backend** - Laravel + API (`todolist-backend`)
+3. **Frontend** - Angular compilado (`todolist-frontend`)
+4. **Proxy** - Nginx roteador (`todolist-proxy`)
+
+---
+
+## 📋 Comandos Úteis
+
+### Iniciar/Parar
 
 ```bash
-# Build das imagens
-docker-compose build
-
-# Inicia containers
+# Inicia
 docker-compose up -d
 
-# Roda migrations
-docker-compose exec backend php artisan migrate --force
+# Para
+docker-compose down
 
-# (Opcional) Seed database
-docker-compose exec backend php artisan db:seed
-```
-
----
-
-## 📋 Comandos Disponíveis
-
-### Ciclo de Vida
-
-```bash
-make docker-up           # Inicia containers
-make docker-down         # Para containers
-make docker-restart      # Reinicia tudo
-make docker-rebuild      # Reconstrói tudo (sem cache)
+# Reinicia
+docker-compose restart
 ```
 
 ### Monitoramento
 
 ```bash
-make docker-ps           # Lista containers
-make docker-logs         # Ver todos os logs (Ctrl+C sair)
-make docker-logs-backend # Logs do backend
-make docker-logs-frontend # Logs do frontend
-make docker-logs-database # Logs do MySQL
-make docker-logs-nginx   # Logs do proxy
+# Ver status dos containers
+docker-compose ps
+
+# Ver logs em tempo real
+docker-compose logs -f
+
+# Logs de um container específico
+docker-compose logs -f backend
 ```
 
-### Acesso de Shell
+### Acesso a Shells
 
 ```bash
-make docker-shell-backend  # Acesso ao shell PHP/Laravel
-make docker-shell-frontend # Acesso ao shell Node
-make docker-shell-db       # Acesso ao MySQL CLI
+# Shell do Backend (Laravel commands)
+docker-compose exec backend bash
+
+# Shell da BD (MySQL CLI)
+docker-compose exec database mysql -u todolist_user -p
+
+# Migrations/Seeders
+docker-compose exec backend php artisan migrate
+docker-compose exec backend php artisan db:seed
+```
+
+### Reconstruir
+
+```bash
+# Rebuild completo (código mudou)
+docker-compose up --build -d
+
+# Rebuild sem cache
+docker-compose up --build --no-cache -d
+```
+
+---
+
+## ❌ Troubleshooting
+
+**Porta 8000 já em uso:**
+```bash
+docker-compose down
+```
+
+**BD não inicializa:**
+```bash
+docker-compose down -v   # Remove volumes (apaga dados)
+docker-compose up -d     # Recria tudo
+```
+
+**Ver erro específico:**
+```bash
+docker-compose logs -f backend   # ou database, frontend
 ```
 
 ### Database

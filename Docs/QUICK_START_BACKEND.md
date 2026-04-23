@@ -1,68 +1,32 @@
-# QUICK START - Backend (Laravel)
+# QUICK START - Backend (Laravel) - Desenvolvimento Local
 
-**Setup Rápido do Backend em 5 Minutos**
+> ⚠️ **Se está a usar Docker, vá para [DOCKER_README.md](../DOCKER_README.md)**
 
----
-
-## 🎯 Objetivos
-
-1. Instalar dependências PHP
-2. Configurar ambiente
-3. Preparar base de dados
-4. Executar migrations e seeders
-5. Iniciar servidor Laravel
+Este guia é **APENAS** para desenvolvimento local sem Docker.
 
 ---
 
-## 📋 Pré-Requisitos
+## 🎯 Setup em 5 minutos
 
-Verificar versões instaladas:
+### 1. Pré-requisitos
 
 ```bash
-# PHP 8.2+
-php --version
-
-# MySQL 8.0+
-mysql --version
-
-# Composer
-composer --version
+php --version          # PHP 8.2+
+mysql --version        # MySQL 8.0+
+composer --version     # Composer
 ```
 
-Se faltar algo:
-- **Ubuntu/Debian:** `sudo apt install php8.2 php8.2-mysql php8.2-xml mysql-server composer`
-- **macOS:** `brew install php mysql composer`
-
----
-
-## 🚀 Instalação (Passo a Passo)
-
-### 1️⃣ Navegar para o backend
+### 2. Instalar dependências
 
 ```bash
 cd backend
-```
-
-### 2️⃣ Instalar dependências PHP
-
-```bash
 composer install
 ```
 
-**Resultado esperado:**
-```
-✓ 108 packages installed
-✓ laravel/pail, laravel/sanctum, laravel/tinker descobertos
-✓ 78 packages procuram funding
-```
-
-### 3️⃣ Configurar ficheiro .env
+### 3. Configurar ambiente
 
 ```bash
-# Copiar template
 cp .env.example .env
-
-# Gerar chave de encriptação
 php artisan key:generate
 ```
 
@@ -70,33 +34,32 @@ Verificar `.env`:
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_PORT=3306
 DB_DATABASE=db_todolist_contactus
 DB_USERNAME=root
 DB_PASSWORD=mysql
 ```
 
-### 4️⃣ Criar base de dados MySQL
+### 4. Criar BD e tabelas
 
-```bash
-# Abrir MySQL
-mysql -u root -p
-
-# Executar (dentro do MySQL):
-CREATE DATABASE db_todolist_contactus;
-EXIT;
-```
-
-Ou em uma linha:
 ```bash
 mysql -u root -pmysql -e "CREATE DATABASE db_todolist_contactus;"
+php artisan migrate:fresh --seed
 ```
 
-### 5️⃣ Executar migrations e seeders
+### 5. Iniciar servidor
 
 ```bash
-# Eliminar todas as tabelas e recriar (fresh)
-php artisan migrate:fresh --seed
+php artisan serve
+```
+
+Acesso: **http://localhost:8000/api**
+
+---
+
+## 🧪 Testes
+
+```bash
+npm test
 ```
 
 **Resultado esperado:**

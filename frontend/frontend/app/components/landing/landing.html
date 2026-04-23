@@ -7,7 +7,7 @@
     </div>
   </div>
   <div class="header-right">
-    <nav class="landing-nav" aria-label="Navegacao da landing">
+    <nav class="landing-nav" aria-label="Navegação da landing">
       <a href="#entrar" [class.active]="activeLandingSection() === 'entrar'" (click)="scrollToSection('entrar', $event)">Entrar</a>
       <a href="#vantagens" [class.active]="activeLandingSection() === 'vantagens'" (click)="scrollToSection('vantagens', $event)">Vantagens</a>
       <a href="#workflow" [class.active]="activeLandingSection() === 'workflow'" (click)="scrollToSection('workflow', $event)">Workflow</a>
@@ -40,7 +40,7 @@
 		</div>
 	</section>
 
-	<section id="vantagens" class="benefits reveal-section" aria-label="Beneficios">
+	<section id="vantagens" class="benefits reveal-section" aria-label="Benefícios">
 		<h3 class="section-title-glow">
 			<span class="section-title-icon material-symbols-rounded" aria-hidden="true">checklist</span>
 			<span>Vantagens</span>
@@ -49,12 +49,12 @@
 			<article class="benefit-card reveal-card">
 				<span class="material-symbols-rounded">checklist</span>
 				<h4>Organiza tarefas</h4>
-				<p>Regista, edita e conclui tarefas num fluxo claro, sem sair da aplicacao.</p>
+				<p>Regista, edita e conclui tarefas num fluxo claro, sem sair da aplicação.</p>
 			</article>
 			<article class="benefit-card reveal-card">
 				<span class="material-symbols-rounded">flag</span>
 				<h4>Prioridades e foco</h4>
-				<p>Diferencia o que e urgente e concentra-te no que gera mais impacto.</p>
+				<p>Diferencia o que é urgente e concentra-te no que gera mais impacto.</p>
 			</article>
 			<article class="benefit-card reveal-card">
 				<span class="material-symbols-rounded">workspace_premium</span>
@@ -78,12 +78,12 @@
 			<article class="step-card reveal-card">
 				<span class="step-index">2</span>
 				<h4>Acompanhar</h4>
-				<p>Consulta tarefas abertas e concluidas com visao clara do teu progresso.</p>
+				<p>Consulta tarefas abertas e concluídas com visão clara do teu progresso.</p>
 			</article>
 			<article class="step-card reveal-card">
 				<span class="step-index">3</span>
 				<h4>Concluir</h4>
-				<p>Marca objetivos como concluidos e fortalece consistencia diaria.</p>
+				<p>Marca objetivos como concluídos e fortalece a consistência diária.</p>
 			</article>
 		</div>
 	</section>
@@ -124,7 +124,7 @@
 						</div>
 
 						@if (!isLastBadge()) {
-							<button type="button" class="badge-nav-btn badge-nav-next" (click)="goNextBadge()" aria-label="Proxima badge">
+							<button type="button" class="badge-nav-btn badge-nav-next" (click)="goNextBadge()" aria-label="Próxima badge">
 								<span aria-hidden="true">&#10095;</span>
 							</button>
 						}
@@ -134,17 +134,17 @@
 		</div>
 	</section>
 
-	<section id="about" class="about reveal-section" aria-label="Sobre a aplicacao">
+	<section id="about" class="about reveal-section" aria-label="Sobre a aplicação">
 		<article class="about-card reveal-card">
 			<span class="material-symbols-rounded">rocket_launch</span>
 			<h4>Sobre a Aplicação</h4>
 			<p>
 				Uma SPA moderna para organização pessoal e produtividade: permite planear o trabalho, acompanhar prioridades e
-				medir progresso com uma experiencia visual limpa e rápida.
+				medir progresso com uma experiência visual limpa e rápida.
 			</p>
-			<div class="about-pill-list" aria-label="Destaques da aplicacao">
+			<div class="about-pill-list" aria-label="Destaques da aplicação">
 				<span>Gestão simples de tarefas</span>
-				<span>Fluxo rapido e intuitivo</span>
+				<span>Fluxo rápido e intuitivo</span>
 				<span>Progresso com badges</span>
 			</div>
 		</article>

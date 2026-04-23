@@ -1,44 +1,35 @@
-# Quick Start - Frontend Angular
+# Quick Start - Frontend Angular - Desenvolvimento Local
 
-Este documento é um guia rápido para começar a desenvolver o frontend Angular para a TODO App.
+> ⚠️ **Se está a usar Docker, vá para [DOCKER_README.md](../DOCKER_README.md)**
 
-## Estrutura do Backend (Laravel)
+Este guia é **APENAS** para desenvolvimento local sem Docker.
 
-O backend Laravel está em funcionamento neste repositório com os seguintes endpoints principais:
+---
 
-### URLs Base
-- **Desenvolvimento:** `http://localhost:8000/api`
-- **Produção:** `https://seu-dominio.com/api`
+## 🎯 Setup em 2 minutos
 
-### Autenticação
-```
-POST /api/login
-{
-  "email": "admin@example.com",
-  "password": "password"
-}
-```
-Retorna um token Bearer que deve ser enviado em todas as requisições autenticadas.
-
-## Setup do Frontend (Angular)
-
-### 1. Criar novo projeto Angular
+### 1. Pré-requisitos
 
 ```bash
-ng new todo-app-frontend
-cd todo-app-frontend
+node --version     # Node 20+
+ng version         # Angular CLI
+```
+
+Se faltar Angular CLI:
+```bash
+npm install -g @angular/cli
 ```
 
 ### 2. Instalar dependências
 
 ```bash
-npm install axios chart.js ng2-charts
+cd frontend/frontend
+npm install
 ```
 
-### 3. Configurar environments
+### 3. Configurar API
 
-Crie `src/environments/environment.ts`:
-
+Editar `src/environments/environment.ts`:
 ```typescript
 export const environment = {
   production: false,
@@ -46,58 +37,21 @@ export const environment = {
 };
 ```
 
-E `src/environments/environment.prod.ts`:
-
-```typescript
-export const environment = {
-  production: true,
-  apiUrl: 'https://seu-dominio.com/api'
-};
-```
-
-### 4. Criar Interceptor de Autenticação
+### 4. Iniciar dev server
 
 ```bash
-ng generate interceptor interceptors/auth
+ng serve -o
 ```
 
-Ficheiro `src/app/interceptors/auth.interceptor.ts`:
+Acesso: **http://localhost:4200**
 
-```typescript
-import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
-import { Observable } from 'rxjs';
+---
 
-@Injectable()
-export class AuthInterceptor implements HttpInterceptor {
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = localStorage.getItem('auth_token');
+## 📝 Observações
 
-    if (token) {
-      req = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    }
-
-    return next.handle(req);
-  }
-}
-```
-
-### 5. Registar no AppModule
-
-```typescript
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AuthInterceptor } from './interceptors/auth.interceptor';
-import { NgChartsModule } from 'ng2-charts';
-
-@NgModule({
-  imports: [NgChartsModule],
-  providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
-  ]
+- **Backend deve estar a correr** (http://localhost:8000/api)
+- Autenticação via token Bearer (localStorage)
+- Hot-reload automático em mudanças de código
 })
 export class AppModule { }
 ```
