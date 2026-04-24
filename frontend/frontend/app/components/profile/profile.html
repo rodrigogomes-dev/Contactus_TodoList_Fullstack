@@ -2,16 +2,21 @@
   @if (isInitialized()) {
     <!-- User Card -->
     <div class="profile-card">
-      <div class="profile-avatar">
-        @if (currentUser(); as user) {
-          @if (user.avatar_url) {
-            <img [src]="user.avatar_url" [alt]="username()" class="avatar-image" />
+      <div class="profile-avatar-container">
+        <div class="profile-avatar">
+          @if (currentUser(); as user) {
+            @if (user.avatar_url) {
+              <img [src]="user.avatar_url" [alt]="username()" class="avatar-image" />
+            } @else {
+              <span class="material-symbols-rounded">account_circle</span>
+            }
           } @else {
             <span class="material-symbols-rounded">account_circle</span>
           }
-        } @else {
-          <span class="material-symbols-rounded">account_circle</span>
-        }
+        </div>
+        <button class="btn-edit-avatar" (click)="openAvatarModal()" title="Alterar Avatar">
+          <span class="material-symbols-rounded">edit</span>
+        </button>
       </div>
       <div class="profile-info">
         <div class="profile-name-row">
@@ -91,35 +96,6 @@
       <h2>Editar Perfil</h2>
       <form [formGroup]="editForm" (ngSubmit)="saveProfile()">
         
-        <!-- Avatar Upload Section -->
-        <div class="avatar-upload-section">
-          <label>Avatar</label>
-          <div class="avatar-upload-area" (click)="fileInput.click()">
-            <input 
-              #fileInput
-              type="file" 
-              accept="image/*" 
-              (change)="onAvatarSelected($event)"
-              class="file-input"
-              hidden>
-            <div class="upload-placeholder">
-              <span class="material-symbols-rounded">cloud_upload</span>
-              <p>Clique para selecionar uma imagem</p>
-              @if (avatarFileName()) {
-                <small>{{ avatarFileName() }}</small>
-              }
-            </div>
-          </div>
-          @if (isUploadingAvatar()) {
-            <div class="progress-bar avatar-progress">
-              <div class="progress-fill"></div>
-            </div>
-          }
-          @if (avatarUploadError()) {
-            <div class="error">{{ avatarUploadError() }}</div>
-          }
-        </div>
-
         <div class="form-group">
           <label>Nome</label>
           <input type="text" formControlName="nome" maxlength="100" [disabled]="isSaving()" />
@@ -162,6 +138,43 @@
           <button type="button" class="btn-cancel" (click)="closeModal()" [disabled]="isSaving()">Cancelar</button>
         </div>
       </form>
+    </div>
+  </div>
+}
+
+<!-- Avatar Selection Modal -->
+@if (showAvatarModal()) {
+  <div class="modal-overlay" (click)="closeAvatarModal()">
+    <div class="modal-content avatar-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Selecionar Avatar</h2>
+        <button type="button" class="btn-close" (click)="closeAvatarModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      
+      <div class="avatars-gallery">
+        @for (avatar of availableAvatars; track avatar.id) {
+          <button 
+            type="button"
+            class="avatar-option"
+            [class.selected]="currentUser()?.avatar_path === avatar.id || selectedAvatarId() === avatar.id"
+            (click)="selectAvatar(avatar.id)"
+            [disabled]="isUploadingAvatar()">
+            <img [src]="'/avatars/' + avatar.id + '.png'" [alt]="avatar.label" />
+          </button>
+        }
+      </div>
+      
+      @if (isUploadingAvatar()) {
+        <div class="progress-bar avatar-progress">
+          <div class="progress-fill"></div>
+        </div>
+      }
+      
+      @if (avatarUploadError()) {
+        <div class="error-message">{{ avatarUploadError() }}</div>
+      }
     </div>
   </div>
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\User\UploadAvatarRequest;
+use App\Http\Requests\User\SelectAvatarRequest;
 
 class UserController extends Controller
 {
@@ -43,6 +44,27 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Avatar carregado com sucesso',
+            'user'    => $user->load('badges', 'tasks'),
+        ], 200);
+    }
+
+    /**
+     * Seleciona um avatar pré-definido da biblioteca.
+     * Apenas atualiza avatar_path para referência local (ex: 'avatar-1').
+     *
+     * @param SelectAvatarRequest $request Avatar name validado (avatar-1 até avatar-10)
+     * @return \Illuminate\Http\JsonResponse Utilizador atualizado, HTTP 200
+     */
+    public function selectAvatar(SelectAvatarRequest $request)
+    {
+        $validated = $request->validated();
+        $user = $request->user();
+
+        // Atualiza avatar_path com o nome do avatar selecionado
+        $user->update(['avatar_path' => $validated['avatar_name']]);
+
+        return response()->json([
+            'message' => 'Avatar selecionado com sucesso',
             'user'    => $user->load('badges', 'tasks'),
         ], 200);
     }

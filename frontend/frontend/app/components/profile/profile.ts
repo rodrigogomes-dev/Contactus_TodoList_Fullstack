@@ -23,6 +23,7 @@ export class ProfileComponent {
   isInitialized = this.auth.isInitialized;
 
   showModal = signal(false);
+  showAvatarModal = signal(false);
   isSaving = signal(false);
   saveMessage = signal('');
   saveError = signal('');
@@ -30,6 +31,21 @@ export class ProfileComponent {
   avatarUploadError = signal('');
   avatarFileName = signal('');
   selectedAvatarFile: File | null = null;
+  selectedAvatarId = signal<string>('');
+
+  // Array de avatares pré-definidos disponíveis
+  availableAvatars = [
+    { id: 'avatar-1', label: 'Avatar 1' },
+    { id: 'avatar-2', label: 'Avatar 2' },
+    { id: 'avatar-3', label: 'Avatar 3' },
+    { id: 'avatar-4', label: 'Avatar 4' },
+    { id: 'avatar-5', label: 'Avatar 5' },
+    { id: 'avatar-6', label: 'Avatar 6' },
+    { id: 'avatar-7', label: 'Avatar 7' },
+    { id: 'avatar-8', label: 'Avatar 8' },
+    { id: 'avatar-9', label: 'Avatar 9' },
+    { id: 'avatar-10', label: 'Avatar 10' },
+  ];
 
   editForm = new FormGroup({
     nome:  new FormControl('', [Validators.required, Validators.maxLength(100)]),
@@ -70,9 +86,18 @@ export class ProfileComponent {
   closeModal() {
     this.showModal.set(false);
     this.editForm.reset();
-    this.selectedAvatarFile = null;
-    this.avatarFileName.set('');
+  }
+
+  openAvatarModal() {
+    this.showAvatarModal.set(true);
     this.avatarUploadError.set('');
+    this.selectedAvatarId.set('');
+  }
+
+  closeAvatarModal() {
+    this.showAvatarModal.set(false);
+    this.avatarUploadError.set('');
+    this.selectedAvatarId.set('');
   }
 
   onAvatarSelected(event: Event) {
@@ -125,6 +150,33 @@ export class ProfileComponent {
       error: (err) => {
         this.isUploadingAvatar.set(false);
         this.avatarUploadError.set(err?.error?.message || 'Erro ao atualizar avatar');
+      }
+    });
+  }
+
+  selectAvatar(avatarId: string) {
+    this.isUploadingAvatar.set(true);
+    this.avatarUploadError.set('');
+    this.selectedAvatarId.set(avatarId);
+
+    this.auth.selectAvatar(avatarId).subscribe({
+      next: () => {
+        this.isUploadingAvatar.set(false);
+        this.saveMessage.set('Avatar selecionado com sucesso!');
+        
+        // Refresh user data after a short delay to ensure backend has persisted
+        setTimeout(() => {
+          this.auth.getMe().subscribe();
+        }, 500);
+        
+        setTimeout(() => {
+          this.saveMessage.set('');
+        }, 2000);
+      },
+      error: (err) => {
+        this.isUploadingAvatar.set(false);
+        this.avatarUploadError.set(err?.error?.message || 'Erro ao selecionar avatar');
+        this.selectedAvatarId.set('');
       }
     });
   }

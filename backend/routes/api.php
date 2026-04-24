@@ -37,6 +37,9 @@ Route::middleware('auth:sanctum', 'throttle:60,1')->group(function () {
     
     // Carregamento de avatar
     Route::post('/users/avatar', [UserController::class, 'uploadAvatar']);
+    
+    // Seleção de avatar pré-definido
+    Route::post('/users/avatar/select', [UserController::class, 'selectAvatar']);
 
     // ROTAS DE ADMINISTRADOR (requerem is_admin = true)
     Route::middleware('admin')->group(function () {

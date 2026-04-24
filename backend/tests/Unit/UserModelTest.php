@@ -71,21 +71,22 @@ class UserModelTest extends TestCase
     }
 
     /**
-     * Teste: avatar_url acessor funciona.
+     * Teste: avatar_url acessor funciona com avatares pré-definidos.
      * 
      * Verifica:
-     *  - Se avatar_path preenchido, gera URL cométa
+     *  - Se avatar_path preenchido com avatar pré-definido (ex: 'avatar-1'), gera URL correta
+     *  - URL contém: /avatars/avatar-1.png
      *  - URL é acedida como atributo computado
      */
     public function test_avatar_url_accessor_works(): void
     {
         $user = User::factory()->create([
-            'avatar_path' => 'avatars/user123.jpg',
+            'avatar_path' => 'avatar-1',
         ]);
 
         // avatar_url should be calculated
         $avatarUrl = $user->avatar_url;
-        $this->assertStringContainsString('storage/avatars/user123.jpg', $avatarUrl);
+        $this->assertStringContainsString('avatars/avatar-1.png', $avatarUrl);
     }
 
     /**

@@ -20,6 +20,7 @@ class TestUserSeeder extends Seeder
             'email' => 'joao@teste.com',
             'password' => Hash::make('password123'),
             'is_admin' => false,
+            'avatar_path' => 'avatar-1',
         ]);
 
         // User Admin
@@ -28,6 +29,7 @@ class TestUserSeeder extends Seeder
             'email' => 'admin@teste.com',
             'password' => Hash::make('admin123'),
             'is_admin' => true,
+            'avatar_path' => 'avatar-2',
         ]);
     }
 }

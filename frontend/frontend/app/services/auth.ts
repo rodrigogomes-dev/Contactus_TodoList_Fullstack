@@ -217,6 +217,33 @@ export class AuthService {
   }
 
   /**
+   * Endpoint: POST /users/avatar/select
+   * Selecionar um avatar pré-definido da biblioteca.
+   * 
+   * Recebe:
+   *  - avatarName: string (ex: 'avatar-1', 'avatar-2', etc)
+   * 
+   * Backend:
+   *  - Valida que avatarName está em lista permitida
+   *  - Atualiza avatar_path do utilizador
+   *  - Retorna novo user com avatar_url atualizado
+   */
+  selectAvatar(avatarName: string): Observable<{ user: AuthUser }> {
+    return this.http.post<{ message: string; user: AuthUser }>(`${this.apiUrl}/users/avatar/select`, {
+      avatar_name: avatarName
+    }).pipe(
+      tap((response) => {
+        const user = response.user;
+        // Atualizar signals do utilizador (agora tem novo avatar_url)
+        this.currentUser.set(user);
+        this.nome.set(user.name);
+        this.email.set(user.email);
+        this.username.set(user.name);
+      })
+    );
+  }
+
+  /**
    * Obter token do localStorage.
    * Retorna null se não existe.
    */

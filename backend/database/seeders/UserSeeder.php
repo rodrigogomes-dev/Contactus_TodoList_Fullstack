@@ -21,6 +21,7 @@ class UserSeeder extends Seeder
             'email' => 'testadmin@example.com',
             'password' => bcrypt('password123'),
             'is_admin' => 1,
+            'avatar_path' => 'avatar-3',
         ]);
 
         User::create([
@@ -28,6 +29,7 @@ class UserSeeder extends Seeder
             'email' => 'testuser@example.com',
             'password' => bcrypt('password123'),
             'is_admin' => 0,
+            'avatar_path' => 'avatar-4',
         ]);
 
         // Buscar dados necessários
@@ -35,7 +37,13 @@ class UserSeeder extends Seeder
         $badges = Badge::all();
 
         // Criar 5 users aleatórios com Factory
-        User::factory()->count(5)->create()->each(function (User $user) use ($categories, $badges) {
+        $avatarCounter = 5;
+        User::factory()->count(5)->create()->each(function (User $user) use ($categories, $badges, &$avatarCounter) {
+            // Atribuir um avatar pré-definido (avatar-5 até avatar-10)
+            $user->update([
+                'avatar_path' => 'avatar-' . $avatarCounter,
+            ]);
+            $avatarCounter++;
             
             // Criar 3-5 tasks por user
             for ($i = 0; $i < random_int(3, 5); $i++) {
