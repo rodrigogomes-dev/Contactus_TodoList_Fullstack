@@ -20,13 +20,11 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['nome' => 'Informática', 'cor' => '#3B82F6'], // Azul
-            ['nome' => 'RH', 'cor' => '#EC4899'], // Rosa
-            ['nome' => 'Marketing', 'cor' => '#8B5CF6'], // Roxo
-            ['nome' => 'Vendas', 'cor' => '#10B981'], // Verde
-            ['nome' => 'Financeiro', 'cor' => '#F59E0B'], // Laranja
-            ['nome' => 'Administração', 'cor' => '#6B7280'], // Cinzento
-            ['nome' => 'Logística', 'cor' => '#EF4444'], // Vermelho
+            ['nome' => 'Trabalho', 'cor' => '#3B82F6'], // Azul
+            ['nome' => 'Pessoal', 'cor' => '#10B981'],  // Verde
+            ['nome' => 'Saúde', 'cor' => '#EF4444'],    // Vermelho
+            ['nome' => 'Educação', 'cor' => '#F59E0B'], // Amarelo
+            ['nome' => 'Finanças', 'cor' => '#8B5CF6'], // Roxo
         ];
 
         foreach ($categories as $categoryData) {

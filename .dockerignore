@@ -1,44 +1,8 @@
-# Controlo de versão
+backend/vendor
+backend/.env
+backend/bootstrap/cache/*.php
+frontend/frontend/node_modules
+frontend/frontend/dist
 .git
-.gitignore
-.github
-
-# IDE
 .vscode
-.idea
-*.swp
-*.swo
-*~
-
-# Sistema operativo
-.DS_Store
-Thumbs.db
-
-# Node
-node_modules/
-npm-debug.log
-
-# Documentação
-Docs/
-*.md
-README.md
-
-# Build/Dist
-dist/
-.angular/
-
-# PHP/Composer
-vendor/
-
-# Testes
-tests/
-*.spec.ts
-phpunit.xml
-
-# Ambiente
-.env
-.env.example
-.env.testing
-
-# Docker (não incluir em builds)
-docker-compose.override.yml
+node_modules

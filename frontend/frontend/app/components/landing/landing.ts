@@ -135,20 +135,19 @@ export class Landing implements OnInit, AfterViewInit, OnDestroy {
     }
 
     try {
-      const [threeModule, vantaNetModule] = await Promise.all([
-        import('three'),
-        import('vanta/dist/vanta.net.min'),
-      ]);
+      const win = window as any;
+      const THREE = win.THREE;
+      const VANTA = win.VANTA;
 
-      const threeInstance = (threeModule as unknown as { default?: unknown }).default ?? threeModule;
-      const win = window as GlobalWindow;
-      win.THREE = threeInstance;
+      if (!VANTA || !VANTA.NET || !THREE) {
+        console.warn('Vanta ou Three ainda não carregados via CDN. A tentar novamente em 500ms...');
+        setTimeout(() => this.ngAfterViewInit(), 500);
+        return;
+      }
 
-      const vantaFactory = (vantaNetModule.default ?? vantaNetModule) as unknown as VantaNetFactory;
-
-      const effect = vantaFactory({
+      const effect = VANTA.NET({
         el: vantaElement,
-        THREE: threeInstance,
+        THREE: THREE,
         mouseControls: true,
         touchControls: true,
         gyroControls: false,
@@ -168,12 +167,10 @@ export class Landing implements OnInit, AfterViewInit, OnDestroy {
       netEffect.setOptions?.({ color: 0x007bff, backgroundColor: 0x202022 });
       netEffect.blending = 'additive';
 
-      const additiveBlending = (threeInstance as { AdditiveBlending?: number }).AdditiveBlending;
       if (netEffect.linesMesh?.material) {
-        if (typeof additiveBlending === 'number') {
-          netEffect.linesMesh.material.blending = additiveBlending;
+        if (typeof THREE.AdditiveBlending === 'number') {
+          netEffect.linesMesh.material.blending = THREE.AdditiveBlending;
         }
-        // In newer Three.js versions, force vertex colors or lines can render white.
         netEffect.linesMesh.material.vertexColors = true;
         netEffect.linesMesh.material.color?.set?.(0x007bff);
         netEffect.linesMesh.material.transparent = true;

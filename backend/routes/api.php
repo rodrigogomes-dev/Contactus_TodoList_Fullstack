@@ -9,13 +9,6 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\StatsController;
 
-// Gerenciar pedidos CORS preflight (OPTIONS)
-// Browsers enviam OPTIONS antes de POST/PATCH para verificar permissões
-// Respondemos com 204 No Content + headers CORS corretos
-Route::options('/{any}', function () {
-    return response()->noContent(204);
-})->where('any', '.*');
-
 // ROTAS PÚBLICAS (sem autenticação necessária)
 // Limitadas com throttle: máximo 5 tentativas por minuto (previne brute force)
 Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login'])->middleware('throttle:5,1');

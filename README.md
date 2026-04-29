@@ -6,347 +6,175 @@ Autor: **Rodrigo Gomes**
 
 ---
 
-## Visão Geral
+## 📝 Visão Geral
 
-Aplicação completa de gestão de tarefas com sistema de gamificação baseado em badges. Desenvolvida com **Laravel 11** (Backend) e **Angular 21** (Frontend) com autenticação via tokens Sanctum e MySQL 8.0+.
+O **TODO List - Contactus** é uma aplicação completa de gestão de tarefas com um sistema inovador de gamificação baseado em badges. Desenvolvida para oferecer uma experiência fluida e motivadora, a plataforma utiliza **Laravel 13** no Backend e **Angular 21** no Frontend, garantindo performance e segurança com autenticação via **Laravel Sanctum**.
 
-### Funcionalidades Principais
-
-- **Autenticação** - Login/Registo com tokens Bearer (Sanctum)
-- **Gestão de Tarefas** - CRUD completo com estados e prioridades
-- **Categorias** - Organização de tarefas por categoria
-- **Gamificação** - Sistema automático de badges baseado em milestones
-- **Avatar de Utilizador** - Upload e visualização de fotografias
-- **Estatísticas** - Dashboard admin com gráficos de crescimento
+### Funcionalidades Principais:
+- **Gestão de Tarefas:** CRUD completo com estados, prioridades e categorias.
+- **Gamificação:** Sistema automático de atribuição de badges por milestones.
+- **Dashboard Admin:** Estatísticas visuais e métricas de crescimento.
+- **Segurança:** Proteção de dados e autenticação robusta.
 
 ---
 
-## Arquitetura
-
-### Stack Tecnológico
+## 🛠️ Stack Tecnológico (Versões Exatas)
 
 | Camada | Tecnologia | Versão |
 |--------|-----------|--------|
-| Backend API | Laravel | 11 |
-| Frontend SPA | Angular | 21 |
-| Database | MySQL | 8.0+ |
-| Auth | Sanctum | Tokens Bearer |
-| Charts | Chart.js | 4.5+ |
+| **Backend API** | PHP | `8.3` |
+| | Laravel Framework | `13.0` |
+| | Laravel Sanctum | `4.3` |
+| | Laravel Tinker | `3.0` |
+| | PHPUnit | `12.5.12` |
+| **Frontend SPA** | Angular | `21.2.0` |
+| | TypeScript | `5.9.2` |
+| | Chart.js | `4.5.1` |
+| | Three.js | `0.183.2` |
+| | Vanta.js | `0.5.24` |
+| **Database** | MySQL | `8.0` |
 
-### Estrutura de Pastas
+---
+
+## 📁 Estrutura do Projeto
 
 ```
 Projeto_TodoList_Contactus_Fullstack/
-├── backend/              # Laravel API
-│   ├── app/
-│   ├── routes/api.php
-│   ├── database/
-│   └── ...
-├── frontend/             # Angular SPA
-│   ├── frontend/         # Workspace Angular
-│   │   ├── app/
-│   │   ├── main.ts
-│   │   └── ...
-│   ├── QUICK_START_FRONTEND.md
-│   └── ...
-├── README.md             # Este ficheiro
-├── QUICK_START_BACKEND.md
-├── .gitignore
-└── ...
+├── backend/              # Laravel API (PHP 8.3 / Laravel 13)
+├── frontend/             # Angular SPA (Angular 21)
+├── DOCKER_README.md      # Guia detalhado de Docker
+├── docker-compose.yml    # Orquestração de containers
+└── Docs/                 # Documentação adicional
 ```
 
 ---
 
-## Quick Start
+## 🔐 Segurança & Boas Práticas
 
-### Pré-Requisitos
+- **Sanctum Auth:** Autenticação via tokens Bearer.
+- **Princípio de Menor Privilégio:** Utilizadores de base de dados restritos.
+- **OWASP Compliance:** Proteção contra SQL Injection e CSRF.
+- **Dashboard Admin:** Estatísticas em tempo real com Chart.js.
 
-- **PHP 8.2+** com extensões: mysql, xml, dom
-- **Node.js 18+** com npm
-- **MySQL 8.0+**
-- **Composer**
-- **Angular CLI 21+** (opcional, usamos npx ng)
+---
 
-### Setup Backend (2 minutos)
+## 🏆 Sistema de Gamificação
 
+A aplicação motiva os utilizadores através de conquistas automáticas:
+- **Iniciante:** 1 tarefa concluída.
+- **Intermédio:** 10 tarefas concluídas.
+- **Avançado:** 50 tarefas concluídas.
+- **Especialista:** 100 tarefas concluídas.
+
+---
+
+## 🚀 Instruções de Execução
+
+Escolha um dos métodos abaixo para rodar o projeto.
+
+### Opção A: Usando Docker (Recomendado)
+
+A forma mais rápida de iniciar todo o ecossistema (Backend, Frontend e Base de Dados).
+
+#### 1. Pré-requisitos e Instalação (Linux)
+Se ainda não tem o Docker instalado, execute:
 ```bash
-cd backend
-
-# 1. Instalar dependências PHP
-composer install
-
-# 2. Configurar ambiente
-cp .env.example .env
-php artisan key:generate
-
-# 3. Criar base de dados
-mysql -u root -p -e "CREATE DATABASE db_todolist_contactus;"
-
-# 4. Carregar schema e dados
-php artisan migrate:fresh --seed
-
-# 5. Criar symlink de storage para avatares
-php artisan storage:link
-
-# 6. Iniciar servidor (porta 8000)
-php artisan serve
+sudo apt update && sudo apt install docker.io docker-compose-v2 -y
+sudo usermod -aG docker $USER  # Requer logout para aplicar
 ```
 
-**Documentação Completa:** [QUICK_START_BACKEND.md](./QUICK_START_BACKEND.md)
+#### 2. Iniciar os containers
+```bash
+sudo docker compose up -d --build
+```
 
-### Setup Frontend (2 minutos)
+#### 3. Configurar Ambiente e Base de Dados
+Se for a primeira vez, execute:
+```bash
+# Criar tabelas, dados iniciais e crachés
+sudo docker compose exec backend php artisan migrate:fresh --seed
 
+# Criar link para imagens (Avatars e Badges)
+sudo docker compose exec backend php artisan storage:link --force
+```
+
+#### 4. Aceder à aplicação
+- **Frontend (UI):** [http://localhost:4200](http://localhost:4200)
+- **Backend API:** [http://localhost:8000/api](http://localhost:8000/api)
+- **MySQL:** `localhost:3307`
+
+#### 5. Credenciais de Teste
+- **Test User:** `testuser@example.com` / `password123` (Possui tarefas e crachés)
+- **Test Admin:** `admin@example.com` / `password123` (Gestão de estatísticas)
+
+*Para detalhes avançados, veja o [DOCKER_README.md](./DOCKER_README.md).*
+
+---
+
+### Opção B: Configuração Manual
+
+Caso prefira rodar os serviços localmente sem Docker.
+
+#### 1. Pré-Requisitos
+- **PHP 8.3+**, **MySQL 8.0+**, **Composer**.
+- **Node.js 20+** e **npm 10+**.
+
+#### 2. Setup do Backend
+
+1. **Instalar Dependências:**
+   ```bash
+   cd backend
+   composer install
+   ```
+
+2. **Configurar Base de Dados:**
+   ```bash
+   # Criar a base de dados
+   sudo mysql -e "CREATE DATABASE db_todolist_contactus;"
+
+   # Criar utilizador administrativo e dar permissões
+   sudo mysql -e "CREATE USER 'admin'@'localhost' IDENTIFIED BY 'xpt0_c0mpl3x0#';"
+   sudo mysql -e "GRANT ALL PRIVILEGES ON db_todolist_contactus.* TO 'admin'@'localhost';"
+   sudo mysql -e "FLUSH PRIVILEGES;"
+   ```
+
+3. **Configurar Ambiente (.env):**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+   Abra o ficheiro `.env` e substitua o bloco de conexão por:
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=db_todolist_contactus
+   DB_USERNAME=admin
+   DB_PASSWORD=xpt0_c0mpl3x0#
+   ```
+
+4. **Migrar e Popular:**
+   ```bash
+   php artisan migrate:fresh --seed
+   php artisan storage:link
+   php artisan serve
+   ```
+
+#### 3. Setup do Frontend
 ```bash
 cd frontend/frontend
-
-# 1. Instalar dependências
 npm install
-
-# 2. Iniciar servidor (porta 4200)
-ng serve
-
-# 3. Abrir browser
-# http://localhost:4200
+npx ng serve
 ```
-
-**Documentação Completa:** [QUICK_START_FRONTEND.md](./frontend/QUICK_START_FRONTEND.md)
-
----
-
-## Database Schema
-
-### 7 Tabelas Principais
-
-| Tabela | Propósito | Registos |
-|--------|-----------|----------|
-| **users** | Utilizadores da plataforma | 8 |
-| **tasks** | Tarefas individuais | 21 |
-| **categories** | Categorias de tarefas | 8 |
-| **badges** | Badges de gamificação | 36 |
-| **badge_user** | Relação N-N users ↔ badges | 18 |
-| **personal_access_tokens** | Tokens Sanctum | 20 |
-| **migrations** | Histórico de migrations | 14 |
-
-### Relacionamentos
-
-```
-users
-├── hasMany: tasks
-└── belongsToMany: badges (via badge_user)
-
-tasks
-├── belongsTo: users
-└── belongsTo: categories (nullable)
-
-categories
-├── hasMany: tasks
-└── hasMany: badges
-
-badges
-├── belongsTo: categories (nullable)
-└── belongsToMany: users (via badge_user)
-```
-
----
-
-## 🔐 Segurança & DevOps
-
-### Princípio de Menor Privilégio (Database)
-
-**Implementação:** A aplicação Laravel comunica com a base de dados através de um utilizador restrito, nunca com `root`.
-
-```
-Utilizador MySQL: rodrigo_admin
-Permissões: DML + DDL apenas
-Base de Dados: contactus_db
-
-Utilizador root: Isolado para operações administrativas apenas
-```
-
-**Benefícios:**
-- ✅ Reduz superfície de ataque (se a aplicação for comprometida, attacker tem acesso limitado à BD)
-- ✅ Conformidade com OWASP Top 10 (A01:2021 - Broken Access Control)
-- ✅ Pronto para containerização Docker com segurança aplicada
-
-**Configuração:** Variáveis `DB_USER` e `DB_PASSWORD` em `.env` (nunca commitar em git)
-
-### Outros Controles de Segurança
-
-Ver [SECURITY_CHECKLIST.md](./Docs/SECURITY_CHECKLIST.md) para auditoria completa:
-- ✅ CORS configurado (localhost:4200, localhost:3000)
-- ✅ Rate Limiting (5 req/min em /login, 60 req/min em rotas protegidas)
-- ✅ Autorização (RBAC com Policies: TaskPolicy, CategoryPolicy)
-- ✅ Hashing de passwords (Bcrypt - BCRYPT_ROUNDS=12)
-- ✅ Tokens JWT via Laravel Sanctum
-- ✅ Prepared Statements via Eloquent ORM
-
----
-
-## Autenticação
-
-### Credenciais de Teste
-
-- **Email:** `testadmin@example.com`
-- **Password:** `password123`
-
-### Fluxo de Autenticação
-
-1. `POST /api/login` → Retorna token Bearer
-2. Token armazenado em `localStorage.auth_token`
-3. Interceptador Angular anexa token em todos os requests
-4. Backend valida via middleware `auth:sanctum`
-5. `POST /api/logout` → Elimina token
-
----
-
-## Sistema de Gamificação
-
-### Milestones & Badges
-
-Quando um utilizador conclui tarefas numa categoria, automaticamente recebe badges:
-
-| Milestone | Tarefas | Badge |
-|-----------|---------|-------|
-| 1 | 1 concluída | Iniciante em [Categoria] |
-| 10 | 10 concluídas | Intermédio em [Categoria] |
-| 50 | 50 concluídas | Avançado em [Categoria] |
-| 100 | 100 concluídas | Especialista em [Categoria] |
-
-### Automação
-
-- **TaskObserver** dispara ao atualizar task
-- **CategoryObserver** cria 4 badges automaticamente ao criar categoria
-- Atribuição de badges é instantânea (sem delay)
-
----
-
-## API Endpoints
-
-### Públicos (sem autenticação)
-
-```
-POST   /api/login              Login
-POST   /api/register           Registar
-```
-
-### Autenticados (requerem token)
-
-```
-# Utilizador
-GET    /api/me                 Dados do utilizador
-PATCH  /api/me                 Atualizar perfil
-POST   /api/users/avatar       Upload avatar
-GET    /api/me/badges          My badges
-
-# Tasks
-GET    /api/tasks              Listar tarefas
-POST   /api/tasks              Criar tarefa
-GET    /api/tasks/{id}         Ver tarefa
-PUT    /api/tasks/{id}         Editar tarefa
-DELETE /api/tasks/{id}         Eliminar tarefa
-
-# Categories
-GET    /api/categories         Listar categorias
-POST   /api/categories         Criar categoria
-PUT    /api/categories/{id}    Editar categoria
-DELETE /api/categories/{id}    Eliminar categoria
-
-# Badges
-GET    /api/badges             Listar badges
-
-# Admin
-GET    /api/admin/stats        Estatísticas globais
-GET    /api/stats/available-years-months
-GET    /api/stats/users-growth?period=year&year=2026
-```
-
----
-
-## Troubleshooting
-
-### Backend não responde
-
-```bash
-# Verificar se PHP está a correr
-ps aux | grep "php artisan serve"
-
-# Verificar porta 8000
-lsof -i :8000
-
-# Reiniciar com output
-php artisan serve --host=127.0.0.1 --port=8000
-```
-
-### Frontend não carrega
-
-```bash
-# Verificar se Node está a correr
-ps aux | grep "ng serve"
-
-# Limpar cache Angular
-rm -rf frontend/frontend/.angular
-
-# Reinstalar dependências
-cd frontend/frontend
-npm ci
-ng serve
-```
-
-### CORS errors
-
-**Já configurado!** 
-- Middleware `HandleCors.php` permite `http://localhost:4200`
-- Rota OPTIONS para preflight requests
-
-### Avatar não aparece
-
-1. Verificar se `storage/app/public/avatars/` existe
-2. Confirmar symlink: `php artisan storage:link`
-3. Testar upload via `POST /api/users/avatar`
-
----
-
-## Documentação Adicional
-
-- [QUICK_START_BACKEND.md](./QUICK_START_BACKEND.md) - Setup detalhado do Laravel
-- [QUICK_START_FRONTEND.md](./frontend/QUICK_START_FRONTEND.md) - Setup detalhado do Angular
-- [Relevant_Querys.txt](./frontend/Docs/Relevant_Querys.txt) - Queries SQL importantes
-
----
-
-
-## Features Implementados
-
-- Autenticação com Sanctum
-- ✅ CRUD de tarefas com filtros
-- ✅ Sistema de categorias dinâmico
-- ✅ Gamificação com milestones automáticos
-- ✅ Upload de avatar com storage
-- ✅ Dashboard admin com estatísticas
-- ✅ Gestão de badges
-- ✅ Soft/Hard deletes configurados
-- ✅ CORS configurado
-- ✅ Paginação em endpoints
-- ✅ Validações cliente e servidor
-
----
-
-## 🔄 Próximos Steps
-
-- [ ] Export de estatísticas (PDF/CSV)
-- [ ] Dark mode no frontend
 
 ---
 
 ## 👨‍💻 Autor
-
 **Rodrigo Gomes**
 
 ---
 
 ## 📄 Licença
-
 Propriedade privada - Contactus
 
 ---
-

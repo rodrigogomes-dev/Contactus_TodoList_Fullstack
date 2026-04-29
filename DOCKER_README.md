@@ -19,37 +19,38 @@ docker-compose --version
 ## 🚀 Iniciar (3 segundos)
 
 ```bash
-docker-compose up -d
+sudo docker compose up -d
 ```
 
 Pronto! A aplicação está em:
-- **Frontend:** http://localhost:8000
-- **API:** http://localhost:8000/api
+- **Frontend (UI):** http://localhost:4200
+- **API (Backend):** http://localhost:8000/api
+- **Imagens (Storage):** http://localhost:4200/storage/
 
 ---
 
 ## 📊 Arquitetura
 
 ```
-Cliente (Browser) → http://localhost:8000
-                        ↓
-                  Nginx Reverse Proxy
+Cliente (Browser) → http://localhost:4200 (UI)
+                         ↓
+                   Nginx Reverse Proxy (Gateway)
                     /          \
-              /api/*             /*
+            Port 4200 UI       Port 8000 API
                 /                  \
-         Laravel Backend        Angular Frontend
-           (PHP-FPM)             (Nginx)
-             9000                  80
-                |
-            MySQL BD
-             3306
+         Angular Frontend        Laravel Backend
+            (Nginx)               (PHP-FPM)
+               |                     |
+               |                 MySQL (3307)
+               |                     |
+               └─── Volumes (Storage/Public)
 ```
 
 **4 containers automáticos:**
-1. **MySQL** - Base de dados (`db_todolist_contactus`)
-2. **Backend** - Laravel + API (`todolist-backend`)
-3. **Frontend** - Angular compilado (`todolist-frontend`)
-4. **Proxy** - Nginx roteador (`todolist-proxy`)
+1. **MySQL** - Base de dados exposta na porta `3307`
+2. **Backend** - Laravel 13 + PHP 8.3 (`todolist-backend`)
+3. **Frontend** - Angular 21 compilado (`todolist-frontend`)
+4. **Proxy** - Gateway Nginx (`todolist-proxy`)
 
 ---
 
@@ -159,10 +160,11 @@ make docker-stats          # CPU/Memory usage
 
 | Serviço | URL | Porta |
 |---------|-----|-------|
-| **Frontend (Angular)** | http://localhost:8000 | 8000 |
+| **Frontend (UI)** | http://localhost:4200 | 4200 |
 | **Backend API** | http://localhost:8000/api | 8000 |
-| **MySQL Direct** | localhost:3306 | 3306 |
-| **PHP-FPM** | localhost:9000 | 9000 (interno) |
+| **Imagens/Storage** | http://localhost:4200/storage | 4200 |
+| **MySQL (Host)** | localhost:3307 | 3307 |
+| **PHP-FPM** | todolist-backend:9000 | Interno |
 
 ---
 
@@ -187,9 +189,16 @@ Host: localhost (ou database dentro de Docker)
 User: todolist_user
 Password: todolist_password
 Database: db_todolist_contactus
-Port: 3306
+Port: 3307
 ```
 
+### 🔑 Credenciais de Teste
+
+Para testar todas as funcionalidades imediatamente:
+- **Test User:** `testuser@example.com` / `password123`
+- **Test Admin:** `admin@example.com` / `password123`
+
+---
 ### Laravel App Key
 
 Se a aplicação falhar com erro de encryption:
@@ -392,4 +401,4 @@ docker-compose -f docker-compose.prod.yml up -d
 ---
 
 **Criado**: 2026-04-22  
-**Ultima atualização**: 2026-04-22
+**Ultima atualização**: 2026-04-29 (Estabilização Assets & CORS)
