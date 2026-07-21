@@ -36,7 +36,7 @@ O **TODO List - Contactus** é uma aplicação completa de gestão de tarefas co
 
 ---
 
-## 📁 Estrutura do Projeto
+##Estrutura do Projeto
 
 ```
 Projeto_TodoList_Contactus_Fullstack/
@@ -49,7 +49,7 @@ Projeto_TodoList_Contactus_Fullstack/
 
 ---
 
-## 🔐 Segurança & Boas Práticas
+##Segurança & Boas Práticas
 
 - **Sanctum Auth:** Autenticação via tokens Bearer.
 - **Princípio de Menor Privilégio:** Utilizadores de base de dados restritos.
@@ -58,7 +58,7 @@ Projeto_TodoList_Contactus_Fullstack/
 
 ---
 
-## 🏆 Sistema de Gamificação
+##Sistema de Gamificação
 
 A aplicação motiva os utilizadores através de conquistas automáticas:
 - **Iniciante:** 1 tarefa concluída.
@@ -68,27 +68,27 @@ A aplicação motiva os utilizadores através de conquistas automáticas:
 
 ---
 
-## 🚀 Instruções de Execução
+##Instruções de Execução
 
 Escolha um dos métodos abaixo para rodar o projeto.
 
-### Opção A: Usando Docker (Recomendado)
+###Opção A: Usando Docker (Recomendado)
 
 A forma mais rápida de iniciar todo o ecossistema (Backend, Frontend e Base de Dados).
 
-#### 1. Pré-requisitos e Instalação (Linux)
+####1. Pré-requisitos e Instalação (Linux)
 Se ainda não tem o Docker instalado, execute:
 ```bash
 sudo apt update && sudo apt install docker.io docker-compose-v2 -y
 sudo usermod -aG docker $USER  # Requer logout para aplicar
 ```
 
-#### 2. Iniciar os containers
+####2. Iniciar os containers
 ```bash
 sudo docker compose up -d --build
 ```
 
-#### 3. Configurar Ambiente e Base de Dados
+####3. Configurar Ambiente e Base de Dados
 Se for a primeira vez, execute:
 ```bash
 # Criar tabelas, dados iniciais e crachés
@@ -98,12 +98,12 @@ sudo docker compose exec backend php artisan migrate:fresh --seed
 sudo docker compose exec backend php artisan storage:link --force
 ```
 
-#### 4. Aceder à aplicação
+####4. Aceder à aplicação
 - **Frontend (UI):** [http://localhost:4200](http://localhost:4200)
 - **Backend API:** [http://localhost:8000/api](http://localhost:8000/api)
 - **MySQL:** `localhost:3307`
 
-#### 5. Credenciais de Teste
+####5. Credenciais de Teste
 - **Test User:** `testuser@example.com` / `password123` (Possui tarefas e crachés)
 - **Test Admin:** `admin@example.com` / `password123` (Gestão de estatísticas)
 
@@ -111,15 +111,15 @@ sudo docker compose exec backend php artisan storage:link --force
 
 ---
 
-### Opção B: Configuração Manual
+###Opção B: Configuração Manual
 
 Caso prefira rodar os serviços localmente sem Docker.
 
-#### 1. Pré-Requisitos
+####1. Pré-Requisitos
 - **PHP 8.3+**, **MySQL 8.0+**, **Composer**.
 - **Node.js 20+** e **npm 10+**.
 
-#### 2. Setup do Backend
+####2. Setup do Backend
 
 1. **Instalar Dependências:**
    ```bash
@@ -143,7 +143,7 @@ Caso prefira rodar os serviços localmente sem Docker.
    cp .env.example .env
    php artisan key:generate
    ```
-   Abra o ficheiro `.env` e substitua o bloco de conexão por:
+   Abrir o ficheiro `.env` e substituir o bloco de conexão por:
    ```env
    DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
@@ -169,12 +169,12 @@ npx ng serve
 
 ---
 
-## 👨‍💻 Autor
+##Autor
 **Rodrigo Gomes**
 
 ---
 
-## 📄 Licença
+##
 Propriedade privada - Contactus
 
 ---
