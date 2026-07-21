@@ -17,23 +17,6 @@ O **TODO List - Contactus** é uma aplicação completa de gestão de tarefas co
 - **Segurança:** Proteção de dados e autenticação robusta.
 
 ---
-
-## 🛠️ Stack Tecnológico (Versões Exatas)
-
-| Camada | Tecnologia | Versão |
-|--------|-----------|--------|
-| **Backend API** | PHP | `8.3` |
-| | Laravel Framework | `13.0` |
-| | Laravel Sanctum | `4.3` |
-| | Laravel Tinker | `3.0` |
-| | PHPUnit | `12.5.12` |
-| **Frontend SPA** | Angular | `21.2.0` |
-| | TypeScript | `5.9.2` |
-| | Chart.js | `4.5.1` |
-| | Three.js | `0.183.2` |
-| | Vanta.js | `0.5.24` |
-| **Database** | MySQL | `8.0` |
-
 ---
 
 ##Estrutura do Projeto
