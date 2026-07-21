@@ -6,7 +6,7 @@ Autor: **Rodrigo Gomes**
 
 ---
 
-## 📝 Visão Geral
+##Visão Geral
 
 O **TODO List - Contactus** é uma aplicação completa de gestão de tarefas com um sistema inovador de gamificação baseado em badges. Desenvolvida para oferecer uma experiência fluida e motivadora, a plataforma utiliza **Laravel 13** no Backend e **Angular 21** no Frontend, garantindo performance e segurança com autenticação via **Laravel Sanctum**.
 
